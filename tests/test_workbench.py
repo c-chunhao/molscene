@@ -151,6 +151,65 @@ class WorkbenchControllerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.controller.prepare_job('contacts', dict(selection_a='a', selection_b='atom_b', state=2), state=2)
 
+    def test_relative_batch_input_survives_worker_directory_change(self):
+        inputs = self.root / 'UI inputs 中文'
+        inputs.mkdir()
+        (inputs / '1ubq.pdb').write_bytes((ROOT / 'examples/data/1ubq.pdb').read_bytes())
+        parameters = dict(input_dir=inputs.name, render_options=dict(width=120, height=100))
+        for cancel in (False, True):
+            with self.subTest(cancel=cancel):
+                previous = Path.cwd()
+                try:
+                    os.chdir(self.root)
+                    path = self.controller.prepare_job('batch', parameters, output='output-' + str(cancel))
+                finally:
+                    os.chdir(previous)
+                job = json.loads(path.read_text(encoding='utf-8'))
+                if cancel:
+                    Path(job['parameters']['cancel_file']).touch()
+                process = subprocess.run([sys.executable, '-B', '-m', 'molscene.worker', str(path)],
+                    cwd=path.parent, env=dict(os.environ, PYTHONPATH=str(ROOT)),
+                    capture_output=True, text=True, timeout=60)
+                envelope = json.loads(Path(job['result_path']).read_text(encoding='utf-8'))
+                self.assertIn('result', envelope, process.stdout + process.stderr + str(envelope))
+                report = envelope['result']
+                self.assertEqual(process.returncode, 1 if cancel else 0, envelope)
+                self.assertEqual(envelope['passed'], not cancel)
+                self.assertEqual(report['cancelled'], cancel)
+                self.assertEqual(report['completed'], 0 if cancel else 1)
+                self.assertEqual(report['failed'], 0)
+                self.assertEqual(report['items'][0]['input'], '1ubq.pdb')
+                self.assertEqual(report['items'][0]['status'], 'pending' if cancel else 'completed')
+                output = Path(job['output'])
+                self.assertEqual(json.loads((output / 'batch.json').read_text(encoding='utf-8')), report)
+                if not cancel:
+                    self.assertTrue((output / report['items'][0]['output'] / 'scene.png').is_file())
+                self.assertEqual(Path(job['parameters']['input_dir']), inputs.resolve())
+                self.assertEqual(parameters['input_dir'], inputs.name)
+
+    def test_batch_input_requires_existing_directory_before_creating_job(self):
+        regular_file = self.root / 'input.pdb'
+        regular_file.write_text('not a directory')
+        for value in (None, '', str(self.root / 'missing'), str(regular_file)):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, 'existing directory'):
+                    self.controller.prepare_job('batch', dict(input_dir=value), output=self.root / 'output')
+                self.assertFalse((self.root / '.molscene-jobs').exists())
+
+    def test_batch_input_rejects_links_before_resolving_directory(self):
+        target = self.root / 'target'
+        (target / 'inputs').mkdir(parents=True)
+        link = self.root / 'linked'
+        try:
+            link.symlink_to(target, target_is_directory=True)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest('Directory symlinks unavailable: ' + str(exc))
+        for value in (link, link / 'inputs'):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, 'links or reparse points'):
+                    self.controller.prepare_job('batch', dict(input_dir=str(value)), output=self.root / 'output')
+                self.assertFalse((self.root / '.molscene-jobs').exists())
+
     def test_labels_resolve_spatial_selection_in_requested_state(self):
         self.cmd.load_coordset([[20, 0, 0]], 'a', state=2)
         self.cmd.load_coordset([[3, 0, 0]], 'atom_b', state=2)

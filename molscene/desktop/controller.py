@@ -395,6 +395,17 @@ class WorkbenchController:
         if operation not in ('geometry', 'contacts', 'sasa', 'inspect', 'export', 'batch'):
             raise ValueError('Unsupported worker operation')
         parameters = deepcopy(parameters)
+        if operation == 'batch':
+            source = parameters.get('input_dir')
+            if not isinstance(source, (str, os.PathLike)) or not os.fspath(source):
+                raise ValueError('Batch input must be an existing directory')
+            # Freeze the UI cwd before QProcess switches to the private job
+            # directory. Check lexical links before resolve can erase them.
+            lexical = Path(os.path.abspath(os.path.expanduser(os.fspath(source))))
+            _no_link(lexical)
+            if not lexical.is_dir():
+                raise ValueError('Batch input must be an existing directory')
+            parameters['input_dir'] = str(lexical.resolve())
         if operation in ('geometry', 'contacts', 'sasa', 'inspect'):
             if parameters.get('state') != state:
                 raise ValueError('Job and selection states must match explicitly')

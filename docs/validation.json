@@ -12,7 +12,7 @@
     "molscene/cli.py": "42faed956d4b2d58833e7979fb6842feca9ceede7b9cedea740a54cb36c47655",
     "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
     "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
-    "molscene/desktop/controller.py": "7be6a7086f74310e2f0be5b5f32614d5e29b18fc3a1f8102b8a032e2cb79cd9a",
+    "molscene/desktop/controller.py": "20c6a3b71b049aede2b1dc61e8d2ed04e975b296d1f0067fcbf7176fcbe6b6c7",
     "molscene/desktop/jobs.py": "771591c0634a640fc50b45a74974f330c305ae8e5ed18a6e2f2f60c31cd8fb94",
     "molscene/desktop/panel.py": "5aa3b2bbea615be319bc9208152c48dd235499a34604804164b0f8eb1ee19904",
     "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
@@ -35,11 +35,11 @@
       "qt": "6.8.1",
       "pillow": "12.3.0",
       "unittest": {
-        "discovered": 135,
-        "passed": 122,
-        "skipped": 13,
+        "discovered": 138,
+        "passed": 124,
+        "skipped": 14,
         "failed": 0,
-        "seconds": 150.32,
+        "seconds": 156.412,
         "skip_scope": "Local exFAT hardlink/symlink/junction and distinct Windows 8.3 alias capabilities"
       }
     },
@@ -49,11 +49,11 @@
       "pymol": null,
       "qt": null,
       "unittest": {
-        "discovered": 135,
+        "discovered": 138,
         "passed": 36,
-        "skipped": 99,
+        "skipped": 102,
         "failed": 0,
-        "seconds": 10.151,
+        "seconds": 9.5,
         "skip_scope": "Expected missing-backend/Qt and filesystem capability skips"
       }
     }
@@ -349,22 +349,36 @@
         "scene_events": true,
         "rename_delete": true,
         "closed": true
+      },
+      "relative_input_worker": {
+        "passed": true,
+        "isolated": true,
+        "installed_package": true,
+        "canonical_input_dir": true,
+        "caller_parameters_unchanged": true,
+        "child_changed_cwd": true,
+        "child_isolated": true,
+        "completed": 1,
+        "failed": 0,
+        "png_dimensions": [
+          120,
+          100
+        ],
+        "provenance_verified": true
       }
     },
     "sdist": {
       "source_example_test_python_files_verified": 33,
       "fixture_files_verified": 4,
-      "science_unittest": {
-        "discovered": 12,
-        "passed": 12,
-        "skipped": 0,
+      "targeted_controller_unittest": {
+        "discovered": 3,
+        "passed": 2,
+        "skipped": 1,
         "failed": 0,
-        "seconds": 1.841
+        "seconds": 2.863,
+        "skip_scope": "Local exFAT directory-symlink capability"
       },
-      "offline_selftest": {
-        "passed": 9,
-        "failed": 0
-      }
+      "scope": "Real worker completion and pre-cancellation with relative batch inputs, plus invalid-directory rejection; archive source/fixtures matched the reviewed source. CLI/science modules and gallery bytes are unchanged from the previously validated candidate."
     },
     "scope": "Final wheel bytes checked against source and independent installed files; final sdist and example ZIP checked against committed Git blobs. Asset checksums and final commit-specific CI attestation are recorded separately on the release to avoid self-reference."
   }

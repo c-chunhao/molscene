@@ -255,8 +255,20 @@ def grab_native_framebuffer(viewport):
 def native_test(output):
     """Real Qt/GL harness starts official launch, never a second QApplication."""
     from molscene import desktop
-    from pymol.Qt import QtCore, QtWidgets, PYQT_NAME
+    from pymol.Qt import QtCore, QtGui, QtWidgets, PYQT_NAME
     QTest = __import__(PYQT_NAME + '.QtTest', fromlist=['QTest']).QTest
+    def drag(viewport, button, start, end):
+        QTest.mousePress(viewport, button, pos=start)
+        QTest.qWait(40)
+        # Qt5 QTest.mouseMove warps the OS cursor; deliver the drag directly
+        # so the move reaches this widget before the synthetic release.
+        move = QtGui.QMouseEvent(
+            QtCore.QEvent.MouseMove, QtCore.QPointF(end),
+            QtCore.QPointF(viewport.mapTo(viewport.window(), end)),
+            QtCore.QPointF(viewport.mapToGlobal(end)),
+            QtCore.Qt.NoButton, button, QtCore.Qt.NoModifier)
+        QtWidgets.QApplication.sendEvent(viewport, move)
+        QTest.mouseRelease(viewport, button, pos=end)
     from pmg_qt import pymol_qt_gui
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -320,15 +332,11 @@ def native_test(output):
             report['framebuffer_colors'] = len(colors)
             view = cmd.get_view()
             center = viewport.rect().center()
-            QTest.mousePress(viewport, QtCore.Qt.LeftButton, pos=center)
-            QTest.mouseMove(viewport, center + QtCore.QPoint(90, 35), delay=40)
-            QTest.mouseRelease(viewport, QtCore.Qt.LeftButton, pos=center + QtCore.QPoint(90, 35))
+            drag(viewport, QtCore.Qt.LeftButton, center, center + QtCore.QPoint(90, 35))
             QTest.qWait(150)
             report['rotation_changed'] = tuple(view) != tuple(cmd.get_view())
             view = cmd.get_view()
-            QTest.mousePress(viewport, QtCore.Qt.RightButton, pos=center)
-            QTest.mouseMove(viewport, center + QtCore.QPoint(0, 65), delay=40)
-            QTest.mouseRelease(viewport, QtCore.Qt.RightButton, pos=center + QtCore.QPoint(0, 65))
+            drag(viewport, QtCore.Qt.RightButton, center, center + QtCore.QPoint(0, 65))
             QTest.qWait(150)
             report['zoom_changed'] = tuple(view) != tuple(cmd.get_view())
             # One isolated sphere at the centered origin makes a deterministic native pick.
