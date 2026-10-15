@@ -54,6 +54,13 @@ class ValidationTests(unittest.TestCase):
             engine.render(self.source, self.base, overwrite=True)
         self.assertEqual(marker.read_text(), 'keep')
 
+    def test_output_parent_file_is_a_clear_validation_error(self):
+        blocker = self.base / 'not-a-directory'
+        blocker.write_text('keep')
+        with self.assertRaises((ValueError, RuntimeError)):
+            engine.render(self.source, blocker / 'out')
+        self.assertEqual(blocker.read_text(), 'keep')
+
     def test_hardlinked_owned_target_preserves_other_inode_name(self):
         self.out.mkdir()
         outside = self.base / 'outside.txt'
@@ -101,6 +108,9 @@ class SceneTests(ValidationTests):
                     with redirect_stdout(transcript), redirect_stderr(transcript):
                         pm.cmd.do('@scene.pml', echo=0)
                     self.assertEqual(pm.cmd.count_atoms('molecule'), 3)
+                    self.assertEqual(pm.cmd.count_atoms('molecule and rep cartoon'), 3)
+                    self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms'), 0)
+                    self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 1)
             finally:
                 os.chdir(old_cwd)
             self.assertNotIn('Error', transcript.getvalue())
@@ -110,6 +120,32 @@ class SceneTests(ValidationTests):
             shutil.move(str(moved), next_path)
             moved = next_path
             replay(moved)
+
+    def test_nonprotein_render_is_rejected_without_committing_artifacts(self):
+        fixtures = {
+            'water': 'HETATM    1  O   HOH A   1       0.000   0.000   0.000  1.00 20.00           O\nEND\n',
+            'nucleic': 'ATOM      1  P    DA A   1       0.000   0.000   0.000  1.00 20.00           P\nEND\n',
+        }
+        for name, content in fixtures.items():
+            self.source.write_text(content)
+            for style in ('cartoon', 'surface'):
+                with self.subTest(fixture=name, style=style), self.assertRaisesRegex(ValueError, 'protein'):
+                    engine.render(self.source, self.out, style=style, width=240, height=180)
+                self.assertFalse(self.out.exists())
+
+    def test_cartoon_trace_is_scoped_to_ca_only_protein(self):
+        import pymol2
+        engine.render(self.source, self.out, width=240, height=180)
+        with pymol2.PyMOL() as pm:
+            pm.cmd.load(str(self.out / 'scene.pse'))
+            self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms'), 0)
+            self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 1)
+        self.source.write_text(PDB.replace('  CA  ALA A   1', '  N   ALA A   1'))
+        engine.render(self.source, self.out, width=240, height=180, overwrite=True)
+        with pymol2.PyMOL() as pm:
+            pm.cmd.load(str(self.out / 'scene.pse'))
+            self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms'), 0)
+            self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 0)
 
     def test_measure_and_failed_overwrite_preserves_previous_outputs(self):
         report = engine.measure(self.source, self.out, selection_a='index 1',
@@ -136,6 +172,27 @@ class SceneTests(ValidationTests):
         self.assertEqual(report['analysis']['target_atoms'], 3)
         self.assertEqual(len(report['analysis']['align_result']), 7)
         self.assertLess(report['analysis']['rmsd_angstrom'], 1e-5)
+        import pymol2
+        for replay in (False, True):
+            with self.subTest(replay=replay), pymol2.PyMOL() as pm:
+                if replay:
+                    old_cwd = Path.cwd()
+                    try:
+                        os.chdir(self.out)
+                        with redirect_stdout(io.StringIO()):
+                            pm.cmd.do('@scene.pml', echo=0)
+                    finally:
+                        os.chdir(old_cwd)
+                else:
+                    pm.cmd.load(str(self.out / 'scene.pse'))
+                for mobile_atom, target_atom in zip(pm.cmd.get_model('mobile').atom,
+                                                    pm.cmd.get_model('target').atom):
+                    for mobile_coord, target_coord in zip(mobile_atom.coord, target_atom.coord):
+                        self.assertAlmostEqual(mobile_coord, target_coord, places=5)
+                self.assertEqual(pm.cmd.count_atoms('mobile and rep cartoon'), 3)
+                self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms'), 0)
+                self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'mobile'), 1)
+
 
     @unittest.skipUnless((ROOT / '.audit/1ubq.pdb').exists(), 'optional downloaded fixture')
     def test_real_pdb_and_cif_counts(self):
@@ -148,6 +205,15 @@ class SceneTests(ValidationTests):
                 self.assertEqual(report['structure']['molecule']['residues'], 134)
                 self.check_artifacts(report)
 
+    @unittest.skipUnless((ROOT / '.audit/1ubq.pdb').exists(), 'optional downloaded fixture')
+    def test_full_atom_ubiquitin_cartoon_does_not_trace_sidechains(self):
+        import pymol2
+        engine.render(ROOT / '.audit/1ubq.pdb', self.out, width=240, height=180)
+        with pymol2.PyMOL() as pm:
+            pm.cmd.load(str(self.out / 'scene.pse'))
+            self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 0)
+            self.assertEqual(pm.cmd.count_atoms('molecule and polymer.protein and rep cartoon'), 602)
+
     @unittest.skipUnless((ROOT / '.audit/1hsg.pdb').exists(), 'optional downloaded fixture')
     def test_real_pocket_neighborhood_and_representations(self):
         import pymol2
@@ -157,11 +223,36 @@ class SceneTests(ValidationTests):
         self.assertEqual(report['analysis']['pocket_neighbor_atoms'], 115)
         self.assertEqual(report['analysis']['pocket_atoms'], 236)
         self.assertEqual(report['analysis']['pocket_residues'], 33)
-        with pymol2.PyMOL() as pm:
-            pm.cmd.load(str(self.out / 'scene.pse'))
-            self.assertEqual(pm.cmd.count_atoms('pocket'), 236)
-            self.assertEqual(pm.cmd.count_atoms('ligand and rep sticks'), 45)
-            self.assertGreater(pm.cmd.get_setting_float('cartoon_transparency', 'molecule'), 0.5)
+        for replay in (False, True):
+            with self.subTest(replay=replay), pymol2.PyMOL() as pm:
+                if replay:
+                    old_cwd = Path.cwd()
+                    try:
+                        os.chdir(self.out)
+                        with redirect_stdout(io.StringIO()):
+                            pm.cmd.do('@scene.pml', echo=0)
+                    finally:
+                        os.chdir(old_cwd)
+                else:
+                    pm.cmd.load(str(self.out / 'scene.pse'))
+                self.assertEqual(pm.cmd.count_atoms('pocket'), 236)
+                self.assertEqual(pm.cmd.count_atoms('ligand and rep sticks'), 45)
+                self.assertEqual(pm.cmd.count_atoms('pocket and rep sticks'), 236)
+                self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 0)
+                self.assertGreater(pm.cmd.get_setting_float('cartoon_transparency', 'molecule'), 0.5)
+                carbon_colors = []
+                pm.cmd.iterate('ligand and elem C', 'values.append(color)', space={'values': carbon_colors})
+                self.assertTrue(carbon_colors)
+                self.assertTrue(all(color == pm.cmd.get_color_index('orange') for color in carbon_colors))
+                # stick_radius is stored on bonds; atom-level s returns the default.
+                ligand_radius = [bond[2] for _, bonds in pm.cmd.get_bond('stick_radius', 'ligand', 'ligand')
+                                 for bond in bonds]
+                pocket_radius = [bond[2] for _, bonds in pm.cmd.get_bond('stick_radius', 'pocket', 'pocket')
+                                 for bond in bonds]
+                self.assertTrue(ligand_radius)
+                self.assertTrue(pocket_radius)
+                self.assertTrue(all(abs(value - 0.23) < 1e-5 for value in ligand_radius))
+                self.assertTrue(all(abs(value - 0.10) < 1e-5 for value in pocket_radius))
 
 if __name__ == '__main__':
     unittest.main()

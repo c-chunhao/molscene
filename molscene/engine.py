@@ -69,7 +69,7 @@ def _no_link(path):
     for candidate in (path, *path.parents):
         try:
             info = candidate.lstat()
-        except FileNotFoundError:
+        except (FileNotFoundError, NotADirectoryError):
             continue
         if stat.S_ISLNK(info.st_mode) or getattr(info, 'st_file_attributes', 0) & 0x400:
             raise ValueError('Output paths must not contain links or reparse points: ' + str(candidate))
@@ -78,6 +78,9 @@ def _no_link(path):
 def _output(path, sources, overwrite):
     path = Path(os.path.abspath(os.path.expanduser(os.fspath(path))))
     _no_link(path)
+    for ancestor in path.parents:
+        if ancestor.exists() and not ancestor.is_dir():
+            raise ValueError('Output parent must be a directory: ' + str(ancestor))
     if path.exists() and not path.is_dir():
         raise ValueError('Output must be a directory: ' + str(path))
     if any(source == path or path in source.parents for source in sources):
@@ -145,7 +148,7 @@ def _base(scene):
     scene.call('bg_color', 'white')
     for name, value in (('ray_opaque_background', 1), ('antialias', 2),
                         ('orthoscopic', 1), ('depth_cue', 0), ('ray_shadows', 0),
-                        ('specular', 0.2), ('cartoon_trace_atoms', 1)):
+                        ('specular', 0.2), ('cartoon_trace_atoms', 0)):
         scene.call('set', name, value)
     scene.call('hide', 'everything', 'all')
 
@@ -201,8 +204,16 @@ def _run(operation, sources, output_dir, parameters, overwrite):
                     names = ('molecule',)
                 structure = {name: _stats(pm.cmd, name) for name in names}
                 _base(scene)
+                for name in names:
+                    protein = _scope(name, 'polymer.protein')
+                    # Trace arbitrary atoms only for genuinely CA-only protein models.
+                    # On full-atom proteins this setting would trace sidechains too.
+                    ca_only = (pm.cmd.count_atoms(protein) > 0 and
+                               pm.cmd.count_atoms(_scope(protein, 'not name CA')) == 0)
+                    scene.call('set', 'cartoon_trace_atoms', int(ca_only), name)
                 analysis = {}
                 if operation == 'render':
+                    _require_atoms(pm.cmd, _scope('molecule', 'polymer.protein'), 'protein render')
                     style = parameters['style']
                     _overview(scene, 'molecule', 'surface' if style == 'surface' else 'cartoon')
                     if style == 'pocket':
