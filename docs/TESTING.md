@@ -4,7 +4,7 @@ MolScene distinguishes **backend baseline observations**, **tests of its own imp
 
 ## Final local tool results
 
-Verified on **2026-10-15**, against implementation revision **`334b68b`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
+Verified on **2026-10-15**, for the timed implementation run at **`9b8df7c`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
 
 | Local Windows environment | Discovered | Passed | Skipped | Suite elapsed time | CLI selftest |
 | --- | --- | --- | --- | --- | --- |
@@ -17,6 +17,8 @@ All three suite runs completed without failures. The plain-Python run verifies t
 These are local observations, not universal compatibility claims. The community wheel is a prerelease build. The separate Linux conda-forge environment remains unverified until its actual CI job succeeds. Suite timings describe these individual runs and are not performance benchmarks.
 
 [Machine-readable validation record](validation.json) preserves the curated test results, selftest evidence, and gallery hashes without publishing local absolute paths.
+
+The subsequent fixture correction at **`334b68b`** was verified from a clean Git archive and from an extracted source distribution: each passed all 35 tests with zero skips on both local PyMOL backends. The installed wheel also passed all nine self-test checks under Python isolated mode outside the checkout. These clean-artifact checks are recorded separately from the timed matrix above.
 
 ## Recorded installed-backend baseline
 
