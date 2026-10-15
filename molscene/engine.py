@@ -83,6 +83,9 @@ def _output(path, sources, overwrite):
             raise ValueError('Output parent must be a directory: ' + str(ancestor))
     if path.exists() and not path.is_dir():
         raise ValueError('Output must be a directory: ' + str(path))
+    # Resolve only after inspecting the lexical path: canonicalization would hide
+    # links, but Windows 8.3 aliases must match the canonical inputs from _input.
+    path = path.resolve()
     if any(source == path or path in source.parents for source in sources):
         raise ValueError('Output directory must not contain an input structure')
     if path.exists() and any(path.iterdir()) and not overwrite:

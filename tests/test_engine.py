@@ -21,6 +21,36 @@ ATOM      3  CA  ALA A   3       3.000   4.000   5.000  1.00 20.00           C
 END
 '''
 
+@unittest.skipUnless(os.name == 'nt', 'Windows 8.3 aliases require GetShortPathNameW')
+class WindowsAliasTests(unittest.TestCase):
+    def test_short_output_alias_cannot_contain_original_input(self):
+        import ctypes
+        from ctypes import wintypes
+
+        with tempfile.TemporaryDirectory(prefix='molscene-canonical-long-') as temporary:
+            base = Path(temporary)
+            source = base / 'source.pdb'
+            source.write_text(PDB)
+            get_short_path = ctypes.windll.kernel32.GetShortPathNameW
+            get_short_path.argtypes = (wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD)
+            get_short_path.restype = wintypes.DWORD
+            buffer = ctypes.create_unicode_buffer(32768)
+            length = get_short_path(str(base), buffer, len(buffer))
+            if length == 0:
+                self.skipTest('GetShortPathNameW could not provide a short alias on this filesystem')
+            self.assertLess(length, len(buffer))
+            short = Path(buffer.value)
+            if os.path.normcase(os.path.abspath(short)) == os.path.normcase(str(base.resolve())):
+                self.skipTest('Windows short names are disabled or no distinct 8.3 alias is available')
+            self.assertTrue(short.samefile(base))
+            self.assertEqual(short.resolve(), base.resolve())
+            # Must reject before attempting a PyMOL import, even in the no-backend CI job.
+            with self.assertRaisesRegex(ValueError, 'contain an input'):
+                engine.render(source.resolve(), short, overwrite=True, width=240, height=180)
+            self.assertEqual(source.read_text(), PDB)
+            self.assertEqual({entry.name for entry in base.iterdir()}, {'source.pdb'})
+
+
 class ValidationTests(unittest.TestCase):
     def setUp(self):
         self.assertIsNotNone(engine, 'scene engine must be implemented')
