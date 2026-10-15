@@ -3,3 +3,9 @@ include examples/data/*.cif
 include examples/data/sources.json
 include examples/README.md
 include examples/download_examples.py
+include examples/reproduce_v02.py
+recursive-include tests *.py
+include README.zh-CN.md CONTRIBUTING.md
+include docs/*.md docs/*.json
+recursive-include docs/screenshots *.png *.json
+recursive-include examples/outputs *.png *.pse *.pml *.json *.csv *.fasta *.pdb *.cif

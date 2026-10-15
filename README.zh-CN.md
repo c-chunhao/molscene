@@ -1,117 +1,81 @@
-# MolScene
+# MolScene 0.2
 
-[![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
+**在 PyMOL 原生桌面中完成结构分析与可复现制图。**
 
-**调用你已有的 PyMOL，生成可复现的分子结构图与结构分析记录。**
+[English](README.md) · [桌面操作指南](docs/GUI.md) · [实例与数据来源](examples/README.md) · [测试记录](docs/TESTING.md) · [科学定义与内部接口](docs/INTERNALS.md)
 
-[English](README.md) · [样例与数据来源](examples/README.md) · [测试与验证](docs/TESTING.md) · [接口分析](docs/INTERNALS.md)
+MolScene 在上游 PyMOL Qt 主窗口中加入工作台 dock，保留原生的旋转、缩放、原子拾取、对象菜单和命令界面。新增的面板及离线 CLI 共用几何、接触、溶剂可及表面积（SASA）和结构概况算法，并输出图像、可编辑会话、回放脚本和来源报告。分子引擎及原生界面由 PyMOL 提供。
 
-MolScene 将本地 PDB/mmCIF 文件转换为光线追踪图片、可编辑的 PyMOL 会话、重放脚本与 JSON 报告。它适合统一论文或组会中的结构图风格，检查配体周围残基，测量指定原子间距离，并查看相关蛋白的叠合，同时保留生成图片时使用的输入与参数。
+![真实原生 PyMOL 视口与 MolScene 接触结果](docs/screenshots/workbench-contacts.png)
 
-| 泛素概览 | HIV 蛋白酶配体口袋 |
-| --- | --- |
-| ![1UBQ 泛素 cartoon 概览](examples/outputs/overview/scene.png) | ![1HSG 中 MK1 配体及周围蛋白残基](examples/outputs/pocket/scene.png) |
+真实桌面截图：1HSG 的 MK1/蛋白几何接触，state 1，共 97 对。[操作指南与点击记录](docs/GUI.md)。
 
-| 分子表面 | PDB/mmCIF 叠合检查 |
-| --- | --- |
-| ![1UBQ 泛素表面图](examples/outputs/surface/scene.png) | ![1UBQ 的 PDB 与 mmCIF 坐标叠合](examples/outputs/alignment/scene.png) |
+## 安装和启动
 
-## 快速开始
-
-需要 Python 3.10 或更新版本，且**该 Python 环境能够导入 `pymol2`**。MolScene 不附带或自动安装 PyMOL。以下命令从仓库根目录运行；其中 `python` 指你的 PyMOL 环境所用的解释器。
+核心 CLI 需要 Python 3.10 及以上，实际计算还需要独立安装的 PyMOL。固定 GUI 额外依赖要求 Python **3.10–3.13**：PySide6-Essentials 6.8.1 要求 Python 低于 3.14，本地桌面验证版本为 3.10.18。建议先使用 Python 3.10 后端环境。MolScene 不捆绑 PyMOL。使用能够 `import pymol2` 的解释器：
 
 ```sh
 git clone https://github.com/c-chunhao/molscene.git
 cd molscene
+python -m pip install ".[gui,test]"
 python -m molscene doctor
-python examples/download_examples.py
-python -m molscene render examples/data/1ubq.pdb --output results/overview
+python -m molscene gui examples/data/1ubq.pdb --workspace workspace
 ```
 
-例如，若 Windows 上已有的 PyMOL 提供 `D:/soft/pymol/python.exe`，可在 PowerShell 中这样调用；请替换为自己的安装路径：
+`gui` 额外依赖固定为 `PySide6-Essentials==6.8.1`；工作台通过 `pymol.Qt` 使用兼容 binding，同一进程不能混用 Qt binding。`test` 安装用于验证图像的 Pillow。普通导入、版本和帮助不需要 PyMOL 或 Qt；实际计算需要 PyMOL，桌面还需要原生 Qt 资源和有效 OpenGL 显示环境。
 
-```powershell
-& "D:/soft/pymol/python.exe" -m molscene doctor
-& "D:/soft/pymol/python.exe" -m molscene render examples/data/1ubq.pdb --output results/overview
-```
-
-仓库本身可直接运行。若要从其他目录调用，可选地安装到同一个环境：
+也可以独立创建 conda-forge 环境：
 
 ```sh
-python -m pip install -e .
-```
-
-若 `doctor` 无法导入 PyMOL，请切换到已有的 PyMOL Python，或使用独立的[开源 PyMOL 环境](https://github.com/schrodinger/pymol-open-source)。例如：
-
-```sh
-conda create -n molscene -c conda-forge python=3.10 pymol-open-source pillow pip
+conda create -n molscene -c conda-forge python=3.10 pymol-open-source pyqt pillow pip
 conda activate molscene
-python -m pip install -e .
-python -m molscene doctor
+python -m pip install .
+python -m molscene gui examples/data/1ubq.pdb --workspace workspace
 ```
 
-Pillow 用于测试中的图像验证；核心 CLI 使用 Python 标准库与单独安装的 PyMOL。环境兼容性的实测范围见[测试文档](docs/TESTING.md)。
+conda 配方会自行解析 Qt 版本，不代表未来解析出的所有组合已经验证。本地已测试桌面组合为 Windows、Python 3.10.18、社区 PyMOL 包 3.2.0a0 / native 3.2.0a、PySide6/Qt 6.8.1、NumPy 2.2.6。该 PyMOL wheel 是预发布版本。[测试记录](docs/TESTING.md) 区分真实桌面、仅后端和无依赖测试，并记录实际版本。
 
-## 常用工作流
+## 命令行工作流
+
+以下命令从仓库根目录运行。安装后可从其它目录使用自己的本地文件。selection 是 PyMOL 表达式，需要整体加引号。
 
 ```sh
-# 默认 cartoon：蛋白按链着色，有机配体显示为 sticks
-python -m molscene render examples/data/1ubq.cif --output results/cartoon --width 1600 --height 1200 --dpi 300
-
-# 蛋白表面
-python -m molscene render examples/data/1ubq.pdb --style surface --output results/surface
-
-# MK1 配体 5 Å 范围内蛋白原子所在的完整残基
+python -m molscene render examples/data/1ubq.pdb --output results/overview
+python -m molscene render examples/data/1ubq.pdb --representation surface --coloring bfactor --state 1 --background transparent --output results/surface
 python -m molscene render examples/data/1hsg.pdb --style pocket --ligand "resn MK1" --radius 5 --output results/pocket
-
-# 两端各精确选择一个原子，测量几何距离
-python -m molscene measure examples/data/1ubq.pdb --selection-a "chain A and resi 1 and name CA" --selection-b "chain A and resi 2 and name CA" --output results/distance
-
-# 用同一结构的两种格式检查坐标一致性
-python -m molscene align examples/data/1ubq.pdb examples/data/1ubq.cif --selection "polymer.protein and name CA" --output results/alignment
-
-# 离线生成固定测试结构并检查后端
+python -m molscene measure examples/data/1ubq.pdb --selection-a "resi 1 and name CA" --selection-b "resi 2 and name CA" --state 1 --output results/distance
+python -m molscene angle examples/data/1ubq.pdb --selection-a "resi 1 and name CA" --selection-b "resi 2 and name CA" --selection-c "resi 3 and name CA" --state 1 --output results/angle
+python -m molscene dihedral examples/data/1ubq.pdb --selection-a "resi 1 and name CA" --selection-b "resi 2 and name CA" --selection-c "resi 3 and name CA" --selection-d "resi 4 and name CA" --state 1 --output results/dihedral
+python -m molscene contacts examples/data/1hsg.pdb --selection-a "resn MK1" --selection-b "polymer.protein" --cutoff 4 --state 1 --output results/contacts
+python -m molscene sasa examples/data/1ubq.pdb --selection "polymer.protein" --context "not solvent and not hydro" --altloc primary --state 1 --output results/sasa
+python -m molscene inspect examples/data/1ubq.cif --state 1 --output results/inspect
+python -m molscene align examples/data/1ubq.pdb examples/data/1ubq.cif --method align --mobile-state 1 --target-state 1 --output results/alignment
+python -m molscene batch examples/data --state 1 --width 800 --height 600 --output results/batch
 python -m molscene selftest --output results/selftest
 ```
 
-使用 `python -m molscene COMMAND --help` 查看选项。选择表达式采用 [PyMOL 语法](https://pymol.org/pymol-command-ref.html)，应加引号，确保 shell 将整个表达式作为一个参数传入；MolScene 会将其限制在相应的已加载结构对象内。
+显示方式包括 cartoon、ribbon、sticks、lines、spheres、surface、mesh、dots、nonbonded；着色包括 chain、element、single、rainbow、bfactor。原有 cartoon/surface/pocket 预设以蛋白为中心；显式表示方式可用于适合的非蛋白选择，cartoon/ribbon 需要合适的聚合物。B-factor 着色记录实际范围，计算保留原 B-factor。完整选项见 `python -m molscene COMMAND --help`。
 
-制图、测距和叠合成功后，输出目录包含：
+## 科学口径与结果
 
-| 文件 | 用途 |
-| --- | --- |
-| `scene.png` | 指定像素尺寸的结构图 |
-| `scene.pse` | 可继续编辑的 PyMOL 会话 |
-| `scene.pml` | 可独立重放的脚本，随附输入文件副本 |
-| `report.json` | UTC 时间、工具/后端版本、输入 SHA-256、参数、结构计数、分析结果与产物名称 |
+所有操作固定正整数 `state`，CLI 默认 1；缺少该态的坐标会报错，不借用其它帧。叠合分别指定 mobile/target state。多状态文件并不等于经过验证的轨迹分析。
 
-分享重放时，请保留完整输出目录。在新的 PyMOL 会话中进入该目录执行 `@scene.pml`，或直接打开 `scene.pse` 继续编辑。报告用文件名和哈希标识输入，避免公开本机绝对路径。
+距离端点各需一个原子；角度 A–B–C 以 B 为顶点；二面角遵循 PyMOL 的有符号约定。距离单位 Å，角度单位度，退化几何明确失败。
 
-输出目录须为空。需要明确覆盖并重新生成时，添加 `--overwrite`；它只替换 MolScene 固定产物，不删除整个目录。不存在的输入、空选择、非单原子测距端点、非有限数值及输入/输出冲突等错误会以非零退出码结束。
+接触表列出 cutoff 内不重复的无向重原子对，默认 4 Å，排除自身配对，跨对象保留身份。这是几何接近，不能直接解释为氢键或结合亲和力。超过 100000 对会失败，不截断；图中至多画最短 200 对，成功 CSV 保留全部结果。
 
-## 如何理解结果
+SASA 使用 1.4 Å 探针、dot density 3、溶剂可及点。默认 context 为目标所在对象中的非溶剂重原子，`primary` altloc 保留空白+A；target 必须属于过滤后的 context。将完整 context 合并计算后汇总 target 面积，保留跨残基、跨对象遮挡，不能逐残基孤立计算再求和。`--altloc all` 纳入全部构象，会改变解释。坐标序列来自实际 guide atoms，保留残基映射，未知字符记为 X，不补缺失残基，也不声称恢复完整 SEQRES。
 
-- **口袋是几何邻域。** MolScene 先找配体指定半径内的蛋白原子，再扩展至完整残基。固定的 1HSG 样例中，`resn MK1` 为 45 个原子；5 Å 范围内有 115 个蛋白原子，扩展后为 33 个蛋白残基、236 个原子。这不等同于氢键判定或结合力预测。
-- 测距以 Å 为单位；每个选择须恰好包含一个原子。跨结构比较前，请核对链、残基、原子名及替代构象。
-- 叠合调用 PyMOL `cmd.align`，包含序列匹配与离群点迭代剔除。JSON 记录其统计量与参数，适合相关蛋白；RMSD 不是通用相似性评分。上图将同一 1UBQ 的两种文件格式叠合，用于检查可复现性。
-- 表面图展示几何表面，不计算静电势；图像清晰也不代表结构模型本身已经验证。
+制图、测量、叠合生成 `scene.png`、`scene.pse`、`scene.pml`、`report.json` 和输入副本。接触另有 `contacts.csv`，SASA 另有 `sasa.csv`；inspect 不强制渲染，生成 `chains.csv` 和 `sequence.fasta`。批处理按稳定顺序非递归读取 PDB/CIF/mmCIF，输出 `batch.json`、`batch.csv` 及编号子目录；失败返回非零，取消保留完成项，不把待运行项记为成功。
 
-## 验证、范围与参与
+报告使用 schema_version 2，保存输入哈希、参数、单位和相对产物路径，并保留旧 distance/RMSD 字段。非空目录需显式 `--overwrite`；危险链接、别名和输入输出碰撞会被拒绝；失败不破坏旧的有效输出。
 
-2026-10-15，MolScene 的完整 **36 项测试**与 CLI selftest 的 **9 项检查**均在两个本机 PyMOL 后端通过（实现版本 `684bce7`）：
+CLI 坐标工作流的 PML 使用输入副本和记录的 API 操作，可脱离 MolScene 回放。GUI 自由编辑的现场通过 PSE 保存，其 PML 会加载随附 PSE，因此必须完整保留输出目录。分析记录 state、时间与坐标语义指纹，场景变化后标注 stale。[桌面指南](docs/GUI.md) 说明面板流程。
 
-| 本机 Windows 环境 | 工具测试 | CLI selftest |
-| --- | --- | --- |
-| Python 3.10.18 + 已安装的 Incentive PyMOL 3.1.6.1 | 36 通过，0 跳过 | 9/9 通过 |
-| Python 3.10.18 + 社区开源 wheel 3.2.0a0，native 3.2.0a | 36 通过，0 跳过 | 9/9 通过 |
-| 无 PyMOL 的普通 Python 3.14.3 | 发现 36 项，18 通过、18 跳过 | 需要 PyMOL |
+## 来源、范围和许可
 
-社区 wheel 为预发布版本。Linux conda-forge PyMOL 3.1.0 集成任务也已[通过 35 项科学测试和 9 项自测](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261)。顶部徽章显示当前完整 CI 矩阵的状态。[测试文档](docs/TESTING.md) 记录了命令、覆盖范围、耗时与样例图人工检查。
+MolScene 自有代码采用 [MIT](LICENSE)。PyMOL、Qt 及其原生资源遵守各自发行版的许可；上游 viewport、菜单、命令控制台和分子引擎不是从商业安装复制或重新实现的。项目独立开发，与 Schrödinger / PyMOL 无隶属或背书关系。详见 [上游开源许可](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) 和 [接口分析](docs/INTERNALS.md)。
 
-公开样例图使用独立安装的社区开源 wheel（包版本 **3.2.0a0**，native 版本 **3.2.0a**）正常生成。本机已安装发行版在较大尺寸导出时出现评估版标记；[环境与输出说明](docs/TESTING.md#tested-environments-and-output-limits) 区分了 API 测试结果、许可状态与图像质量检查。
+本轮验证常用表示与着色、对象/场景管理、指定态几何、几何接触、SASA、坐标序列、叠合和批量制图。经过验证的氢键化学判定、轨迹统计、独立电影时间轴、密度图专用工作流、静电势、自动生物学组装及商业专属组件仍是后续范围，不宣称全面商业等价。原生 PyMOL 可能提供其它命令，其行为和许可由上游决定。
 
-制图以蛋白为中心，要求输入包含蛋白原子；`render` 目前不支持只有水或只有 DNA/RNA 的结构。`measure` 可在已加载对象中使用一般原子选择，但每个端点仍须恰好选择一个原子。核心工具对本地文件的操作可以离线完成。只有可选样例下载器会连接 RCSB PDB，并且仅下载三个固定、校验 SHA-256 的公开文件。首版不提供 GUI、核心 CLI 联网抓取、分子对接、轨迹处理或结构预测。
-
-开发与问题反馈见 [CONTRIBUTING.md](CONTRIBUTING.md)。MolScene 自有代码使用 [MIT 许可](LICENSE)。PyMOL 是独立依赖，应遵循所安装发行版自身的许可；[开源版许可见上游](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE)。MolScene 为独立项目，与 Schrödinger 或 PyMOL 项目不存在官方隶属或背书关系。[接口分析](docs/INTERNALS.md) 记录正常 API 边界与行为测试。
-
-样例数据的存档与原始论文署名见[样例说明](examples/README.md)。研究中使用坐标时，请引用原始结构论文。
+公开示例由独立开源运行时正常生成，未移除或修改评估水印。结构数据保留 [原始归属](examples/README.md)。核心工具离线运行，仅单独调用的固定来源、校验和验证下载器联网。参阅 [验证记录](docs/TESTING.md) 与 [贡献指南](CONTRIBUTING.md)。

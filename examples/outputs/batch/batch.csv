@@ -1,0 +1,4 @@
+input,output,status,error,report
+1hsg.pdb,0001-1hsg,completed,,0001-1hsg/report.json
+1ubq.cif,0002-1ubq,completed,,0002-1ubq/report.json
+1ubq.pdb,0003-1ubq,completed,,0003-1ubq/report.json

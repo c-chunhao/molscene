@@ -1,123 +1,85 @@
 # Testing and reproducibility
 
-MolScene distinguishes **backend baseline observations**, **tests of its own implementation**, and **CI environments**. A backend import or a passing unit-only job does not establish that rendering and replay work.
+This document separates a test definition from a recorded successful run. A dependency skip is not backend or desktop validation. The machine-readable [validation record](validation.json) records v0.2 code hashes, exact environments, source tests, native acceptance and gallery evidence.
 
-## Latest path-compatibility verification
+## Reproduce locally
 
-After the genuine Windows 8.3 path regression was corrected at `684bce7`, all **36 tests** passed on each local Windows PyMOL backend (3.1.6.1 and 3.2.0a). Plain Python passed 18 tests with 18 expected backend skips. The new alias regression is Windows-specific; Linux runs 35 active tests and skips that one platform-only case. Lexical symlink/junction checks still run before canonical path comparisons.
-
-The actual Linux conda-forge job with PyMOL **3.1.0** / Python **3.10.22** [passed 35 tests and nine self-test checks](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261) before the Windows-specific fix. The repository workflow badge and Actions history provide the subsequent full-matrix status.
-
-## Recorded timed local tool results
-
-Verified on **2026-10-15**, for the timed implementation run at **`9b8df7c`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
-
-| Local Windows environment | Discovered | Passed | Skipped | Suite elapsed time | CLI selftest |
-| --- | --- | --- | --- | --- | --- |
-| Python 3.10.18, installed Incentive PyMOL native 3.1.6.1 | 35 | 35 | 0 | 13.060 s | 9/9 passed |
-| Python 3.10.18, independent community wheel `pymol-open-source` 3.2.0a0, native 3.2.0a | 35 | 35 | 0 | 12.773 s | 9/9 passed |
-| Plain Python 3.14.3, without PyMOL | 35 | 17 | 18 | 1.789 s | Requires PyMOL |
-
-All three suite runs completed without failures. The plain-Python run verifies the available unit/failure-path behavior; its 18 skips do not establish backend integration. Each backend's CLI selftest JSON recorded `passed: true` and nine individually passing checks: runtime, PDB/mmCIF coordinates, Cα selection, representations, known 5 Å distance, rigid alignment, session restoration, ray image, and portable replay. Portable replay covers directories containing spaces, Chinese characters, an apostrophe, a semicolon, and literal dollar/parenthesis characters after the original fixtures have been removed.
-
-These are local observations, not universal compatibility claims. The community wheel is a prerelease build. The Linux conda-forge result is recorded separately above. Suite timings describe these individual runs and are not performance benchmarks.
-
-[Machine-readable validation record](validation.json) preserves the curated test results, selftest evidence, and gallery hashes without publishing local absolute paths.
-
-The subsequent fixture correction at **`334b68b`** was verified from a clean Git archive and from an extracted source distribution: each passed all 35 tests with zero skips on both local PyMOL backends. The installed wheel also passed all nine self-test checks under Python isolated mode outside the checkout. These clean-artifact checks are recorded separately from the timed matrix above.
-
-## Recorded installed-backend baseline
-
-An initial probe ran on **2026-10-15**, with installed Incentive PyMOL **3.1.6.1**, Python **3.10.18**, on **Windows**. All **11 backend checks passed**. This probe preceded the final MolScene CLI and is not a count of MolScene tests.
-
-| Check | Recorded evidence |
-| --- | --- |
-| Real 1UBQ PDB load | 660 atoms, 76 Cα atoms, chain A, one state |
-| 1UBQ mmCIF load | 660 atoms; maximum coordinate difference from PDB: 0.0 Å |
-| Chain/residue/atom selections | 76 Cα atoms; residue 1: 8 atoms |
-| Cartoon representation | Representation flags observed on 660 selected atoms |
-| Sticks representation | Representation flags observed on 660 selected atoms |
-| Surface representation | Representation flags observed on 660 selected atoms |
-| Known-geometry distance | 5.0 Å |
-| Rotated/translated-copy alignment | RMSD 0.0 Å; 76 aligned atoms |
-| Overview ray image | 1200 × 900 PNG, 145,886 bytes, 15,085 distinct colors |
-| Session restoration | 6 objects; 660 atoms; 76 selected atoms; view maximum difference 0.0 |
-| Real 1HSG ligand pocket | 45 ligand atoms; 236 whole-residue pocket atoms; 1200 × 900 PNG, 513,764 bytes, 14,171 colors |
-
-For the pinned inputs and hashes, see [examples/README.md](../examples/README.md). 1UBQ has 76 protein residues and 134 total residues when solvent is included. The 1HSG pocket figure above uses the residue-expanded selection, not just the 115 protein atoms directly within 5 Å of MK1.
-
-The baseline records come from the local audit captured during development. The public test suite and commands below are the reproducible evidence for MolScene's implementation. Generated images can differ in bytes across backend versions; fixed dimensions, image content, selection counts, geometry, session state, and replay provide useful checks alongside scientific inspection of the figures.
-
-## Tested environments and output limits
-
-Local numerical/API tests have passed in two separate Windows Python 3.10 environments:
-
-| Backend | Version identification | Interpretation |
-| --- | --- | --- |
-| Existing installed Incentive PyMOL bundle | Native version 3.1.6.1 | Numerical/API behavior was exercised; larger exports displayed an evaluation overlay |
-| Independently installed community open-source wheel | Package `pymol-open-source` 3.2.0a0; native version 3.2.0a | A separate prerelease backend used to generate the public example gallery |
-
-During manual inspection, 1600 × 1200 exports from the installed bundle displayed the literal message `No License File - For Evaluation Only (0 days remaining)`. Those observations describe that local environment; passing numerical/API tests does not validate its commercial license status or establish that its exports are suitable for production figures. The public gallery is generated normally with the independent community wheel, rather than altering an evaluation-marked image. That wheel is a prerelease, and its local results are separate from the Linux conda-forge CI environment.
-
-Image dimensions, nonuniform pixels, and representation flags do not by themselves establish scientific correctness. Manual acceptance also checks that cartoons follow the protein backbone, the pocket shows the intended residues and ligand, the surface is interpretable, and the alignment displays the intended structures. In particular, a trace through every atom can produce a nonblank but scientifically misleading ribbon. Regenerated figures must be inspected again after a representation change.
-
-The four shipped gallery PNGs were regenerated through the open-source CLI at the default **1600 × 1200 pixels, 300 DPI**, then manually inspected on 2026-10-15. The overview shows the ubiquitin fold with the expected backbone cartoon; the pocket's transparent protein context leaves the orange MK1 ligand visible; the surface is a solid molecular surface; and the alignment shows coincident blue/orange copies of 1UBQ. All four reports identify native PyMOL **3.2.0a**, and the inspected images show no evaluation overlay. This visual review complements the automated checks; it does not validate the experimental models for every research use.
-
-## Run the tool tests
-
-From the repository root:
+Use a writable temporary directory and a fresh output destination. `python` means your selected environment's interpreter:
 
 ```sh
-python -m unittest discover -s tests -v
-```
-
-Unit tests exercise argument validation and failure paths without requiring PyMOL. Integration tests use a real `pymol2` backend and Pillow. In an environment without PyMOL, those tests are reported as skipped; inspect the summary instead of treating skips as verified integration behavior.
-
-Use the interpreter from an existing PyMOL installation for the full suite. Install Pillow in that environment if it is not already present:
-
-```sh
-python -m pip install pillow
+python -m pip install ".[test]"
 python -m molscene doctor
 python -m unittest discover -s tests -v
 python -m molscene selftest --output results/selftest
+python examples/reproduce_v02.py --output results/gallery
 ```
 
-Each selftest run should use a new output directory, or an explicit `--overwrite`. It generates fixed geometry and peptide inputs locally, records per-check outcomes, and returns nonzero if any check fails. Keep its report alongside the test log when reporting a backend result.
+The real backend tests use local/synthetic fixtures and do not fetch network data. No-PyMOL runs report expected dependency skips and verify lazy import, parser, validation and failure behavior only. No-Qt runs do not establish GUI compatibility. A platform incapable of hardlinks/reparse points/distinct Windows 8.3 aliases may report capability skips; the reason must be retained. These tests remain enabled for capable CI filesystems.
 
-For example, on Windows PowerShell:
+Native desktop validation runs in a subprocess because native PyMOL owns its QApplication/event loop and quit lifecycle. Require the native harness directly when testing the actual desktop:
 
-```powershell
-& "D:/soft/pymol/python.exe" -m unittest discover -s tests -v
-& "D:/soft/pymol/python.exe" -m molscene selftest --output results/selftest
+```sh
+python -B tests/test_desktop.py --native results/native
+python -B tests/test_desktop.py --native --clean-startup results/native-clean
 ```
 
-That path is an example; substitute the interpreter in your own installation.
+These commands fail on missing dependencies, startup errors or invalid GL. They verify a valid native QOpenGLWidget, nonuniform framebuffer, mouse rotation/zoom, native atom pick, dock singleton/reopen, panel events and native window shutdown. An offscreen Qt widget is insufficient. Linux runners use `QT_QPA_PLATFORM=xcb`, Xvfb with a 24-bit screen/GLX and software Mesa; no offscreen override is used for acceptance.
 
-## Integration coverage
+The native workbench batch-close acceptance synchronizes after the first persisted, genuinely rendered item, then closes through the normal cancellation marker. This ensures pending items still exist when cancellation is requested; it is not a timing benchmark of an uncontrolled five-file batch. The separately published screenshot/click trace records an earlier actual run with two completed and three pending items. No production worker/render/cancellation algorithm is replaced by the test barrier.
 
-The integration suite is intended to check PDB/mmCIF loading, selection counts, representation flags, known-distance geometry, rigid-transform alignment, PNG dimensions and nonuniform content, session restoration, and PML replay in a fresh context. Numerical tolerances account for floating-point behavior. Replay comparisons focus on the principal molecular state rather than assuming bit-identical rendering on different systems.
+## Scientific and output coverage
 
-Core tests use generated/local fixtures. They do not fetch data during a run. The optional three-file downloader is documented separately, so upstream availability does not decide whether the core tests pass.
+Geometry is checked against independent 3–4–5/90° fixtures and signed torsions; degenerate endpoints fail. Contacts are compared with brute-force Euclidean-distance oracles, including boundary, overlap, same index in different objects, zero rows and pair-limit failure. SASA is checked against a single-sphere 4π(r+probe)² oracle (1% tolerance), separated/overlapping spheres, cross-object occlusion, residue sums and unchanged source B-factors/settings. Coordinate inspection uses insertion codes, blank chain/segment distinctions, alternate conformers, unknown residues and pinned PDB/mmCIF parity.
 
-`render` requires protein atoms and currently rejects water-only or DNA/RNA-only input. This keeps its protein-oriented cartoon, surface, and pocket workflows explicit. `measure` accepts general atom selections scoped to the loaded object, with exactly one atom per endpoint. The suite checks clear rejection of unsupported protein-rendering input rather than treating an empty or misleading figure as success.
+State tests use coordinates that differ between states and objects absent in the requested state; singleton fallback is rejected. Engine/worker/GUI checks cover result parity, snapshot identity/staleness, non-GUI workers, camera preservation, tables/CSV, cancellation/recovery, unusual Unicode/punctuation paths, relocated replay and preservation of previous valid outputs on failure.
 
-For a manual acceptance check, generate the [gallery](../examples/README.md#generate-the-gallery), inspect each PNG against the criteria above, open each PSE, and replay each PML from its complete output directory in a fresh context. Check the corresponding JSON inputs, units, selection counts, and alignment statistics. Image decoding alone does not verify the scientific meaning of a scene.
+File safeguards are checked for links/reparse points, Windows aliases, input/output ancestry, explicit overwrite and fixed owned artifacts. Replay compares molecular state rather than promising pixel identity across backends. Image decoding, dimensions and nonblank pixels supplement manual scientific appearance checks: expected backbone cartoon, intended ligand/residue neighborhood, interpretable surface and intended alignment. No evaluation overlay is removed or modified.
+
+## Packaging verification
+
+Build both distributions and check metadata before release:
+
+```sh
+python -m pip install ".[build]"
+python -m build --installer uv
+python -m twine check dist/*
+```
+
+Install the wheel into an independent environment on the task drive. Run outside the checkout with Python `-I`: import/version/help, `doctor`, scientific CLI, offline selftest, and a native GUI smoke against the installed package. `-I` must not be defeated by adding checkout paths to sys.path. The wheel includes original packages, GUI Python plugin resources and pinned coordinates under `share/molscene/examples/data`; PyMOL/Qt remain separate dependencies. Selftest generates its own synthetic fixtures.
+
+Extract sdist into a new directory, compare all pinned fixture hashes with `examples/data/sources.json`, compare package/test/example source bytes, and run fixture-backed science tests plus offline selftest there. The complete source suite is recorded separately; this archive check verifies a different packaging contract. This detects hidden reliance on ignored audit files or local worktrees. Record archive SHA-256, exact installed versions, commands, pass/fail/skip counts and capability reasons. Check tracked files and generated reports for private paths, credentials, runtime files and commercial material before publishing.
 
 ## CI environments
 
-The [workflow](../.github/workflows/ci.yml) defines:
+The [workflow](../.github/workflows/ci.yml) retains four unit combinations: Ubuntu/Windows × Python 3.10/3.13, installing only MolScene and intentionally omitting PyMOL/Qt. Expected integration skips in those jobs are not desktop results.
 
-| Job | Environment | What it establishes when green |
-| --- | --- | --- |
-| Unit matrix | Ubuntu and Windows; Python 3.10 and 3.13, without installing PyMOL | CLI/unit behavior on four combinations; backend tests may skip |
-| Open-source integration | Ubuntu; conda-forge Python 3.10, `pymol-open-source`, Pillow | Backend import/version, the full test suite, and offline selftest on that resolved environment |
+The separate required Linux job installs conda-forge PyMOL, its resolved PyQt binding, Pillow and Xvfb/Mesa support, prints environment/backend/Qt versions, asserts the desktop test dependency flags, and runs the full suite plus offline selftest. The suite runs the native harness normally and with clean preferences, plus the real workbench fixture/export/active-close workflow. A separate log gate requires all three native tests to report `ok`, rejecting skipped execution. Missing dependencies, invalid GL or failed native lifecycle therefore fail this job. Native workbench artifacts are retained; evidence is uploaded on success or failure. The environment is resolved rather than locked, so logs establish versions for a particular run. This does not imply future combinations are verified. Configuration follows the [official setup-micromamba v3 inputs](https://github.com/mamba-org/setup-micromamba).
 
-The integration job prints package/backend versions, asserts that `pymol2` is importable, and uses Xvfb and software OpenGL for a headless runner. On failure, diagnostic output folders are uploaded if available. The environment currently resolves conda-forge packages instead of using a lockfile; inspect the job log for the exact versions installed in a particular run.
+Actual conclusions belong to the [Actions run for the release commit](https://github.com/c-chunhao/molscene/actions). Workflow code alone is not evidence of a green run. Historical v0.1 Linux backend [run](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261) passed backend tests before the desktop existed and does not validate v0.2 native GUI.
 
-The workflow definition is a test plan, not a recorded successful run. Refer to the [repository's actual Actions runs](https://github.com/c-chunhao/molscene/actions) for the result of a particular commit. A Windows installed-backend result must not be generalized to Linux or to the open-source build.
+## Environment and scope notes
 
-The action setup follows the [official `setup-micromamba` usage](https://github.com/mamba-org/setup-micromamba). CI does not install or redistribute Incentive PyMOL.
+The v0.2 local desktop runtime is an independent open-source community build: Windows, Python 3.10.18, `pymol-open-source` package 3.2.0a0/native 3.2.0a, NumPy 2.2.6, PySide6-Essentials/shiboken6 6.8.1 and Pillow 12.3.0. The PyMOL package is prerelease. Numerical/API observations from the older installed Incentive PyMOL 3.1.6.1 are historical, not a desktop compatibility claim. Larger exports in that separate installation showed an evaluation overlay; the public gallery is generated normally with the independent open-source build.
 
-## Useful bug-report evidence
+Include the MolScene revision, OS, Python/backend/Qt versions, `doctor`, exact command/selections, full test summary and relevant report fields when reporting a bug. Use public or minimal synthetic structures and remove private coordinates, credentials, license material and personal paths from shared logs. [Contribution guidance](../CONTRIBUTING.md).
 
-Include the MolScene revision/version, OS, Python version, `doctor` output, full command with selections, test failure, and relevant report fields. Use a public or minimal synthetic structure when possible. Review logs before sharing: omit private coordinates, credentials, license material, personal paths, and unrelated environment details. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+## Recorded v0.2 source results
+
+Verified 2026-10-15 on the reviewed 0.2.0 implementation, including version/packaging changes. `validation.json` identifies the tested source by exact module SHA-256 values. The published main commit and remote CI run are recorded in the release publication-evidence.json and notes after actual green CI; the prepublication record keeps its CI URL null and links to the stable release page.
+
+| Windows environment | Discovered | Passed | Skipped | Failed | Seconds |
+| --- | --- | --- | --- | --- | --- |
+| Python 3.10.18, open-source PyMOL package 3.2.0a0/native 3.2.0a, PySide6/Qt 6.8.1 | 135 | 122 | 13 | 0 | 150.320 |
+| Python 3.10.18 without PyMOL or Qt | 135 | 36 | 99 | 0 | 10.151 |
+
+The thirteen full-runtime skips are filesystem capabilities on the local exFAT drive: hardlinks, symlinks/junctions and a distinct Windows 8.3 alias. No backend/GUI tests skipped in that run. The plain environment's skips include missing scientific/GUI dependencies and filesystem capabilities. The final native workbench acceptance completed one real batch item and left four pending on cancellation, with normal native shutdown. An earlier full run exposed an unsynchronized batch-test timing race; the final test uses the explicit first-item barrier described above, with production behavior unchanged. Both the failure and corrective evidence were retained during development. A later full run exposed a real Windows summary-replacement failure while the GUI read progress; bounded retries for sharing/access errors and repeated path guards corrected it. The table above reports the passing final source run.
+
+## Recorded v0.2 package checks
+
+The refreshed wheel and sdist built successfully in isolated environments using the uv installer. Both independent wheel environments were forcibly reinstalled from the final wheel, then checked outside the checkout with Python `-I`. All 19 installed Python modules and four pinned data files matched the wheel; module hashes matched the source record. The environment without PyMOL/Qt passed lazy import, help and version checks.
+
+The installed backend wheel passed `doctor`, a 660-atom mmCIF inspection and all nine offline selftest checks. Its native GUI smoke passed with valid OpenGL, 1,365 sampled framebuffer colors, actual mouse rotation/zoom, one atom picked, dock/scene/object events, unchanged preferences and normal close. This used the same Windows Python/backend/Qt versions listed above.
+
+The extracted sdist matched all 33 package, test and example Python files and four pinned data files. Its fixture-backed science suite passed 12/12 tests with zero skips in 1.841 seconds; offline selftest passed 9/9. The final archive was rebuilt after evidence updates, then all source, gallery and documentation bytes were compared with committed Git blobs. All 64 gallery hashes also matched the working tree and example ZIP; generated text uses canonical LF before hashing. Privacy checks covered 126 public files, including 11 PSE sessions and 13 PNG metadata records, with zero findings.
+
+Actual final commit-specific CI conclusions and asset hashes are attached to the [v0.2.0 release](https://github.com/c-chunhao/molscene/releases/tag/v0.2.0) as publication-evidence.json and release notes after green CI; they are not presumed by this prepublication document.

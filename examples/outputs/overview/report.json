@@ -1,8 +1,9 @@
 {
+  "schema_version": 2,
   "tool": "molscene",
-  "tool_version": "0.1.0",
+  "tool_version": "0.2.0",
   "pymol_version": "3.2.0a",
-  "created_at": "2026-10-15T02:44:51.948891+00:00",
+  "created_at": "2026-10-15T08:17:21.424268+00:00",
   "operation": "render",
   "inputs": [
     {
@@ -12,12 +13,20 @@
     }
   ],
   "parameters": {
+    "width": 1000,
+    "height": 750,
+    "dpi": 300,
+    "state": 1,
     "style": "cartoon",
     "ligand": null,
     "radius": 5.0,
-    "width": 1600,
-    "height": 1200,
-    "dpi": 300
+    "representation": null,
+    "selection": "all",
+    "coloring": "chain",
+    "color": "marine",
+    "background": "white",
+    "surface_transparency": 0.2,
+    "stick_radius": 0.18
   },
   "structure": {
     "molecule": {
@@ -27,14 +36,21 @@
       "chains": 1
     }
   },
-  "analysis": {},
+  "analysis": {
+    "kind": "render",
+    "state": 1,
+    "coloring": {
+      "mode": "chain",
+      "chain_count": 1
+    }
+  },
   "artifacts": {
-    "png": "scene.png",
-    "session": "scene.pse",
-    "replay": "scene.pml",
     "report": "report.json",
     "inputs": [
       "inputs/input.pdb"
-    ]
+    ],
+    "png": "scene.png",
+    "session": "scene.pse",
+    "replay": "scene.pml"
   }
 }

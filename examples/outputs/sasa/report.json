@@ -1,0 +1,825 @@
+{
+  "schema_version": 2,
+  "tool": "molscene",
+  "tool_version": "0.2.0",
+  "pymol_version": "3.2.0a",
+  "created_at": "2026-10-15T08:18:04.913275+00:00",
+  "operation": "sasa",
+  "inputs": [
+    {
+      "role": "input",
+      "basename": "1ubq.pdb",
+      "sha256": "d4a6812d8951cf6594e6a0763f089e35f5a80b62acb3c117b2c5565228a7b161"
+    }
+  ],
+  "parameters": {
+    "width": 1000,
+    "height": 750,
+    "dpi": 300,
+    "state": 1,
+    "selection": "polymer.protein",
+    "context": "not solvent and not hydro",
+    "altloc": "primary"
+  },
+  "structure": {
+    "molecule": {
+      "atoms": 660,
+      "residues": 134,
+      "protein_residues": 76,
+      "chains": 1
+    }
+  },
+  "analysis": {
+    "total_area_angstrom2": 4869.986287385225,
+    "context_area_angstrom2": 4869.986287385225,
+    "residues": [
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "1",
+        "resn": "MET",
+        "state": 1,
+        "area_angstrom2": 56.366987347602844,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "10",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 69.448566198349,
+        "atom_count": 4
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "11",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 93.71875278651714,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "12",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 66.4546127319336,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "13",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 6.499760746955872,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "14",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 61.798655927181244,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "15",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 7.248493358492851,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "16",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 147.60087776184082,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "17",
+        "resn": "VAL",
+        "state": 1,
+        "area_angstrom2": 5.40257528424263,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "18",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 101.23060829937458,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "19",
+        "resn": "PRO",
+        "state": 1,
+        "area_angstrom2": 47.269715651869774,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "2",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 78.65911114215851,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "20",
+        "resn": "SER",
+        "state": 1,
+        "area_angstrom2": 85.39295744895935,
+        "atom_count": 6
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "21",
+        "resn": "ASP",
+        "state": 1,
+        "area_angstrom2": 34.74045276641846,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "22",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 46.2082736492157,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "23",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 0.3607279658317566,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "24",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 121.69277691841125,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "25",
+        "resn": "ASN",
+        "state": 1,
+        "area_angstrom2": 53.0338431596756,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "26",
+        "resn": "VAL",
+        "state": 1,
+        "area_angstrom2": 0.18935580551624298,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "27",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 15.895647704601288,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "28",
+        "resn": "ALA",
+        "state": 1,
+        "area_angstrom2": 45.391626715660095,
+        "atom_count": 5
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "29",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 66.52117791771889,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "3",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 0.0,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "30",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 1.348418116569519,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "31",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 77.83892726898193,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "32",
+        "resn": "ASP",
+        "state": 1,
+        "area_angstrom2": 135.37588757276535,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "33",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 111.84440441429615,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "34",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 72.55603477358818,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "35",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 48.74473547935486,
+        "atom_count": 4
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "36",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 30.473783135414124,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "37",
+        "resn": "PRO",
+        "state": 1,
+        "area_angstrom2": 47.31022834777832,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "38",
+        "resn": "PRO",
+        "state": 1,
+        "area_angstrom2": 50.106136441230774,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "39",
+        "resn": "ASP",
+        "state": 1,
+        "area_angstrom2": 85.44623303413391,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "4",
+        "resn": "PHE",
+        "state": 1,
+        "area_angstrom2": 55.25193905830383,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "40",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 46.317984223365784,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "41",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 0.3703676462173462,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "42",
+        "resn": "ARG",
+        "state": 1,
+        "area_angstrom2": 90.15432205796242,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "43",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 0.5480796694755554,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "44",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 28.69868066906929,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "45",
+        "resn": "PHE",
+        "state": 1,
+        "area_angstrom2": 37.75184869766235,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "46",
+        "resn": "ALA",
+        "state": 1,
+        "area_angstrom2": 72.81374740600586,
+        "atom_count": 5
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "47",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 76.4628729224205,
+        "atom_count": 4
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "48",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 91.34342238306999,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "49",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 104.50976884365082,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "5",
+        "resn": "VAL",
+        "state": 1,
+        "area_angstrom2": 0.18202854692935944,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "50",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 7.885359168052673,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "51",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 119.74622142314911,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "52",
+        "resn": "ASP",
+        "state": 1,
+        "area_angstrom2": 65.2151420712471,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "53",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 48.92383575439453,
+        "atom_count": 4
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "54",
+        "resn": "ARG",
+        "state": 1,
+        "area_angstrom2": 118.51535606384277,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "55",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 30.347296953201294,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "56",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 0.0,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "57",
+        "resn": "SER",
+        "state": 1,
+        "area_angstrom2": 65.75164717435837,
+        "atom_count": 6
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "58",
+        "resn": "ASP",
+        "state": 1,
+        "area_angstrom2": 90.92095685005188,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "59",
+        "resn": "TYR",
+        "state": 1,
+        "area_angstrom2": 40.92541551589966,
+        "atom_count": 12
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "6",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 98.82165858149529,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "60",
+        "resn": "ASN",
+        "state": 1,
+        "area_angstrom2": 114.08954095840454,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "61",
+        "resn": "ILE",
+        "state": 1,
+        "area_angstrom2": 6.489676475524902,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "62",
+        "resn": "GLN",
+        "state": 1,
+        "area_angstrom2": 117.96689909696579,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "63",
+        "resn": "LYS",
+        "state": 1,
+        "area_angstrom2": 132.7563111782074,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "64",
+        "resn": "GLU",
+        "state": 1,
+        "area_angstrom2": 102.57686650753021,
+        "atom_count": 9
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "65",
+        "resn": "SER",
+        "state": 1,
+        "area_angstrom2": 18.668694972991943,
+        "atom_count": 6
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "66",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 55.677064418792725,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "67",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 0.3853110074996948,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "68",
+        "resn": "HIS",
+        "state": 1,
+        "area_angstrom2": 85.42184138298035,
+        "atom_count": 10
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "69",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 6.859581768512726,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "7",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 26.2660980373621,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "70",
+        "resn": "VAL",
+        "state": 1,
+        "area_angstrom2": 37.404409408569336,
+        "atom_count": 7
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "71",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 81.44506335258484,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "72",
+        "resn": "ARG",
+        "state": 1,
+        "area_angstrom2": 112.93943476676941,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "73",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 118.76649713516235,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "74",
+        "resn": "ARG",
+        "state": 1,
+        "area_angstrom2": 206.00642323493958,
+        "atom_count": 11
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "75",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 73.91505813598633,
+        "atom_count": 4
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "76",
+        "resn": "GLY",
+        "state": 1,
+        "area_angstrom2": 145.546893119812,
+        "atom_count": 5
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "8",
+        "resn": "LEU",
+        "state": 1,
+        "area_angstrom2": 139.8295283615589,
+        "atom_count": 8
+      },
+      {
+        "object": "molecule",
+        "segi": "",
+        "chain": "A",
+        "resi": "9",
+        "resn": "THR",
+        "state": 1,
+        "area_angstrom2": 123.34679651260376,
+        "atom_count": 7
+      }
+    ],
+    "selected_atom_count": 602,
+    "context_atom_count": 602,
+    "selection_state_policy": "requested_state_only",
+    "parameters": {
+      "dot_solvent": 1,
+      "solvent_radius": 1.4,
+      "dot_density": 3,
+      "altloc": "primary",
+      "state": 1,
+      "heavy_only": true,
+      "exclude_solvent": true,
+      "selected_input_atom_count": 602,
+      "context_input_atom_count": 602,
+      "selected_filtered_atom_count": 0,
+      "context_filtered_atom_count": 0
+    },
+    "kind": "sasa"
+  },
+  "artifacts": {
+    "report": "report.json",
+    "inputs": [
+      "inputs/input.pdb"
+    ],
+    "png": "scene.png",
+    "session": "scene.pse",
+    "replay": "scene.pml",
+    "sasa_csv": "sasa.csv"
+  }
+}

@@ -1,602 +1,371 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "verified_on": "2026-10-15",
-  "tested_code_revision": "684bce7",
+  "molscene_version": "0.2.0",
+  "revision_note": "Release 0.2.0 source including packaging changes, identified by exact module hashes below; the published main commit and CI run are recorded during publication.",
+  "module_sha256": {
+    "molscene/__init__.py": "2d72c2c2e0b47ccb72fca6af622d99d4a18d83af81f570c820b61e2a6aed502a",
+    "molscene/__main__.py": "084c51488a3f064a81dd863f49ce4631adc79a962ab41d859867064724a0df11",
+    "molscene/analysis.py": "ccd936d4f5574686b302ad82fd0e9efbf486e6aca4a9f2f4867ea891b033f2fa",
+    "molscene/artifacts.py": "a5dfbef2f4dfa0cd1980b78020f22fcc5114cb93ffae60d7475436b0ab82c191",
+    "molscene/batch.py": "fc013b9fbab078c32d9bda7b2f93898ce07ceb670d9c38f6c18d9a6646f26929",
+    "molscene/cli.py": "42faed956d4b2d58833e7979fb6842feca9ceede7b9cedea740a54cb36c47655",
+    "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
+    "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
+    "molscene/desktop/controller.py": "7be6a7086f74310e2f0be5b5f32614d5e29b18fc3a1f8102b8a032e2cb79cd9a",
+    "molscene/desktop/jobs.py": "771591c0634a640fc50b45a74974f330c305ae8e5ed18a6e2f2f60c31cd8fb94",
+    "molscene/desktop/panel.py": "5aa3b2bbea615be319bc9208152c48dd235499a34604804164b0f8eb1ee19904",
+    "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
+    "molscene/desktop/plugin/startup/__init__.py": "3c9b7e9214210642f6e93080026722d011a97b6f6a87dbc80e8d54dcd904ad61",
+    "molscene/desktop/plugin/startup/molscene_workbench.py": "f2cfbc8243185c87a792132e20b7c27acfd6757d25e6146dcc0a05d87fc89166",
+    "molscene/engine.py": "18f58951b234e3f3390db46bbc2e8cc19beb67abf27747341a819593a0e37e65",
+    "molscene/selftest.py": "a6fadcb7ff5e0d085d0f2fcc5dc410d8e15556719515c5400da890bfd9485539",
+    "molscene/snapshot.py": "3b5c0a033a4909f01068c0b67d5331ec1019f9e4b4ed830d37b67b28b942f8ce",
+    "molscene/styles.py": "d22b6d20601d84b07c83a5fcad33452d26ab32e6e229c081d2e0a1c22ef9ca8b",
+    "molscene/worker.py": "d5930a65db8ff5af3d35bca44ed3e21ffd023b4b1a50b8799033520875d84453"
+  },
   "environments": [
     {
-      "name": "Installed PyMOL bundle",
       "platform": "Windows",
       "python": "3.10.18",
-      "pymol_version": "3.1.6.1",
+      "pymol_package": "3.2.0a0",
+      "pymol_native": "3.2.0a",
+      "numpy": "2.2.6",
+      "qt_binding": "PySide6",
+      "qt": "6.8.1",
+      "pillow": "12.3.0",
       "unittest": {
-        "total": 36,
-        "passed": 36,
+        "discovered": 135,
+        "passed": 122,
+        "skipped": 13,
         "failed": 0,
-        "skipped": 0
-      },
-      "selftest": {
-        "passed": true,
-        "checks": [
-          {
-            "name": "runtime",
-            "status": "passed",
-            "evidence": {
-              "pymol_version": "3.1.6.1"
-            }
-          },
-          {
-            "name": "pdb_mmcif_coordinates",
-            "status": "passed",
-            "evidence": {
-              "pdb_atoms": 26,
-              "mmcif_atoms": 26,
-              "coordinate_tolerance_angstrom": 0.001
-            }
-          },
-          {
-            "name": "ca_selection",
-            "status": "passed",
-            "evidence": {
-              "ca_atoms": 6
-            }
-          },
-          {
-            "name": "representations",
-            "status": "passed",
-            "evidence": {
-              "cartoon": 24,
-              "cartoon_ligand_sticks": 2,
-              "surface": 24,
-              "surface_ligand_sticks": 2
-            }
-          },
-          {
-            "name": "distance_5_angstrom",
-            "status": "passed",
-            "evidence": {
-              "distance_angstrom": 5.0,
-              "endpoint_atoms": [
-                1,
-                1
-              ]
-            }
-          },
-          {
-            "name": "rigid_alignment",
-            "status": "passed",
-            "evidence": {
-              "rmsd_angstrom": 0.0,
-              "aligned_atoms": 6
-            }
-          },
-          {
-            "name": "session_restore",
-            "status": "passed",
-            "evidence": {
-              "scenes": [
-                "cartoon",
-                "surface",
-                "measure",
-                "align"
-              ],
-              "state": [
-                "coordinates",
-                "objects",
-                "selections",
-                "representations",
-                "colors",
-                "view",
-                "background",
-                "enabled"
-              ]
-            }
-          },
-          {
-            "name": "ray_image",
-            "status": "passed",
-            "evidence": {
-              "size": [
-                240,
-                180
-              ],
-              "ray": 1,
-              "images": [
-                {
-                  "scene": "cartoon",
-                  "colors": 777
-                },
-                {
-                  "scene": "surface",
-                  "colors": 1147
-                },
-                {
-                  "scene": "measure",
-                  "colors": 402
-                },
-                {
-                  "scene": "align",
-                  "colors": 725
-                }
-              ]
-            }
-          },
-          {
-            "name": "portable_replay",
-            "status": "passed",
-            "evidence": {
-              "directories": [
-                "space dir",
-                "中文",
-                "apostrophe'",
-                "bare;semicolon",
-                "dollar$()"
-              ],
-              "scenes": [
-                "cartoon",
-                "surface",
-                "measure",
-                "align"
-              ],
-              "replays": [
-                {
-                  "directory": "space dir",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                }
-              ],
-              "loader": "save cwd; chdir(output); cmd.do(\"@scene.pml\"); restore cwd",
-              "original_fixtures_removed": true
-            }
-          }
-        ]
+        "seconds": 150.32,
+        "skip_scope": "Local exFAT hardlink/symlink/junction and distinct Windows 8.3 alias capabilities"
       }
     },
     {
-      "name": "Community wheel pymol-open-source 3.2.0a0",
       "platform": "Windows",
       "python": "3.10.18",
-      "pymol_version": "3.2.0a",
+      "pymol": null,
+      "qt": null,
       "unittest": {
-        "total": 36,
+        "discovered": 135,
         "passed": 36,
+        "skipped": 99,
         "failed": 0,
-        "skipped": 0
-      },
-      "selftest": {
-        "passed": true,
-        "checks": [
-          {
-            "name": "runtime",
-            "status": "passed",
-            "evidence": {
-              "pymol_version": "3.2.0a"
-            }
-          },
-          {
-            "name": "pdb_mmcif_coordinates",
-            "status": "passed",
-            "evidence": {
-              "pdb_atoms": 26,
-              "mmcif_atoms": 26,
-              "coordinate_tolerance_angstrom": 0.001
-            }
-          },
-          {
-            "name": "ca_selection",
-            "status": "passed",
-            "evidence": {
-              "ca_atoms": 6
-            }
-          },
-          {
-            "name": "representations",
-            "status": "passed",
-            "evidence": {
-              "cartoon": 24,
-              "cartoon_ligand_sticks": 2,
-              "surface": 24,
-              "surface_ligand_sticks": 2
-            }
-          },
-          {
-            "name": "distance_5_angstrom",
-            "status": "passed",
-            "evidence": {
-              "distance_angstrom": 5.0,
-              "endpoint_atoms": [
-                1,
-                1
-              ]
-            }
-          },
-          {
-            "name": "rigid_alignment",
-            "status": "passed",
-            "evidence": {
-              "rmsd_angstrom": 0.0,
-              "aligned_atoms": 6
-            }
-          },
-          {
-            "name": "session_restore",
-            "status": "passed",
-            "evidence": {
-              "scenes": [
-                "cartoon",
-                "surface",
-                "measure",
-                "align"
-              ],
-              "state": [
-                "coordinates",
-                "objects",
-                "selections",
-                "representations",
-                "colors",
-                "view",
-                "background",
-                "enabled"
-              ]
-            }
-          },
-          {
-            "name": "ray_image",
-            "status": "passed",
-            "evidence": {
-              "size": [
-                240,
-                180
-              ],
-              "ray": 1,
-              "images": [
-                {
-                  "scene": "cartoon",
-                  "colors": 777
-                },
-                {
-                  "scene": "surface",
-                  "colors": 1147
-                },
-                {
-                  "scene": "measure",
-                  "colors": 402
-                },
-                {
-                  "scene": "align",
-                  "colors": 725
-                }
-              ]
-            }
-          },
-          {
-            "name": "portable_replay",
-            "status": "passed",
-            "evidence": {
-              "directories": [
-                "space dir",
-                "中文",
-                "apostrophe'",
-                "bare;semicolon",
-                "dollar$()"
-              ],
-              "scenes": [
-                "cartoon",
-                "surface",
-                "measure",
-                "align"
-              ],
-              "replays": [
-                {
-                  "directory": "space dir",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "space dir",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "中文",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "apostrophe'",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "bare;semicolon",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "cartoon",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "surface",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.cif'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('surface', '(molecule) and (polymer.protein)')\n   14:cmd.show('surface', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.deselect()\n   22:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   23:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "measure",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\n    3:cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')\nPyMOL>cmd.bg_color('white')\n    4:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    5:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    6:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    7:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    8:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n    9:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   10:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   11:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   12:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'molecule')\n   13:cmd.set('cartoon_trace_atoms', 0, 'molecule')\nPyMOL>cmd.show('cartoon', '(molecule) and (polymer.protein)')\n   14:cmd.show('cartoon', '(molecule) and (polymer.protein)')\nPyMOL>cmd.color('marine', '(molecule) and (chain \"A\")')\n   15:cmd.color('marine', '(molecule) and (chain \"A\")')\nPyMOL>cmd.color('teal', '(molecule) and (chain \"B\")')\n   16:cmd.color('teal', '(molecule) and (chain \"B\")')\nPyMOL>cmd.show('sticks', '(molecule) and (organic)')\n   17:cmd.show('sticks', '(molecule) and (organic)')\nPyMOL>cmd.show('spheres', '(molecule) and (inorganic)')\n   18:cmd.show('spheres', '(molecule) and (inorganic)')\nPyMOL>cmd.set('sphere_scale', 0.25, 'molecule')\n   19:cmd.set('sphere_scale', 0.25, 'molecule')\nPyMOL>cmd.orient('molecule')\n   20:cmd.orient('molecule')\nPyMOL>cmd.zoom('molecule', 3)\n   21:cmd.zoom('molecule', 3)\nPyMOL>cmd.select('selection_a', '(molecule) and (index 1)')\n   22:cmd.select('selection_a', '(molecule) and (index 1)')\nPyMOL>cmd.select('selection_b', '(molecule) and (index 2)')\n   23:cmd.select('selection_b', '(molecule) and (index 2)')\nPyMOL>cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\n   24:cmd.distance('measurement', '(molecule) and (index 1)', '(molecule) and (index 2)')\nPyMOL>cmd.show('spheres', 'selection_a or selection_b')\n   25:cmd.show('spheres', 'selection_a or selection_b')\nPyMOL>cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\n   26:cmd.set('sphere_scale', 0.3, 'selection_a or selection_b')\nPyMOL>cmd.set('dash_color', 'black', 'measurement')\n   27:cmd.set('dash_color', 'black', 'measurement')\nPyMOL>cmd.set('label_color', 'black', 'measurement')\n   28:cmd.set('label_color', 'black', 'measurement')\nPyMOL>cmd.deselect()\n   29:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   30:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                },
-                {
-                  "directory": "dollar$()",
-                  "scene": "align",
-                  "transcript": "PyMOL>python\nPyMOL>from pathlib import Path\n    1:from pathlib import Path\n    2:_molscene_root = Path(__script__).resolve().parent\nPyMOL>cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\n    3:cmd.load(str(_molscene_root / 'inputs/mobile.pdb'), 'mobile')\nPyMOL>cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\n    4:cmd.load(str(_molscene_root / 'inputs/target.pdb'), 'target')\nPyMOL>cmd.bg_color('white')\n    5:cmd.bg_color('white')\nPyMOL>cmd.set('ray_opaque_background', 1)\n    6:cmd.set('ray_opaque_background', 1)\nPyMOL>cmd.set('antialias', 2)\n    7:cmd.set('antialias', 2)\nPyMOL>cmd.set('orthoscopic', 1)\n    8:cmd.set('orthoscopic', 1)\nPyMOL>cmd.set('depth_cue', 0)\n    9:cmd.set('depth_cue', 0)\nPyMOL>cmd.set('ray_shadows', 0)\n   10:cmd.set('ray_shadows', 0)\nPyMOL>cmd.set('specular', 0.2)\n   11:cmd.set('specular', 0.2)\nPyMOL>cmd.set('cartoon_trace_atoms', 0)\n   12:cmd.set('cartoon_trace_atoms', 0)\nPyMOL>cmd.hide('everything', 'all')\n   13:cmd.hide('everything', 'all')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'mobile')\n   14:cmd.set('cartoon_trace_atoms', 0, 'mobile')\nPyMOL>cmd.set('cartoon_trace_atoms', 0, 'target')\n   15:cmd.set('cartoon_trace_atoms', 0, 'target')\nPyMOL>cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\n   16:cmd.align('(mobile) and (polymer.protein and name CA)', '(target) and (polymer.protein and name CA)', cutoff=2.0, cycles=5, gap=-10.0, extend=-0.5, max_gap=50, object='alignment', transform=1)\nPyMOL>cmd.show('cartoon', 'mobile')\n   17:cmd.show('cartoon', 'mobile')\nPyMOL>cmd.color('marine', 'mobile')\n   18:cmd.color('marine', 'mobile')\nPyMOL>cmd.show('cartoon', 'target')\n   19:cmd.show('cartoon', 'target')\nPyMOL>cmd.color('orange', 'target')\n   20:cmd.color('orange', 'target')\nPyMOL>cmd.orient('mobile or target')\n   21:cmd.orient('mobile or target')\nPyMOL>cmd.zoom('mobile or target', 3)\n   22:cmd.zoom('mobile or target', 3)\nPyMOL>cmd.deselect()\n   23:cmd.deselect()\nPyMOL>cmd.viewport(240, 180)\n   24:cmd.viewport(240, 180)\nPyMOL>python end\nPyMOL>python end\n"
-                }
-              ],
-              "loader": "save cwd; chdir(output); cmd.do(\"@scene.pml\"); restore cwd",
-              "original_fixtures_removed": true
-            }
-          }
-        ]
+        "seconds": 10.151,
+        "skip_scope": "Expected missing-backend/Qt and filesystem capability skips"
       }
     }
   ],
-  "without_pymol": {
-    "python": "3.14",
-    "total": 36,
-    "passed": 18,
-    "skipped": 18,
-    "failed": 0
-  },
-  "gallery": [
-    {
-      "scene": "alignment",
-      "pixels": [
-        1600,
-        1200
+  "native_workbench": {
+    "passed": true,
+    "trace": [
+      "click show_representation",
+      "click apply_coloring",
+      "click orient_objects",
+      "click apply_appearance",
+      "click run_geometry",
+      "click run_inspect",
+      "click export_csv",
+      "click export_fasta",
+      "click load_coordinates",
+      "click hide_objects",
+      "click show_representation",
+      "click show_representation",
+      "click apply_coloring",
+      "click show_representation",
+      "click apply_coloring",
+      "click run_contacts",
+      "click annotate_result",
+      "click run_sasa",
+      "click run_export",
+      "click run_batch",
+      "request native main-window close during real batch",
+      "cooperative worker stopped; native close resumes"
+    ],
+    "close_events": 2,
+    "gl_valid": true,
+    "ubq_distance_angstrom": 22.168378853064407,
+    "framebuffer_colors": 2556,
+    "hsg_contact_pairs": 97,
+    "hsg_drawn_contacts": 97,
+    "hsg_ligand_sasa_angstrom2": 97.79540991783142,
+    "current_view_export": true,
+    "batch_barrier_ready": {
+      "schema_version": 2,
+      "passed": false,
+      "items": [
+        {
+          "input": "0.pdb",
+          "output": "0001-0",
+          "status": "completed",
+          "report": "0001-0/report.json"
+        },
+        {
+          "input": "1.pdb",
+          "output": "0002-1",
+          "status": "pending"
+        },
+        {
+          "input": "2.pdb",
+          "output": "0003-2",
+          "status": "pending"
+        },
+        {
+          "input": "3.pdb",
+          "output": "0004-3",
+          "status": "pending"
+        },
+        {
+          "input": "4.pdb",
+          "output": "0005-4",
+          "status": "pending"
+        }
       ],
-      "pymol_version": "3.2.0a",
-      "analysis": {
-        "mobile_atoms": 76,
-        "target_atoms": 76,
-        "align_result": [
-          0.0,
-          76,
-          0,
-          0.0,
-          76,
-          381.0,
-          76
+      "completed": 1,
+      "failed": 0,
+      "cancelled": false
+    },
+    "batch_progress_before_close": {
+      "schema_version": 2,
+      "passed": false,
+      "items": [
+        {
+          "input": "0.pdb",
+          "output": "0001-0",
+          "status": "completed",
+          "report": "0001-0/report.json"
+        },
+        {
+          "input": "1.pdb",
+          "output": "0002-1",
+          "status": "pending"
+        },
+        {
+          "input": "2.pdb",
+          "output": "0003-2",
+          "status": "pending"
+        },
+        {
+          "input": "3.pdb",
+          "output": "0004-3",
+          "status": "pending"
+        },
+        {
+          "input": "4.pdb",
+          "output": "0005-4",
+          "status": "pending"
+        }
+      ],
+      "completed": 1,
+      "failed": 0,
+      "cancelled": false
+    },
+    "cancel_marker_present": true,
+    "close_was_deferred": true,
+    "batch_terminal": "cancelled",
+    "batch_terminal_payload": {
+      "schema_version": 2,
+      "passed": false,
+      "items": [
+        {
+          "input": "0.pdb",
+          "output": "0001-0",
+          "status": "completed",
+          "report": "0001-0/report.json"
+        },
+        {
+          "input": "1.pdb",
+          "output": "0002-1",
+          "status": "pending"
+        },
+        {
+          "input": "2.pdb",
+          "output": "0003-2",
+          "status": "pending"
+        },
+        {
+          "input": "3.pdb",
+          "output": "0004-3",
+          "status": "pending"
+        },
+        {
+          "input": "4.pdb",
+          "output": "0005-4",
+          "status": "pending"
+        }
+      ],
+      "completed": 1,
+      "failed": 0,
+      "cancelled": true,
+      "output_path": "<local artifact>/batch-outputs"
+    },
+    "worker_stderr": "",
+    "batch_progress_at_terminal": {
+      "schema_version": 2,
+      "passed": false,
+      "items": [
+        {
+          "input": "0.pdb",
+          "output": "0001-0",
+          "status": "completed",
+          "report": "0001-0/report.json"
+        },
+        {
+          "input": "1.pdb",
+          "output": "0002-1",
+          "status": "pending"
+        },
+        {
+          "input": "2.pdb",
+          "output": "0003-2",
+          "status": "pending"
+        },
+        {
+          "input": "3.pdb",
+          "output": "0004-3",
+          "status": "pending"
+        },
+        {
+          "input": "4.pdb",
+          "output": "0005-4",
+          "status": "pending"
+        }
+      ],
+      "completed": 1,
+      "failed": 0,
+      "cancelled": true
+    },
+    "batch_envelope": {
+      "passed": false,
+      "result": {
+        "schema_version": 2,
+        "passed": false,
+        "items": [
+          {
+            "input": "0.pdb",
+            "output": "0001-0",
+            "status": "completed",
+            "report": "0001-0/report.json"
+          },
+          {
+            "input": "1.pdb",
+            "output": "0002-1",
+            "status": "pending"
+          },
+          {
+            "input": "2.pdb",
+            "output": "0003-2",
+            "status": "pending"
+          },
+          {
+            "input": "3.pdb",
+            "output": "0004-3",
+            "status": "pending"
+          },
+          {
+            "input": "4.pdb",
+            "output": "0005-4",
+            "status": "pending"
+          }
         ],
-        "rmsd_angstrom": 0.0,
-        "aligned_atoms": 76,
-        "mobile_selection": "(mobile) and (polymer.protein and name CA)",
-        "target_selection": "(target) and (polymer.protein and name CA)"
-      },
-      "sha256": "b1fa02bc0a744bdb191d2b757041ec08d94190d852d0b73f1da2008c45ad1ff1"
+        "completed": 1,
+        "failed": 0,
+        "cancelled": true
+      }
     },
-    {
-      "scene": "overview",
-      "pixels": [
-        1600,
-        1200
-      ],
-      "pymol_version": "3.2.0a",
-      "analysis": {},
-      "sha256": "bf9c44bb22603f3a935f7166604e06a9e1a85a9dfe45323dab807ec5eb58169c"
-    },
-    {
-      "scene": "pocket",
-      "pixels": [
-        1600,
-        1200
-      ],
-      "pymol_version": "3.2.0a",
-      "analysis": {
-        "ligand_atoms": 45,
-        "pocket_neighbor_atoms": 115,
-        "pocket_atoms": 236,
-        "pocket_residues": 33,
-        "definition": "Protein atoms within radius of ligand, expanded to whole residues; geometric proximity only."
-      },
-      "sha256": "9bf1fb3624a62de138da44ea063c8b8977bae83dce89dc1017b0c15296b283c6"
-    },
-    {
-      "scene": "surface",
-      "pixels": [
-        1600,
-        1200
-      ],
-      "pymol_version": "3.2.0a",
-      "analysis": {},
-      "sha256": "8dc626ae15d6a8b22efaf2a7a254a6d3e20bd61b35e0938df7f73d17c21021d8"
-    }
-  ],
-  "limits": [
-    "Installed commercial bundle large exports visibly carry an evaluation watermark. Gallery uses the independently installed open-source backend.",
-    "Self-tests validate deterministic fixtures; the gallery was also manually inspected for scientific display correctness.",
-    "The Windows 8.3 alias regression is platform-specific: the corresponding test is expected to skip on Linux."
-  ],
-  "clean_source_validation": {
-    "git_archive": {
-      "total": 35,
-      "skipped": 0,
-      "failed": 0,
-      "backends": [
-        "3.1.6.1",
-        "3.2.0a"
-      ]
-    },
-    "extracted_sdist": {
-      "total": 35,
-      "skipped": 0,
-      "failed": 0,
-      "backends": [
-        "3.1.6.1",
-        "3.2.0a"
-      ]
-    },
-    "wheel_install_isolated_selftest": {
-      "total": 9,
-      "failed": 0,
-      "pymol_version": "3.2.0a"
-    }
+    "active_close_cancelled": true,
+    "batch_completed": 1,
+    "batch_pending": 4,
+    "closed_after_worker": true
   },
-  "ci_linux": {
-    "run_url": "https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261",
-    "revision": "ab3d5bd",
-    "python": "3.10.22",
-    "pymol_version": "3.1.0",
-    "tests_passed": 35,
-    "selftest_passed": 9
+  "gallery": {
+    "manifest": "../examples/outputs/validation.json",
+    "sha256": "5f719de1e8925fe21a07a711b809a763f197165897d032cf70f2a7da7386367f",
+    "workflows": 10,
+    "files": 64,
+    "images": [
+      1000,
+      750
+    ],
+    "state": 1,
+    "manual_main_figures_reviewed": 8,
+    "evaluation_overlay_modified": false
+  },
+  "screenshots": [
+    {
+      "file": "docs/screenshots/ubiquitin-viewport.png",
+      "sha256": "289038adafde0bc6dadb5253033bd05f78f1a4df534c8c724c87d60fbaeb53fb"
+    },
+    {
+      "file": "docs/screenshots/workbench-contacts.png",
+      "sha256": "0d7303603dd1c81dd61f4dea4b934788bb325a65f21a8b8a5f560636f7490ba7"
+    }
+  ],
+  "privacy": {
+    "files": 126,
+    "text_files": 82,
+    "pse_files": 11,
+    "png_files": 13,
+    "gallery_artifacts": 64,
+    "findings": []
+  },
+  "ci": {
+    "workflow": "../.github/workflows/ci.yml",
+    "unit_matrix": "Windows/Linux x Python 3.10/3.13",
+    "required_gui": "Linux Xvfb/xcb; dependency assertions and three-native-case execution log gate",
+    "v02_run_url": null,
+    "note": "Prepublication observation: v02_run_url is null. Final commit-specific main/tree/CI conclusions and asset hashes are recorded in the release publication-evidence.json and notes after actual green CI, not presumed by this record.",
+    "publication_record": "https://github.com/c-chunhao/molscene/releases/tag/v0.2.0"
+  },
+  "packaging": {
+    "isolated_build": "wheel and sdist; build 1.6.1 with uv installer",
+    "isolated_installed_wheel": {
+      "forced_reinstall": true,
+      "python": "3.10.18",
+      "isolated": true,
+      "module_files_verified": 19,
+      "fixture_files_verified": 4,
+      "help_version": true,
+      "doctor": true,
+      "inspect_atoms": 660,
+      "offline_selftest": {
+        "passed": 9,
+        "failed": 0
+      },
+      "native_gui": {
+        "gl_valid": true,
+        "device_pixel_ratio": 1.5,
+        "preferences_unchanged": true,
+        "bootstrap_loaded": true,
+        "native_refresh": true,
+        "framebuffer_colors": 1365,
+        "rotation_changed": true,
+        "zoom_changed": true,
+        "picked_atoms": 1,
+        "singleton": true,
+        "panel_events": true,
+        "scene_events": true,
+        "rename_delete": true,
+        "closed": true
+      }
+    },
+    "sdist": {
+      "source_example_test_python_files_verified": 33,
+      "fixture_files_verified": 4,
+      "science_unittest": {
+        "discovered": 12,
+        "passed": 12,
+        "skipped": 0,
+        "failed": 0,
+        "seconds": 1.841
+      },
+      "offline_selftest": {
+        "passed": 9,
+        "failed": 0
+      }
+    },
+    "scope": "Final wheel bytes checked against source and independent installed files; final sdist and example ZIP checked against committed Git blobs. Asset checksums and final commit-specific CI attestation are recorded separately on the release to avoid self-reference."
   }
 }

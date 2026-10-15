@@ -33,7 +33,8 @@ class CliTests(unittest.TestCase):
                                      cwd=ROOT, capture_output=True, text=True)
                 self.assertEqual(run.returncode, 0, run.stderr)
                 self.assertNotIn('Traceback', run.stderr)
-        self.assertIn('0.1.0', run.stdout)
+        from molscene import __version__
+        self.assertIn(__version__, run.stdout)
 
     def test_required_inputs_and_selections_return_usage_error(self):
         for args in ([], ['render', '--output', 'out'], ['measure', 'a.pdb', '--output', 'out'],

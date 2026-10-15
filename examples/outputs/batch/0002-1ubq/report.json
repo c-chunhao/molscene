@@ -1,0 +1,56 @@
+{
+  "schema_version": 2,
+  "tool": "molscene",
+  "tool_version": "0.2.0",
+  "pymol_version": "3.2.0a",
+  "created_at": "2026-10-15T08:18:11.803671+00:00",
+  "operation": "render",
+  "inputs": [
+    {
+      "role": "input",
+      "basename": "1ubq.cif",
+      "sha256": "056f98710cb2b36f633c45e41902a02eb446e82871da21ff2dd44f74a56ca0f6"
+    }
+  ],
+  "parameters": {
+    "width": 1000,
+    "height": 750,
+    "dpi": 300,
+    "state": 1,
+    "style": "cartoon",
+    "ligand": null,
+    "radius": 5.0,
+    "representation": null,
+    "selection": "all",
+    "coloring": "chain",
+    "color": "marine",
+    "background": "white",
+    "surface_transparency": 0.2,
+    "stick_radius": 0.18
+  },
+  "structure": {
+    "molecule": {
+      "atoms": 660,
+      "residues": 134,
+      "protein_residues": 76,
+      "chains": 2
+    }
+  },
+  "analysis": {
+    "kind": "render",
+    "state": 1,
+    "coloring": {
+      "mode": "chain",
+      "chain_count": 2
+    }
+  },
+  "artifacts": {
+    "report": "report.json",
+    "inputs": [
+      "inputs/input.cif"
+    ],
+    "png": "scene.png",
+    "session": "scene.pse",
+    "replay": "scene.pml"
+  }
+}

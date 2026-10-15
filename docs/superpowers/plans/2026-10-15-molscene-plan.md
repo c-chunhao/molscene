@@ -61,7 +61,7 @@
 - [ ] Run CLI tests to verify failures before implementation.
 - [ ] Implement five subcommands from the spec; the CLI prints concise output location and key scientific numbers, catches expected validation/runtime failures, and never prints success when testing fails.
 - [ ] Build offline fixtures with a fixed peptide and single-atom points at (0,0,0)/(3,4,0). Verify PDB/mmCIF coordinates, selected C-alpha count, representation flags, 5 Å measurement, rotated/translated copy alignment, session recovery, ray image dimensions and nonuniform pixels, and PML replay in a new context.
-- [ ] Run `D:/soft/pymol/python.exe -m unittest discover -s tests -v` and `D:/soft/pymol/python.exe -m molscene selftest --output .audit/tool-selftest`.
+- [ ] Run `python -m unittest discover -s tests -v` and `python -m molscene selftest --output .audit/tool-selftest`, where `python` is the interpreter from the selected PyMOL environment.
 - [ ] Commit Task 2 paths.
 
 ### Task 3: Examples, Interface Research and Documentation

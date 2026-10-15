@@ -1,0 +1,46 @@
+# MolScene standalone replay: use @scene.pml in PyMOL.
+# For directories containing parser punctuation, use this Python loader:
+# import os
+# old = os.getcwd()
+# os.chdir(output_directory)
+# try: cmd.do("@scene.pml")
+# finally: os.chdir(old)
+# The loader uses only os and the active PyMOL cmd (no MolScene install).
+python
+from pathlib import Path
+_molscene_root = Path(__script__).resolve().parent
+cmd.load(str(_molscene_root / 'inputs/input.pdb'), 'molecule')
+cmd.bg_color('white')
+cmd.set('ray_opaque_background', 1)
+cmd.set('antialias', 2)
+cmd.set('orthoscopic', 1)
+cmd.set('depth_cue', 0)
+cmd.set('ray_shadows', 0)
+cmd.set('specular', 0.2)
+cmd.set('cartoon_trace_atoms', 0)
+cmd.hide('everything', 'all')
+cmd.frame(1)
+cmd.set('cartoon_trace_atoms', 0, 'molecule')
+cmd.select('_molscene_display', '(molecule) and (all)', state=1, enable=0, quiet=1)
+cmd.show('cartoon', '(_molscene_display) and (polymer.protein)')
+cmd.color('marine', '(_molscene_display) and (chain "A")')
+cmd.show('sticks', '(_molscene_display) and (organic)')
+cmd.show('spheres', '(_molscene_display) and (inorganic)')
+cmd.set('sphere_scale', 0.25, '_molscene_display')
+cmd.orient('_molscene_display', state=1)
+cmd.zoom('_molscene_display', 3, state=1)
+cmd.show('lines', '_molscene_display')
+cmd.show('sticks', '(_molscene_display) and (not polymer.protein)')
+cmd.show('nonbonded', '_molscene_display')
+cmd.select('selection_a', '(molecule) and (resi 1 and name CA)', state=1, enable=0, quiet=1)
+cmd.select('selection_b', '(molecule) and (resi 2 and name CA)', state=1, enable=0, quiet=1)
+cmd.select('selection_c', '(molecule) and (resi 3 and name CA)', state=1, enable=0, quiet=1)
+cmd.select('selection_d', '(molecule) and (resi 4 and name CA)', state=1, enable=0, quiet=1)
+cmd.dihedral('measurement', 'selection_a', 'selection_b', 'selection_c', 'selection_d', state=1)
+cmd.show('spheres', 'selection_a or selection_b or selection_c or selection_d')
+cmd.set('sphere_scale', 0.3, 'selection_a or selection_b or selection_c or selection_d')
+cmd.set('dash_color', 'black', 'measurement')
+cmd.set('label_color', 'black', 'measurement')
+cmd.deselect()
+cmd.viewport(1000, 750)
+python end

@@ -1,0 +1,3 @@
+id,object,segi,chain,atom_count,residue_site_count,protein_residue_site_count,nucleic_residue_site_count
+molecule|A|A,molecule,A,A,602,76,76,0
+molecule|B|A,molecule,B,A,58,58,0,0

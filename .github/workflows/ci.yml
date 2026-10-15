@@ -28,14 +28,15 @@ jobs:
         run: python -m unittest discover -s tests -v
 
   integration:
-    name: Open-source PyMOL / Linux
+    name: Required PyMOL + native Qt OpenGL / Linux
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash -e -o pipefail -l {0}
     env:
       LIBGL_ALWAYS_SOFTWARE: '1'
-      QT_QPA_PLATFORM: offscreen
+      QT_QPA_PLATFORM: xcb
+      MOLSCENE_TEST_ARTIFACTS: artifacts/native-workbench
     steps:
       - uses: actions/checkout@v4
       # See https://github.com/mamba-org/setup-micromamba for official inputs.
@@ -47,28 +48,47 @@ jobs:
             python=3.10
             pymol-open-source
             pillow
+            pyqt
             pip
           init-shell: bash
           cache-environment: true
           post-cleanup: all
       - name: Install headless display support
-        run: sudo apt-get update && sudo apt-get install -y xvfb xauth libgl1 libegl1
+        run: sudo apt-get update && sudo apt-get install -y xvfb xauth libgl1 libegl1 libxcb-cursor0 libxkbcommon-x11-0
       - name: Install MolScene
         run: python -m pip install -e .
       - name: Record resolved backend and assert import
         run: |
           mkdir -p artifacts
           micromamba list > artifacts/environment.txt
-          python -c "import sys, pymol2; print(sys.version); print(pymol2.__file__)" | tee artifacts/backend.txt
+          python -c "import sys, pymol2; from PIL import Image; from pymol.Qt import QtCore, QtWidgets, PYQT_NAME; print(sys.version); print(pymol2.__file__); print(PYQT_NAME, QtCore.qVersion())" | tee artifacts/backend.txt
           xvfb-run -a python -m molscene doctor | tee artifacts/doctor.txt
+      - name: Require desktop test dependencies
+        run: python -c "import runpy; tests = runpy.run_path('tests/test_desktop.py'); assert tests['HAS_PYMOL'] and tests['HAS_QT'], 'Required native tests cannot skip for missing dependencies'"
       - name: Run full test suite with real PyMOL
-        run: xvfb-run -a python -m unittest discover -s tests -v 2>&1 | tee artifacts/tests.txt
+        run: xvfb-run -a -s '-screen 0 1920x1080x24 +extension GLX' python -m unittest discover -s tests -v 2>&1 | tee artifacts/tests.txt
+      # The full suite already invokes the real harness normally and with clean
+      # preferences. Require actual execution, without repeating the same runs.
+      - name: Require native GL, mouse, pick and lifecycle tests to have passed
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          log = Path('artifacts/tests.txt').read_text()
+          required = {
+              'test_native_startup_events_framebuffer_and_shutdown': 'test_desktop.NativeDesktopTests',
+              'test_native_clean_preferences_startup_and_shutdown': 'test_desktop.NativeDesktopTests',
+              'test_native_fixtures_exports_and_cooperative_window_close': 'test_workbench.QtWorkbenchTests',
+          }
+          for name, case in required.items():
+              assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute successfully, not skip'
+          PY
       - name: Run offline selftest
         run: xvfb-run -a python -m molscene selftest --output artifacts/selftest 2>&1 | tee artifacts/selftest.txt
-      - name: Upload failure diagnostics
-        if: failure()
+      - name: Upload integration evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: opensource-integration-failure
+          name: opensource-qt-integration
           path: artifacts/
           if-no-files-found: ignore

@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "passed": true,
+  "items": [
+    {
+      "input": "1hsg.pdb",
+      "output": "0001-1hsg",
+      "status": "completed",
+      "report": "0001-1hsg/report.json"
+    },
+    {
+      "input": "1ubq.cif",
+      "output": "0002-1ubq",
+      "status": "completed",
+      "report": "0002-1ubq/report.json"
+    },
+    {
+      "input": "1ubq.pdb",
+      "output": "0003-1ubq",
+      "status": "completed",
+      "report": "0003-1ubq/report.json"
+    }
+  ],
+  "completed": 3,
+  "failed": 0,
+  "cancelled": false
+}

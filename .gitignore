@@ -6,3 +6,6 @@ dist/
 .audit/
 .superpowers/
 .runtime/
+.worktrees/
+workspace/
+results/

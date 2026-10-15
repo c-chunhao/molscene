@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "molscene"
-version = "0.1.0"
-description = "Reproducible molecular scenes and geometry through PyMOL"
+version = "0.2.0"
+description = "Native PyMOL workbench, reproducible molecular scenes and structural analysis"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -13,6 +13,8 @@ authors = [{name = "Chunhao Cao"}]
 
 [project.optional-dependencies]
 test = ["Pillow>=10"]
+build = ["build[uv]>=1.2", "twine>=6"]
+gui = ["PySide6-Essentials==6.8.1"]
 
 [project.urls]
 Repository = "https://github.com/c-chunhao/molscene"
@@ -23,3 +25,6 @@ molscene = "molscene.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["molscene*"]
+
+[tool.setuptools.data-files]
+"share/molscene/examples/data" = ["examples/data/1ubq.pdb", "examples/data/1ubq.cif", "examples/data/1hsg.pdb", "examples/data/sources.json"]

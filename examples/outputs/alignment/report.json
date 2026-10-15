@@ -1,8 +1,9 @@
 {
+  "schema_version": 2,
   "tool": "molscene",
-  "tool_version": "0.1.0",
+  "tool_version": "0.2.0",
   "pymol_version": "3.2.0a",
-  "created_at": "2026-10-15T02:45:19.614361+00:00",
+  "created_at": "2026-10-15T08:17:46.573842+00:00",
   "operation": "align",
   "inputs": [
     {
@@ -18,9 +19,12 @@
   ],
   "parameters": {
     "selection": "polymer.protein and name CA",
-    "width": 1600,
-    "height": 1200,
+    "width": 1000,
+    "height": 750,
     "dpi": 300,
+    "method": "align",
+    "mobile_state": 1,
+    "target_state": 1,
     "cutoff": 2.0,
     "cycles": 5,
     "gap": -10.0,
@@ -43,6 +47,10 @@
     }
   },
   "analysis": {
+    "kind": "alignment",
+    "method": "align",
+    "mobile_state": 1,
+    "target_state": 1,
     "mobile_atoms": 76,
     "target_atoms": 76,
     "align_result": [
@@ -60,13 +68,13 @@
     "target_selection": "(target) and (polymer.protein and name CA)"
   },
   "artifacts": {
-    "png": "scene.png",
-    "session": "scene.pse",
-    "replay": "scene.pml",
     "report": "report.json",
     "inputs": [
       "inputs/mobile.pdb",
       "inputs/target.cif"
-    ]
+    ],
+    "png": "scene.png",
+    "session": "scene.pse",
+    "replay": "scene.pml"
   }
 }
