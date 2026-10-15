@@ -22,7 +22,20 @@ An initial probe ran on **2026-10-15**, with installed Incentive PyMOL **3.1.6.1
 
 For the pinned inputs and hashes, see [examples/README.md](../examples/README.md). 1UBQ has 76 protein residues and 134 total residues when solvent is included. The 1HSG pocket figure above uses the residue-expanded selection, not just the 115 protein atoms directly within 5 Å of MK1.
 
-The baseline records come from the local audit captured during development. The public test suite and commands below are the reproducible evidence for MolScene's implementation. Generated images can differ in bytes across backend versions; fixed dimensions, image content, selection counts, geometry, session state, and replay are the meaningful checks.
+The baseline records come from the local audit captured during development. The public test suite and commands below are the reproducible evidence for MolScene's implementation. Generated images can differ in bytes across backend versions; fixed dimensions, image content, selection counts, geometry, session state, and replay provide useful checks alongside scientific inspection of the figures.
+
+## Tested environments and output limits
+
+Local numerical/API tests have passed in two separate Windows Python 3.10 environments:
+
+| Backend | Version identification | Interpretation |
+| --- | --- | --- |
+| Existing installed Incentive PyMOL bundle | Native version 3.1.6.1 | Numerical/API behavior was exercised; larger exports displayed an evaluation overlay |
+| Independently installed community open-source wheel | Package `pymol-open-source` 3.2.0a0; native version 3.2.0a | A separate prerelease backend used to generate the public example gallery |
+
+During manual inspection, 1600 × 1200 exports from the installed bundle displayed the literal message `No License File - For Evaluation Only (0 days remaining)`. Those observations describe that local environment; passing numerical/API tests does not validate its commercial license status or establish that its exports are suitable for production figures. The public gallery is generated normally with the independent community wheel, rather than altering an evaluation-marked image. That wheel is a prerelease, and its local results are separate from the Linux conda-forge CI environment.
+
+Image dimensions, nonuniform pixels, and representation flags do not by themselves establish scientific correctness. Manual acceptance also checks that cartoons follow the protein backbone, the pocket shows the intended residues and ligand, the surface is interpretable, and the alignment displays the intended structures. In particular, a trace through every atom can produce a nonblank but scientifically misleading ribbon. Final gallery acceptance requires inspecting regenerated figures after any representation change.
 
 ## Run the tool tests
 
@@ -60,7 +73,7 @@ The integration suite is intended to check PDB/mmCIF loading, selection counts, 
 
 Core tests use generated/local fixtures. They do not fetch data during a run. The optional three-file downloader is documented separately, so upstream availability does not decide whether the core tests pass.
 
-For a manual acceptance check, generate the [gallery](../examples/README.md#generate-the-gallery), inspect each PNG, open each PSE, and replay each PML from its complete output directory in a fresh context. Check the corresponding JSON inputs, units, selection counts, and alignment statistics. Image decoding alone does not verify the scientific meaning of a scene.
+For a manual acceptance check, generate the [gallery](../examples/README.md#generate-the-gallery), inspect each PNG against the criteria above, open each PSE, and replay each PML from its complete output directory in a fresh context. Check the corresponding JSON inputs, units, selection counts, and alignment statistics. Image decoding alone does not verify the scientific meaning of a scene.
 
 ## CI environments
 

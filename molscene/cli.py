@@ -50,7 +50,7 @@ def main(argv=None):
         if args.command == 'selftest':
             from .selftest import run_selftest
             report = run_selftest(args.output, overwrite=args.overwrite)
-            location = Path(args.output).resolve() / 'selftest.json'
+            location = Path(args.output).expanduser().resolve() / 'selftest.json'
             if not report['passed']:
                 for test in report['tests']:
                     if test['status'] == 'failed':
@@ -74,7 +74,7 @@ def main(argv=None):
         else:
             report = engine.align(args.mobile, args.target, args.output, selection=args.selection, **options)
             print(f"RMSD: {report['analysis']['rmsd_angstrom']:.6g} angstrom; {report['analysis']['aligned_atoms']} aligned atoms.")
-        print(f"Artifacts: {Path(args.output).resolve()} (scene.png, scene.pse, scene.pml, report.json)")
+        print(f"Artifacts: {Path(args.output).expanduser().resolve()} (scene.png, scene.pse, scene.pml, report.json)")
         return 0
     except (ValueError, RuntimeError, OSError) as exc:
         print(f'molscene: {exc}', file=sys.stderr)

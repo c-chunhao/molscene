@@ -118,3 +118,15 @@ class CliTests(unittest.TestCase):
             code, out, err = self.invoke(['doctor'])
         self.assertEqual(code, 0, err)
         self.assertIn('3.2', out)
+
+    def test_output_messages_expand_quoted_home_paths(self):
+        output = '~/molscene-cli-regression'
+        expected = Path.home() / 'molscene-cli-regression'
+        with patch('molscene.engine.render', return_value={'structure': {'molecule': {'atoms': 26}}, 'analysis': {}}):
+            code, out, err = self.invoke(['render', 'a.pdb', '--output', output])
+        self.assertEqual(code, 0, err)
+        self.assertIn(str(expected), out)
+        with patch('molscene.selftest.run_selftest', return_value={'passed': True, 'tests': []}):
+            code, out, err = self.invoke(['selftest', '--output', output])
+        self.assertEqual(code, 0, err)
+        self.assertIn(str(expected / 'selftest.json'), out)
