@@ -194,30 +194,27 @@ class SceneTests(ValidationTests):
                 self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'mobile'), 1)
 
 
-    @unittest.skipUnless((ROOT / '.audit/1ubq.pdb').exists(), 'optional downloaded fixture')
     def test_real_pdb_and_cif_counts(self):
         for ext in ('pdb', 'cif'):
             with self.subTest(ext=ext):
-                report = engine.render(ROOT / ('.audit/1ubq.' + ext), self.out,
+                report = engine.render(ROOT / ('examples/data/1ubq.' + ext), self.out,
                                        overwrite=True, style='surface', width=240, height=180)
                 self.assertEqual(report['structure']['molecule']['atoms'], 660)
                 self.assertEqual(report['structure']['molecule']['protein_residues'], 76)
                 self.assertEqual(report['structure']['molecule']['residues'], 134)
                 self.check_artifacts(report)
 
-    @unittest.skipUnless((ROOT / '.audit/1ubq.pdb').exists(), 'optional downloaded fixture')
     def test_full_atom_ubiquitin_cartoon_does_not_trace_sidechains(self):
         import pymol2
-        engine.render(ROOT / '.audit/1ubq.pdb', self.out, width=240, height=180)
+        engine.render(ROOT / 'examples/data/1ubq.pdb', self.out, width=240, height=180)
         with pymol2.PyMOL() as pm:
             pm.cmd.load(str(self.out / 'scene.pse'))
             self.assertEqual(pm.cmd.get_setting_int('cartoon_trace_atoms', 'molecule'), 0)
             self.assertEqual(pm.cmd.count_atoms('molecule and polymer.protein and rep cartoon'), 602)
 
-    @unittest.skipUnless((ROOT / '.audit/1hsg.pdb').exists(), 'optional downloaded fixture')
     def test_real_pocket_neighborhood_and_representations(self):
         import pymol2
-        report = engine.render(ROOT / '.audit/1hsg.pdb', self.out, style='pocket',
+        report = engine.render(ROOT / 'examples/data/1hsg.pdb', self.out, style='pocket',
                                ligand='resn MK1', width=240, height=180)
         self.assertEqual(report['analysis']['ligand_atoms'], 45)
         self.assertEqual(report['analysis']['pocket_neighbor_atoms'], 115)

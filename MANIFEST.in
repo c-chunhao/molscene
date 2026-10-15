@@ -1,0 +1,5 @@
+include examples/data/*.pdb
+include examples/data/*.cif
+include examples/data/sources.json
+include examples/README.md
+include examples/download_examples.py
