@@ -2,7 +2,13 @@
 
 MolScene distinguishes **backend baseline observations**, **tests of its own implementation**, and **CI environments**. A backend import or a passing unit-only job does not establish that rendering and replay work.
 
-## Final local tool results
+## Latest path-compatibility verification
+
+After the genuine Windows 8.3 path regression was corrected at `684bce7`, all **36 tests** passed on each local Windows PyMOL backend (3.1.6.1 and 3.2.0a). Plain Python passed 18 tests with 18 expected backend skips. The new alias regression is Windows-specific; Linux runs 35 active tests and skips that one platform-only case. Lexical symlink/junction checks still run before canonical path comparisons.
+
+The actual Linux conda-forge job with PyMOL **3.1.0** / Python **3.10.22** [passed 35 tests and nine self-test checks](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261) before the Windows-specific fix. The repository workflow badge and Actions history provide the subsequent full-matrix status.
+
+## Recorded timed local tool results
 
 Verified on **2026-10-15**, for the timed implementation run at **`9b8df7c`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
 
@@ -14,7 +20,7 @@ Verified on **2026-10-15**, for the timed implementation run at **`9b8df7c`**, u
 
 All three suite runs completed without failures. The plain-Python run verifies the available unit/failure-path behavior; its 18 skips do not establish backend integration. Each backend's CLI selftest JSON recorded `passed: true` and nine individually passing checks: runtime, PDB/mmCIF coordinates, Cα selection, representations, known 5 Å distance, rigid alignment, session restoration, ray image, and portable replay. Portable replay covers directories containing spaces, Chinese characters, an apostrophe, a semicolon, and literal dollar/parenthesis characters after the original fixtures have been removed.
 
-These are local observations, not universal compatibility claims. The community wheel is a prerelease build. The separate Linux conda-forge environment remains unverified until its actual CI job succeeds. Suite timings describe these individual runs and are not performance benchmarks.
+These are local observations, not universal compatibility claims. The community wheel is a prerelease build. The Linux conda-forge result is recorded separately above. Suite timings describe these individual runs and are not performance benchmarks.
 
 [Machine-readable validation record](validation.json) preserves the curated test results, selftest evidence, and gallery hashes without publishing local absolute paths.
 

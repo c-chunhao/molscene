@@ -1,5 +1,7 @@
 # MolScene
 
+[![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
+
 **调用你已有的 PyMOL，生成可复现的分子结构图与结构分析记录。**
 
 [English](README.md) · [样例与数据来源](examples/README.md) · [测试与验证](docs/TESTING.md) · [接口分析](docs/INTERNALS.md)
@@ -96,15 +98,15 @@ python -m molscene selftest --output results/selftest
 
 ## 验证、范围与参与
 
-2026-10-15，MolScene 的完整 **35 项测试**与 CLI selftest 的 **9 项检查**均在两个本机 PyMOL 后端通过（实现版本 `9b8df7c`）：
+2026-10-15，MolScene 的完整 **36 项测试**与 CLI selftest 的 **9 项检查**均在两个本机 PyMOL 后端通过（实现版本 `684bce7`）：
 
 | 本机 Windows 环境 | 工具测试 | CLI selftest |
 | --- | --- | --- |
-| Python 3.10.18 + 已安装的 Incentive PyMOL 3.1.6.1 | 35 通过，0 跳过 | 9/9 通过 |
-| Python 3.10.18 + 社区开源 wheel 3.2.0a0，native 3.2.0a | 35 通过，0 跳过 | 9/9 通过 |
-| 无 PyMOL 的普通 Python 3.14.3 | 发现 35 项，17 通过、18 跳过 | 需要 PyMOL |
+| Python 3.10.18 + 已安装的 Incentive PyMOL 3.1.6.1 | 36 通过，0 跳过 | 9/9 通过 |
+| Python 3.10.18 + 社区开源 wheel 3.2.0a0，native 3.2.0a | 36 通过，0 跳过 | 9/9 通过 |
+| 无 PyMOL 的普通 Python 3.14.3 | 发现 36 项，18 通过、18 跳过 | 需要 PyMOL |
 
-社区 wheel 为预发布版本。本机结果不代表 Linux conda-forge 环境已经验证；该环境须以实际 CI 运行成功为准。[测试文档](docs/TESTING.md) 记录了命令、覆盖范围、耗时与样例图人工检查。
+社区 wheel 为预发布版本。Linux conda-forge PyMOL 3.1.0 集成任务也已[通过 35 项科学测试和 9 项自测](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261)。顶部徽章显示当前完整 CI 矩阵的状态。[测试文档](docs/TESTING.md) 记录了命令、覆盖范围、耗时与样例图人工检查。
 
 公开样例图使用独立安装的社区开源 wheel（包版本 **3.2.0a0**，native 版本 **3.2.0a**）正常生成。本机已安装发行版在较大尺寸导出时出现评估版标记；[环境与输出说明](docs/TESTING.md#tested-environments-and-output-limits) 区分了 API 测试结果、许可状态与图像质量检查。
 

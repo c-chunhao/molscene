@@ -1,5 +1,7 @@
 # MolScene
 
+[![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
+
 **Reproducible molecular figures and structural checks, powered by your PyMOL.**
 
 [简体中文](README.zh-CN.md) · [Examples and data provenance](examples/README.md) · [Validation](docs/TESTING.md) · [Interface notes](docs/INTERNALS.md)
@@ -96,15 +98,15 @@ Output directories must be empty. To deliberately rerun a command, add `--overwr
 
 ## Evidence, scope, and contribution
 
-On 2026-10-15, MolScene's full **35-test suite** and **9-check CLI selftest** passed on both locally tested PyMOL backends (implementation revision `9b8df7c`):
+On 2026-10-15, MolScene's full **36-test suite** and **9-check CLI selftest** passed on both locally tested PyMOL backends (implementation revision `684bce7`):
 
 | Local Windows environment | Tool tests | CLI selftest |
 | --- | --- | --- |
-| Python 3.10.18 + installed Incentive PyMOL 3.1.6.1 | 35 passed, 0 skipped | 9/9 passed |
-| Python 3.10.18 + community open-source wheel 3.2.0a0, native 3.2.0a | 35 passed, 0 skipped | 9/9 passed |
-| Plain Python 3.14.3, without PyMOL | 17 passed, 18 skipped (35 discovered) | Requires PyMOL |
+| Python 3.10.18 + installed Incentive PyMOL 3.1.6.1 | 36 passed, 0 skipped | 9/9 passed |
+| Python 3.10.18 + community open-source wheel 3.2.0a0, native 3.2.0a | 36 passed, 0 skipped | 9/9 passed |
+| Plain Python 3.14.3, without PyMOL | 18 passed, 18 skipped (36 discovered) | Requires PyMOL |
 
-The community wheel is a prerelease build. These local results do not establish Linux conda-forge compatibility; that CI environment remains unverified until its actual workflow run succeeds. [Testing documentation](docs/TESTING.md) records commands, coverage, timings, and manual gallery checks.
+The community wheel is a prerelease build. The Linux conda-forge PyMOL 3.1.0 integration job has also [passed 35 scientific tests and 9 self-test checks](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261). The current workflow badge reports the complete CI matrix. [Testing documentation](docs/TESTING.md) records commands, coverage, timings, and manual gallery checks.
 
 The public gallery uses the independent community open-source wheel (package **3.2.0a0**, native **3.2.0a**). Larger exports from the local installed bundle displayed an evaluation overlay; the [environment and output notes](docs/TESTING.md#tested-environments-and-output-limits) distinguish API test results from licensing and figure-quality checks.
 

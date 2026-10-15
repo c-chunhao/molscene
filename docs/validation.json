@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "verified_on": "2026-10-15",
-  "tested_code_revision": "334b68b",
+  "tested_code_revision": "684bce7",
   "environments": [
     {
       "name": "Installed PyMOL bundle",
@@ -9,8 +9,8 @@
       "python": "3.10.18",
       "pymol_version": "3.1.6.1",
       "unittest": {
-        "total": 35,
-        "passed": 35,
+        "total": 36,
+        "passed": 36,
         "failed": 0,
         "skipped": 0
       },
@@ -252,8 +252,8 @@
       "python": "3.10.18",
       "pymol_version": "3.2.0a",
       "unittest": {
-        "total": 35,
-        "passed": 35,
+        "total": 36,
+        "passed": 36,
         "failed": 0,
         "skipped": 0
       },
@@ -492,8 +492,8 @@
   ],
   "without_pymol": {
     "python": "3.14",
-    "total": 35,
-    "passed": 17,
+    "total": 36,
+    "passed": 18,
     "skipped": 18,
     "failed": 0
   },
@@ -564,7 +564,7 @@
   "limits": [
     "Installed commercial bundle large exports visibly carry an evaluation watermark. Gallery uses the independently installed open-source backend.",
     "Self-tests validate deterministic fixtures; the gallery was also manually inspected for scientific display correctness.",
-    "Linux conda-forge CI results are recorded by GitHub Actions independently of these Windows results."
+    "The Windows 8.3 alias regression is platform-specific: the corresponding test is expected to skip on Linux."
   ],
   "clean_source_validation": {
     "git_archive": {
@@ -590,5 +590,13 @@
       "failed": 0,
       "pymol_version": "3.2.0a"
     }
+  },
+  "ci_linux": {
+    "run_url": "https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261",
+    "revision": "ab3d5bd",
+    "python": "3.10.22",
+    "pymol_version": "3.1.0",
+    "tests_passed": 35,
+    "selftest_passed": 9
   }
 }
