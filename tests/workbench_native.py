@@ -8,6 +8,15 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def grab_native_framebuffer(viewport):
+    """Read actual GL pixels; keep this harness usable as an isolated script."""
+    for name in ('grabFramebuffer', 'grabFrameBuffer'):
+        capture = getattr(viewport, name, None)
+        if callable(capture):
+            return capture()
+    raise AssertionError('Native GL viewport has neither grabFramebuffer nor grabFrameBuffer')
+
+
 def native_evidence(output):
     from molscene import desktop, analysis
     from pymol.Qt import QtCore, QtWidgets, PYQT_NAME
@@ -98,7 +107,7 @@ def native_evidence(output):
                 click('export_fasta')
             QTest.qWait(150)
             window.grab().save(str(output/'native-1ubq-results.png'))
-            framebuffer = window.pymolwidget.grabFramebuffer()
+            framebuffer = grab_native_framebuffer(window.pymolwidget)
             framebuffer.save(str(output/'native-1ubq-viewport.png'))
             colors = {framebuffer.pixel(x,y) for x in range(0,framebuffer.width(),5) for y in range(0,framebuffer.height(),5)}
             assert len(colors) > 8
@@ -139,7 +148,7 @@ def native_evidence(output):
             report['hsg_drawn_contacts'] = result['displayed_count']
             QTest.qWait(200)
             window.grab().save(str(output/'native-1hsg-contacts.png'))
-            window.pymolwidget.grabFramebuffer().save(str(output/'native-1hsg-viewport.png'))
+            grab_native_framebuffer(window.pymolwidget).save(str(output/'native-1hsg-viewport.png'))
             before = [(a['object'],a['index'],a['b']) for a in analysis.collect_atoms(cmd,'all',state=1)]
             panel.tabs.setCurrentIndex(2)
             enter(panel.sasa_context, hsg)

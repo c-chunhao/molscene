@@ -243,6 +243,15 @@ class NativeDesktopTests(unittest.TestCase):
             self.assertTrue(report['preferences_unchanged'])
 
 
+def grab_native_framebuffer(viewport):
+    """Read actual GL pixels; keep this harness usable as an isolated script."""
+    for name in ('grabFramebuffer', 'grabFrameBuffer'):
+        capture = getattr(viewport, name, None)
+        if callable(capture):
+            return capture()
+    raise AssertionError('Native GL viewport has neither grabFramebuffer nor grabFrameBuffer')
+
+
 def native_test(output):
     """Real Qt/GL harness starts official launch, never a second QApplication."""
     from molscene import desktop
@@ -302,7 +311,7 @@ def native_test(output):
             QTest.qWait(1700)
             report['native_refresh'] = dock.widget().object_list.item(0).data(QtCore.Qt.UserRole) == 'native_molecule'
             assert report['native_refresh']
-            image = viewport.grabFramebuffer()
+            image = grab_native_framebuffer(viewport)
             assert not image.isNull(), 'empty framebuffer'
             image.save(str(output / 'native-viewport.png'))
             parent.grab().save(str(output / 'native-molecule-window.png'))
