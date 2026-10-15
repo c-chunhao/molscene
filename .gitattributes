@@ -1,0 +1,15 @@
+# Keep source, documentation, and JSON manifests consistent across platforms.
+* text=auto eol=lf
+
+# Coordinate inputs are checksum-pinned; never normalize their bytes, including
+# copies stored alongside portable replay scripts.
+*.pdb -text
+*.cif -text
+*.mmcif -text
+
+# Generated molecular figures and sessions are binary artifacts.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pse binary
