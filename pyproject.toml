@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "molscene"
+version = "0.1.0"
+description = "Reproducible molecular scenes and geometry through PyMOL"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "Chunhao Cao"}]
+
+[project.optional-dependencies]
+test = ["Pillow>=10"]
+
+[project.urls]
+Repository = "https://github.com/c-chunhao/molscene"
+Issues = "https://github.com/c-chunhao/molscene/issues"
+
+[project.scripts]
+molscene = "molscene.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["molscene*"]
