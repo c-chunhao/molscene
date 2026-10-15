@@ -4,7 +4,7 @@ MolScene distinguishes **backend baseline observations**, **tests of its own imp
 
 ## Final local tool results
 
-Verified on **2026-10-15**, against implementation revision **`9b8df7c`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
+Verified on **2026-10-15**, against implementation revision **`334b68b`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
 
 | Local Windows environment | Discovered | Passed | Skipped | Suite elapsed time | CLI selftest |
 | --- | --- | --- | --- | --- | --- |

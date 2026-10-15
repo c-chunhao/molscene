@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "verified_on": "2026-10-15",
-  "tested_code_revision": "9b8df7c",
+  "tested_code_revision": "334b68b",
   "environments": [
     {
       "name": "Installed PyMOL bundle",
@@ -565,5 +565,30 @@
     "Installed commercial bundle large exports visibly carry an evaluation watermark. Gallery uses the independently installed open-source backend.",
     "Self-tests validate deterministic fixtures; the gallery was also manually inspected for scientific display correctness.",
     "Linux conda-forge CI results are recorded by GitHub Actions independently of these Windows results."
-  ]
+  ],
+  "clean_source_validation": {
+    "git_archive": {
+      "total": 35,
+      "skipped": 0,
+      "failed": 0,
+      "backends": [
+        "3.1.6.1",
+        "3.2.0a"
+      ]
+    },
+    "extracted_sdist": {
+      "total": 35,
+      "skipped": 0,
+      "failed": 0,
+      "backends": [
+        "3.1.6.1",
+        "3.2.0a"
+      ]
+    },
+    "wheel_install_isolated_selftest": {
+      "total": 9,
+      "failed": 0,
+      "pymol_version": "3.2.0a"
+    }
+  }
 }
