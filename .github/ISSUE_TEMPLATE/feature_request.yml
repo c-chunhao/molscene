@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a concrete improvement for a scientific workflow.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Scientific workflow and problem
+      description: What are you trying to accomplish, and where does the current workflow fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Give an example command or output and explain how correctness could be checked.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and example data
+      description: Mention current workarounds and public or synthetic data suitable for validation.
