@@ -96,11 +96,19 @@ python -m molscene selftest --output results/selftest
 
 ## 验证、范围与参与
 
-2026-10-15 的初始后端探针在 Windows、Python **3.10.18**、Incentive PyMOL **3.1.6.1** 上通过了 **11 项检查**。这是已安装后端的基线证据，与 MolScene 自身的单元测试、集成测试、脚本重放和 selftest 分开记录。详细证据与复测命令见[测试文档](docs/TESTING.md)，其中也说明了 Linux 开源后端 CI 的范围。
+2026-10-15，MolScene 的完整 **35 项测试**与 CLI selftest 的 **9 项检查**均在两个本机 PyMOL 后端通过（实现版本 `9b8df7c`）：
+
+| 本机 Windows 环境 | 工具测试 | CLI selftest |
+| --- | --- | --- |
+| Python 3.10.18 + 已安装的 Incentive PyMOL 3.1.6.1 | 35 通过，0 跳过 | 9/9 通过 |
+| Python 3.10.18 + 社区开源 wheel 3.2.0a0，native 3.2.0a | 35 通过，0 跳过 | 9/9 通过 |
+| 无 PyMOL 的普通 Python 3.14.3 | 发现 35 项，17 通过、18 跳过 | 需要 PyMOL |
+
+社区 wheel 为预发布版本。本机结果不代表 Linux conda-forge 环境已经验证；该环境须以实际 CI 运行成功为准。[测试文档](docs/TESTING.md) 记录了命令、覆盖范围、耗时与样例图人工检查。
 
 公开样例图使用独立安装的社区开源 wheel（包版本 **3.2.0a0**，native 版本 **3.2.0a**）正常生成。本机已安装发行版在较大尺寸导出时出现评估版标记；[环境与输出说明](docs/TESTING.md#tested-environments-and-output-limits) 区分了 API 测试结果、许可状态与图像质量检查。
 
-核心工具对本地文件的操作可以离线完成。只有可选样例下载器会连接 RCSB PDB，并且仅下载三个固定、校验 SHA-256 的公开文件。首版不提供 GUI、核心 CLI 联网抓取、分子对接、轨迹处理或结构预测。
+制图以蛋白为中心，要求输入包含蛋白原子；`render` 目前不支持只有水或只有 DNA/RNA 的结构。`measure` 可在已加载对象中使用一般原子选择，但每个端点仍须恰好选择一个原子。核心工具对本地文件的操作可以离线完成。只有可选样例下载器会连接 RCSB PDB，并且仅下载三个固定、校验 SHA-256 的公开文件。首版不提供 GUI、核心 CLI 联网抓取、分子对接、轨迹处理或结构预测。
 
 开发与问题反馈见 [CONTRIBUTING.md](CONTRIBUTING.md)。MolScene 自有代码使用 [MIT 许可](LICENSE)。PyMOL 是独立依赖，应遵循所安装发行版自身的许可；[开源版许可见上游](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE)。MolScene 为独立项目，与 Schrödinger 或 PyMOL 项目不存在官方隶属或背书关系。[接口分析](docs/INTERNALS.md) 记录正常 API 边界与行为测试。
 

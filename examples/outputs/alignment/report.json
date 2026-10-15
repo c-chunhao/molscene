@@ -1,0 +1,72 @@
+{
+  "tool": "molscene",
+  "tool_version": "0.1.0",
+  "pymol_version": "3.2.0a",
+  "created_at": "2026-10-15T02:45:19.614361+00:00",
+  "operation": "align",
+  "inputs": [
+    {
+      "role": "mobile",
+      "basename": "1ubq.pdb",
+      "sha256": "d4a6812d8951cf6594e6a0763f089e35f5a80b62acb3c117b2c5565228a7b161"
+    },
+    {
+      "role": "target",
+      "basename": "1ubq.cif",
+      "sha256": "056f98710cb2b36f633c45e41902a02eb446e82871da21ff2dd44f74a56ca0f6"
+    }
+  ],
+  "parameters": {
+    "selection": "polymer.protein and name CA",
+    "width": 1600,
+    "height": 1200,
+    "dpi": 300,
+    "cutoff": 2.0,
+    "cycles": 5,
+    "gap": -10.0,
+    "extend": -0.5,
+    "max_gap": 50,
+    "transform": 1
+  },
+  "structure": {
+    "mobile": {
+      "atoms": 660,
+      "residues": 134,
+      "protein_residues": 76,
+      "chains": 1
+    },
+    "target": {
+      "atoms": 660,
+      "residues": 134,
+      "protein_residues": 76,
+      "chains": 2
+    }
+  },
+  "analysis": {
+    "mobile_atoms": 76,
+    "target_atoms": 76,
+    "align_result": [
+      0.0,
+      76,
+      0,
+      0.0,
+      76,
+      381.0,
+      76
+    ],
+    "rmsd_angstrom": 0.0,
+    "aligned_atoms": 76,
+    "mobile_selection": "(mobile) and (polymer.protein and name CA)",
+    "target_selection": "(target) and (polymer.protein and name CA)"
+  },
+  "artifacts": {
+    "png": "scene.png",
+    "session": "scene.pse",
+    "replay": "scene.pml",
+    "report": "report.json",
+    "inputs": [
+      "inputs/mobile.pdb",
+      "inputs/target.cif"
+    ]
+  }
+}

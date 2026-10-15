@@ -2,6 +2,22 @@
 
 MolScene distinguishes **backend baseline observations**, **tests of its own implementation**, and **CI environments**. A backend import or a passing unit-only job does not establish that rendering and replay work.
 
+## Final local tool results
+
+Verified on **2026-10-15**, against implementation revision **`9b8df7c`**, using `python -m unittest discover -s tests -v` and the actual `python -m molscene selftest --output DIR` command:
+
+| Local Windows environment | Discovered | Passed | Skipped | Suite elapsed time | CLI selftest |
+| --- | --- | --- | --- | --- | --- |
+| Python 3.10.18, installed Incentive PyMOL native 3.1.6.1 | 35 | 35 | 0 | 13.060 s | 9/9 passed |
+| Python 3.10.18, independent community wheel `pymol-open-source` 3.2.0a0, native 3.2.0a | 35 | 35 | 0 | 12.773 s | 9/9 passed |
+| Plain Python 3.14.3, without PyMOL | 35 | 17 | 18 | 1.789 s | Requires PyMOL |
+
+All three suite runs completed without failures. The plain-Python run verifies the available unit/failure-path behavior; its 18 skips do not establish backend integration. Each backend's CLI selftest JSON recorded `passed: true` and nine individually passing checks: runtime, PDB/mmCIF coordinates, Cα selection, representations, known 5 Å distance, rigid alignment, session restoration, ray image, and portable replay. Portable replay covers directories containing spaces, Chinese characters, an apostrophe, a semicolon, and literal dollar/parenthesis characters after the original fixtures have been removed.
+
+These are local observations, not universal compatibility claims. The community wheel is a prerelease build. The separate Linux conda-forge environment remains unverified until its actual CI job succeeds. Suite timings describe these individual runs and are not performance benchmarks.
+
+[Machine-readable validation record](validation.json) preserves the curated test results, selftest evidence, and gallery hashes without publishing local absolute paths.
+
 ## Recorded installed-backend baseline
 
 An initial probe ran on **2026-10-15**, with installed Incentive PyMOL **3.1.6.1**, Python **3.10.18**, on **Windows**. All **11 backend checks passed**. This probe preceded the final MolScene CLI and is not a count of MolScene tests.
@@ -35,7 +51,9 @@ Local numerical/API tests have passed in two separate Windows Python 3.10 enviro
 
 During manual inspection, 1600 × 1200 exports from the installed bundle displayed the literal message `No License File - For Evaluation Only (0 days remaining)`. Those observations describe that local environment; passing numerical/API tests does not validate its commercial license status or establish that its exports are suitable for production figures. The public gallery is generated normally with the independent community wheel, rather than altering an evaluation-marked image. That wheel is a prerelease, and its local results are separate from the Linux conda-forge CI environment.
 
-Image dimensions, nonuniform pixels, and representation flags do not by themselves establish scientific correctness. Manual acceptance also checks that cartoons follow the protein backbone, the pocket shows the intended residues and ligand, the surface is interpretable, and the alignment displays the intended structures. In particular, a trace through every atom can produce a nonblank but scientifically misleading ribbon. Final gallery acceptance requires inspecting regenerated figures after any representation change.
+Image dimensions, nonuniform pixels, and representation flags do not by themselves establish scientific correctness. Manual acceptance also checks that cartoons follow the protein backbone, the pocket shows the intended residues and ligand, the surface is interpretable, and the alignment displays the intended structures. In particular, a trace through every atom can produce a nonblank but scientifically misleading ribbon. Regenerated figures must be inspected again after a representation change.
+
+The four shipped gallery PNGs were regenerated through the open-source CLI at the default **1600 × 1200 pixels, 300 DPI**, then manually inspected on 2026-10-15. The overview shows the ubiquitin fold with the expected backbone cartoon; the pocket's transparent protein context leaves the orange MK1 ligand visible; the surface is a solid molecular surface; and the alignment shows coincident blue/orange copies of 1UBQ. All four reports identify native PyMOL **3.2.0a**, and the inspected images show no evaluation overlay. This visual review complements the automated checks; it does not validate the experimental models for every research use.
 
 ## Run the tool tests
 
@@ -72,6 +90,8 @@ That path is an example; substitute the interpreter in your own installation.
 The integration suite is intended to check PDB/mmCIF loading, selection counts, representation flags, known-distance geometry, rigid-transform alignment, PNG dimensions and nonuniform content, session restoration, and PML replay in a fresh context. Numerical tolerances account for floating-point behavior. Replay comparisons focus on the principal molecular state rather than assuming bit-identical rendering on different systems.
 
 Core tests use generated/local fixtures. They do not fetch data during a run. The optional three-file downloader is documented separately, so upstream availability does not decide whether the core tests pass.
+
+`render` requires protein atoms and currently rejects water-only or DNA/RNA-only input. This keeps its protein-oriented cartoon, surface, and pocket workflows explicit. `measure` accepts general atom selections scoped to the loaded object, with exactly one atom per endpoint. The suite checks clear rejection of unsupported protein-rendering input rather than treating an empty or misleading figure as success.
 
 For a manual acceptance check, generate the [gallery](../examples/README.md#generate-the-gallery), inspect each PNG against the criteria above, open each PSE, and replay each PML from its complete output directory in a fresh context. Check the corresponding JSON inputs, units, selection counts, and alignment statistics. Image decoding alone does not verify the scientific meaning of a scene.
 

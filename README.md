@@ -96,11 +96,19 @@ Output directories must be empty. To deliberately rerun a command, add `--overwr
 
 ## Evidence, scope, and contribution
 
-The initial installed-backend probe on 2026-10-15 passed **11 checks** with Incentive PyMOL **3.1.6.1**, Python **3.10.18**, on Windows. That probe establishes the available backend's behavior; it is separate from MolScene's own unit, integration, replay, and selftest results. [Testing documentation](docs/TESTING.md) explains the evidence and commands, including Linux open-source integration CI.
+On 2026-10-15, MolScene's full **35-test suite** and **9-check CLI selftest** passed on both locally tested PyMOL backends (implementation revision `9b8df7c`):
+
+| Local Windows environment | Tool tests | CLI selftest |
+| --- | --- | --- |
+| Python 3.10.18 + installed Incentive PyMOL 3.1.6.1 | 35 passed, 0 skipped | 9/9 passed |
+| Python 3.10.18 + community open-source wheel 3.2.0a0, native 3.2.0a | 35 passed, 0 skipped | 9/9 passed |
+| Plain Python 3.14.3, without PyMOL | 17 passed, 18 skipped (35 discovered) | Requires PyMOL |
+
+The community wheel is a prerelease build. These local results do not establish Linux conda-forge compatibility; that CI environment remains unverified until its actual workflow run succeeds. [Testing documentation](docs/TESTING.md) records commands, coverage, timings, and manual gallery checks.
 
 The public gallery uses the independent community open-source wheel (package **3.2.0a0**, native **3.2.0a**). Larger exports from the local installed bundle displayed an evaluation overlay; the [environment and output notes](docs/TESTING.md#tested-environments-and-output-limits) distinguish API test results from licensing and figure-quality checks.
 
-The CLI works on local structures without network access. Only the optional example downloader connects to RCSB PDB, for three fixed, checksum-verified public files. There is no GUI, remote fetching in the core CLI, docking, trajectory processing, or prediction workflow in this release.
+Rendering is protein-centric and requires protein atoms; water-only and DNA/RNA-only structures are currently unsupported by `render`. `measure` can use general atom selections within its loaded object and still requires exactly one atom at each endpoint. The CLI works on local structures without network access. Only the optional example downloader connects to RCSB PDB, for three fixed, checksum-verified public files. There is no GUI, remote fetching in the core CLI, docking, trajectory processing, or prediction workflow in this release.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and bug reports. MolScene's original code is [MIT licensed](LICENSE). PyMOL is a separate dependency subject to its own distribution's license; see the [upstream open-source license](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE). MolScene is an independent project and is not affiliated with or endorsed by Schrödinger or the PyMOL project. The public [interface analysis](docs/INTERNALS.md) documents normal API boundaries and measured behavior.
 
