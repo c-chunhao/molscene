@@ -69,6 +69,79 @@ class AdvancedControllerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.controller.timeline_seek(1)
 
+    def test_partial_timeline_add_captures_view_and_updates_preserve_it(self):
+        from molscene.timeline import capture_keyframe
+        first=self.controller.timeline_new()['keyframes'][0]
+        self.cmd.turn('y',35)
+        view=list(self.cmd.get_view())
+        doc=self.controller.timeline_edit('add',values=dict(frame=2,state=1,scene=None,label='second',interpolation='smooth'))
+        row=doc['keyframes'][1]
+        self.assertNotEqual(row['id'],first['id'])
+        self.assertEqual(row['view'],view)
+        self.cmd.turn('x',20)
+        changed=self.controller.timeline_edit('update',row['id'],dict(label='renamed',state=2))['keyframes'][1]
+        self.assertEqual(changed['id'],row['id'])
+        self.assertEqual(changed['view'],view)
+        full=capture_keyframe(self.cmd,frame=3,state=1,label='full')
+        doc=self.controller.timeline_edit('add',values=full)
+        self.assertEqual(doc['keyframes'][2],full)
+        explicit=list(self.cmd.get_view())
+        doc=self.controller.timeline_edit('update',row['id'],dict(view=explicit))
+        self.assertEqual(doc['keyframes'][1]['view'],explicit)
+
+    def test_prepared_result_binding_rejects_operation_mode_and_input_role_changes(self):
+        import copy
+        import sys
+        from unittest.mock import patch
+        from molscene.artifacts import sha256
+        pqr=self.root/'ion.pqr'
+        pqr.write_text('ATOM 1 I ION 1 0 0 0 1 3\n')
+        tools=dict(schema_version=1,tools={'apbs':dict(argv=[sys.executable],architecture='x64',path_dirs=[],
+            runtime_files=[],timeout_seconds=15,memory_limit_mib=512)})
+        output=self.root/'prepared'
+        self.controller.prepare_job('potential',dict(request=dict(mode='prepared',pqr_path=str(pqr),tools=tools)),output=output)
+        report=dict(operation='potential',snapshot_id=None,parameters=dict(mode='prepared'),
+                    inputs={'pqr':dict(sha256=sha256(pqr))})
+        variants=[]
+        changed=copy.deepcopy(report); changed['inputs']['potential']=dict(sha256='a'*64); variants.append(changed)
+        changed=copy.deepcopy(report); changed['inputs']={'potential':dict(sha256=sha256(pqr))}; variants.append(changed)
+        changed=copy.deepcopy(report); changed['inputs']['pqr']['sha256']='b'*64; variants.append(changed)
+        changed=copy.deepcopy(report); changed['inputs']={}; variants.append(changed)
+        changed=copy.deepcopy(report); changed['parameters']['mode']='import'; variants.append(changed)
+        changed=copy.deepcopy(report); changed['operation']='density'; variants.append(changed)
+        # The bundle integrity boundary is already independently tested. These
+        # reports isolate ownership binding; no solver/native result is needed.
+        for changed in variants:
+            with self.subTest(changed=changed), patch('molscene.advanced.validate_bundle',return_value=changed), \
+                    patch.object(self.controller,'_load_potential_copy',return_value={}):
+                with self.assertRaises(ValueError):
+                    self.controller.load_advanced_result(output/'report.json')
+        with patch('molscene.advanced.validate_bundle',return_value=report), \
+                patch.object(self.controller,'_load_potential_copy',return_value={}):
+            self.assertEqual(self.controller.result_status(self.controller.load_advanced_result(output/'report.json')),'current')
+
+    def test_session_input_role_is_bound_separately_from_snapshot_id(self):
+        from copy import deepcopy
+        from unittest.mock import patch
+        output=self.root/'session-density'
+        path=self.controller.prepare_job('density',dict(request=dict(map_path=str(self._map()),format='dx')),output=output)
+        context=json.loads(path.read_text())['gui_context']
+        report=dict(operation='density',snapshot_id=context['snapshot_id'],analysis=dict(density={}),
+            inputs=dict(density=dict(sha256=context['original_inputs'][0]['sha256']),session=dict(sha256=context['snapshot_id'])))
+        variants=[]
+        changed=deepcopy(report); del changed['inputs']['session']; variants.append(changed)
+        changed=deepcopy(report); changed['inputs']['session']['sha256']='a'*64; variants.append(changed)
+        changed=deepcopy(report); changed['snapshot_id']='b'*64; variants.append(changed)
+        for changed in variants:
+            with self.subTest(changed=changed), patch('molscene.advanced.validate_bundle',return_value=changed), \
+                    patch.object(self.controller,'_load_density_copy',return_value={}):
+                with self.assertRaises(ValueError):
+                    self.controller.load_advanced_result(output/'report.json')
+        with patch('molscene.advanced.validate_bundle',return_value=report), \
+                patch.object(self.controller,'_load_density_copy',return_value={}):
+            self.assertEqual(self.controller.result_status(self.controller.load_advanced_result(output/'report.json')),'current')
+
+
     def _map(self):
         path = self.root / 'map.dx'
         path.write_text('object 1 class gridpositions counts 2 2 2\norigin 0 0 0\ndelta 1 0 0\ndelta 0 1 0\ndelta 0 0 1\nobject 2 class gridconnections counts 2 2 2\nobject 3 class array type double rank 0 items 8 data follows\n0 1 2 3 4 5 6 7\n')
@@ -87,6 +160,17 @@ class AdvancedControllerTests(unittest.TestCase):
         inventory = self.controller.advanced_inventory()
         self.assertFalse(inventory['maps'][0]['verified'])
         self.assertEqual(result_status(self.cmd, identity, session_epoch=1), 'stale')
+
+    def test_malformed_nested_map_metadata_is_unverified(self):
+        from copy import deepcopy
+        from molscene.advanced_snapshot import capture_identity, result_status
+        record=self.controller.density_load(self._map(),format='dx')
+        identity=capture_identity(self.cmd,maps=[record],session_epoch=0)
+        for field,value in [('shape',[2.0,2,2]),('corners',[False]*24),('map_source',True)]:
+            changed=deepcopy(identity)
+            next(iter(changed['maps'].values()))['record']['native_geometry'][field]=value
+            with self.subTest(field=field):
+                self.assertEqual(result_status(object(),changed,session_epoch=0),'unverified')
 
     def test_map_raw_values_and_timeline_document_changes_stale_identity(self):
         from molscene.advanced_snapshot import capture_identity, result_status
@@ -238,6 +322,23 @@ class AdvancedControllerTests(unittest.TestCase):
         pqr.write_text(pqr.read_text()+'REMARK changed\n')
         with self.assertRaises(ValueError):
             self.controller.potential_ramp(record,ramp_limit=3)
+
+
+class PrivateIdentityShapeTests(unittest.TestCase):
+    def test_malformed_nested_evidence_is_unverified_before_backend_access(self):
+        from copy import deepcopy
+        from molscene.advanced_snapshot import capture_identity,result_status
+        identity=capture_identity(object(),session_epoch=0)
+        variants=[dict(members={'1':False}),dict(selection=[]),dict(selection={'state':True,'members':[]}),
+            dict(members={'01':[]}),dict(members={'0':[]}),dict(members={'1':[{}]}),
+            dict(files={'relative.dx':'a'*64}),dict(files={str(Path.cwd()/'file.dx'):'not-a-digest'}),
+            dict(maps={'map/1':{'record':{},'digest':'a'*64}}),dict(timeline=[]),dict(display_snapshot=False)]
+        for patch in variants:
+            changed=deepcopy(identity); changed.update(patch)
+            with self.subTest(patch=patch):
+                self.assertEqual(result_status(object(),changed,session_epoch=0),'unverified')
+        identity['members']={'1':[]}
+        self.assertEqual(result_status(object(),identity,session_epoch=0),'current')
 
 
 @unittest.skipUnless(importlib.util.find_spec('pymol') and any(importlib.util.find_spec(name)

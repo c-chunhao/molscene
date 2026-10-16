@@ -542,7 +542,10 @@ class WorkbenchController:
     def timeline_edit(self, action, keyframe_id=None, values=None):
         self._thread()
         from copy import deepcopy
-        from molscene.timeline import edit_keyframe, validate_timeline
+        from molscene.timeline import capture_keyframe, edit_keyframe, validate_timeline
+        editor_fields = {'frame', 'state', 'scene', 'label', 'interpolation'}
+        if action == 'add' and isinstance(values, dict) and set(values) == editor_fields:
+            values = capture_keyframe(self.cmd, **values)
         document = edit_keyframe(self._timeline, action, keyframe_id, values)
         self._timeline = validate_timeline(document, self.cmd)
         return deepcopy(self._timeline)
@@ -629,11 +632,21 @@ class WorkbenchController:
         record['_report_path'] = str(path)
         context = self._advanced_contexts.get(str(path))
         if context is not None:
+            if (report.get('operation') != context.get('operation')
+                    or report.get('operation') == 'potential'
+                    and report.get('parameters', {}).get('mode') != context.get('mode')):
+                raise ValueError('Report operation or mode does not match the prepared job')
             if report.get('snapshot_id') != context.get('snapshot_id'):
                 raise ValueError('Report does not belong to the prepared source snapshot')
-            hashes = {row['sha256'] for row in report.get('inputs', {}).values()}
-            if any(row['sha256'] not in hashes for row in context.get('original_inputs', [])):
-                raise ValueError('Report input files do not match the prepared job')
+            roles = {'map_path': 'density', 'pqr_path': 'pqr', 'dx_path': 'potential'}
+            expected = {roles[row['role']]: row['sha256'] for row in context['original_inputs']}
+            if context['snapshot_id'] is not None:
+                expected['session'] = context['snapshot_id']
+            inputs = report.get('inputs')
+            if (not isinstance(inputs, dict) or set(inputs) != set(expected)
+                    or any(not isinstance(inputs[role], dict) or inputs[role].get('sha256') != digest
+                           for role, digest in expected.items())):
+                raise ValueError('Report input roles and hashes do not match the prepared job')
         if self.result_status(record) != 'current':
             raise ValueError('Result source is stale or unverified. Rerun from the current session, or import the original PQR/DX/map using its controls.')
         if report['operation'] == 'density':
@@ -791,6 +804,8 @@ class WorkbenchController:
         job = dict(schema_version=1, operation=operation, output=str(destination), result_path=str(envelope),
                    parameters=parameters, protected_paths=[str(p) for p in sources], original_inputs=originals)
         if operation != 'tools':
+            context['operation'] = operation
+            context['mode'] = request.get('mode') if operation == 'potential' else None
             context['snapshot_id'] = None
             if operation != 'potential' or not request.get('pqr_path'):
                 session = directory / 'snapshot.pse'
