@@ -210,7 +210,7 @@ jobs:
               'test_real_pdb2pqr_ubiquitin_surface_and_replay': 'test_electrostatics_real.RealElectrostaticsTests',
           }
           for name, case in required.items():
-              assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute successfully, not skip'
+              assert re.search(r'^' + re.escape(name) + r' \(' + re.escape(case) + r'(?:\.' + re.escape(name) + r')?\) \.\.\. ok$', log, re.M), name + ' must execute successfully, not skip'
           PY
       - name: Require actual Linux no-replace links and process lifetime proofs
         run: |
@@ -229,7 +229,7 @@ jobs:
               'test_forced_guardian_death_reaps_descendants': 'test_external_tools.ExternalToolsTests',
           }
           for name, case in required.items():
-              assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute on Linux'
+              assert re.search(r'^' + re.escape(name) + r' \(' + re.escape(case) + r'(?:\.' + re.escape(name) + r')?\) \.\.\. ok$', log, re.M), name + ' must execute on Linux'
           PY
       - name: Run offline selftest
         run: xvfb-run -a python -m molscene selftest --output artifacts/selftest 2>&1 | tee artifacts/selftest.txt
