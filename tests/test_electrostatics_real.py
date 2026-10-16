@@ -43,6 +43,7 @@ class RealElectrostaticsTests(unittest.TestCase):
             temp = tempfile.TemporaryDirectory()
             self.addCleanup(temp.cleanup)
             self.work = Path(temp.name)
+        self.work = self.work.resolve()
 
     def uniform(self, name, *, count=129, charge=1., dielectric=78.54, shift=(0.,0.,0.)):
         pqr = self.work/(name+'.pqr')

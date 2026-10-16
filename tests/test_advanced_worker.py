@@ -23,7 +23,7 @@ class AdvancedWorkerTests(unittest.TestCase):
         import sys
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            config = dict(schema_version=1, tools={name: dict(argv=[sys.executable, '-B', '-c', 'print("bad version")'],
+            config = dict(schema_version=1, tools={name: dict(argv=[str(Path(sys.executable).resolve()), '-B', '-c', 'print("bad version")'],
                 architecture='x64', path_dirs=[], runtime_files=[], timeout_seconds=15, memory_limit_mib=512)
                 for name in ('apbs', 'ffmpeg')})
             job = root / 'job.json'
@@ -104,7 +104,7 @@ class AdvancedWorkerTests(unittest.TestCase):
             root = Path(folder)
             script = root/'solver.py'
             script.write_text('import sys\nif "--version" in sys.argv:\n print("APBS 3.4.1")\n sys.exit(13)\nprint("controlled solver failure",file=sys.stderr)\nsys.exit(5)\n')
-            config = dict(schema_version=1,tools={'apbs':dict(argv=[sys.executable,'-B',str(script)],architecture='x64',
+            config = dict(schema_version=1,tools={'apbs':dict(argv=[str(Path(sys.executable).resolve()),'-B',str(script)],architecture='x64',
                 path_dirs=[],runtime_files=[dict(path=str(script),role='package_metadata')],timeout_seconds=15,memory_limit_mib=512)})
             pqr = root/'ion.pqr'
             pqr.write_text('ATOM 1 I ION 1 0 0 0 1 3\n')

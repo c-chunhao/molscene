@@ -96,7 +96,7 @@ class AdvancedControllerTests(unittest.TestCase):
         from molscene.artifacts import sha256
         pqr=self.root/'ion.pqr'
         pqr.write_text('ATOM 1 I ION 1 0 0 0 1 3\n')
-        tools=dict(schema_version=1,tools={'apbs':dict(argv=[sys.executable],architecture='x64',path_dirs=[],
+        tools=dict(schema_version=1,tools={'apbs':dict(argv=[str(Path(sys.executable).resolve())],architecture='x64',path_dirs=[],
             runtime_files=[],timeout_seconds=15,memory_limit_mib=512)})
         output=self.root/'prepared'
         self.controller.prepare_job('potential',dict(request=dict(mode='prepared',pqr_path=str(pqr),tools=tools)),output=output)
@@ -403,7 +403,7 @@ class AdvancedJobsTests(unittest.TestCase):
         from unittest.mock import patch
         from molscene.desktop.controller import WorkbenchController
         controller = WorkbenchController(object(), self.root)
-        config=dict(schema_version=1,tools={'apbs':dict(argv=[sys.executable],architecture='x64',path_dirs=[],
+        config=dict(schema_version=1,tools={'apbs':dict(argv=[str(Path(sys.executable).resolve())],architecture='x64',path_dirs=[],
                     runtime_files=[],timeout_seconds=15,memory_limit_mib=512)})
         with patch('molscene.artifacts.sha256',side_effect=RuntimeError('Tool hashing belongs in asynchronous worker')):
             path = controller.prepare_job('tools', {'tools': config})
@@ -431,7 +431,7 @@ class AdvancedJobsTests(unittest.TestCase):
         import time
         script = self.root / 'slow_probe.py'
         script.write_text('import time\ntime.sleep(30)\nprint("APBS 3.4.1")\n')
-        config = dict(schema_version=1, tools={'apbs': dict(argv=[sys.executable, '-B', str(script)],
+        config = dict(schema_version=1, tools={'apbs': dict(argv=[str(Path(sys.executable).resolve()), '-B', str(script)],
             architecture='x64', path_dirs=[], runtime_files=[dict(path=str(script), role='package_metadata')],
             timeout_seconds=60, memory_limit_mib=512)})
         job = self.root / 'job.json'

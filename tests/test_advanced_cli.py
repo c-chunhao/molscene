@@ -65,7 +65,7 @@ class AdvancedCliTests(unittest.TestCase):
     def test_density_matrix_and_volume_ramp_are_protected_json_files(self):
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             matrix, ramp, source = root/'matrix.json', root/'ramp.json', root/'map.dx'
             matrix.write_text(json.dumps([1,0,0,2,0,1,0,3,0,0,1,4,0,0,0,1]))
             ramp.write_text(json.dumps([0,0,0,1,0,5,1,0,0,1]))

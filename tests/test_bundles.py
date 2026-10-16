@@ -22,7 +22,7 @@ class BundleTests(unittest.TestCase):
         self.assertIsNotNone(bundles, 'bundle implementation is required')
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
+        self.root = Path(self.tmp.name).resolve()
         self.source = self.root/'source.pse'
         self.source.write_bytes(b'original\r\n\x00snapshot')
         self.original = self.source.read_bytes()

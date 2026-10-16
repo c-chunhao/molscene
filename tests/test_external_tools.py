@@ -45,7 +45,7 @@ class ExternalToolsTests(unittest.TestCase):
         self.assertIsNotNone(tools, 'managed external tool implementation is missing')
         self.temporary = tempfile.TemporaryDirectory(prefix='tools unicode 空格 & ', dir=os.environ.get('TEMP'))
         self.addCleanup(self.temporary.cleanup)
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
         self.fake = self.root / 'fake tool 空 &.py'
         shutil.copyfile(Path(__file__).parent / 'fixtures/advanced/fake_tool.py', self.fake)
         self.config = {'schema_version': 1, 'tools': {'apbs': {
@@ -324,7 +324,7 @@ class ExternalToolsTests(unittest.TestCase):
                                   f'  Path({str(ready)!r}).write_text(json.dumps(record))\n'
                                   '  time.sleep(60)\n'
                                   f'run_tool("apbs",load_tools(Path({str(config_path)!r})),["tree",{str(pids)!r}],'
-                                  f'cwd=Path({str(folder)!r}),log_prefix=Path({str(folder / "run")!r}),progress=progress)\n')
+                                  f'cwd=Path({str(folder)!r}),log_prefix=Path({str(folder / "run")!r}),progress=progress)\n', encoding='utf-8')
                 worker = subprocess.Popen([sys.executable, '-B', str(script)], stdout=subprocess.DEVNULL,
                                           stderr=subprocess.PIPE, creationflags=0x08000000 if os.name == 'nt' else 0)
                 try:

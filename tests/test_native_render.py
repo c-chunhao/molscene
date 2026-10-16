@@ -30,7 +30,7 @@ class NativeRenderProtocolTests(unittest.TestCase):
     def setUp(self):
         self.assertIsNotNone(native, 'supervised native renderer implementation required')
         self.tmp=tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
-        self.root=Path(self.tmp.name); self.source=self.root/'source.pse'; self.source.write_bytes(b'input')
+        self.root=Path(self.tmp.name).resolve(); self.source=self.root/'source.pse'; self.source.write_bytes(b'input')
         self.spec=dict(width=16,height=16,dpi=72,ray=True)
 
     def request(self):
