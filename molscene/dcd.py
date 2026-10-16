@@ -97,5 +97,3 @@ def load_dcd(cmd,object_name,path,*,cancelled=None,progress=None):
     if sha256(path)!=metadata['sha256']: raise ValueError('DCD input changed during native import')
     metadata['native_mapping']=[dict(source_frame=i,state=i) for i in range(1,n+1)]
     return metadata
-
-
