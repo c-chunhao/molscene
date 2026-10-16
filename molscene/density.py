@@ -18,6 +18,7 @@ import uuid
 from .artifacts import checked_path, sha256
 from .grids import (MAX_VOXELS, compose, grid_metadata, grid_point,
                     inverse_affine, read_dx, read_mrc, validate_rigid)
+from .native_maps import load_native_dx
 from .snapshot import scene_fingerprint
 
 IDENTITY = (1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.)
@@ -234,7 +235,11 @@ def load_density(cmd,path,*,format,interpretation='auto',name=None,state=1,units
     previous=cmd.get_setting_int('normalize_ccp4_maps')
     try:
         cmd.set('normalize_ccp4_maps',0)
-        cmd.load(str(path),name,state=state,format=grid.metadata['source_format'],zoom=0)
+        native=None
+        if grid.metadata['source_format']=='dx':
+            native=load_native_dx(cmd,grid,name=name,state=state)
+        else:
+            cmd.load(str(path),name,state=state,format=grid.metadata['source_format'],zoom=0)
         matrix=_matrix(cmd,name,state)
         digest,error=_verify_grid(cmd,name,state,grid,matrix)
         if sha256(path)!=grid.metadata['source_sha256']: raise ValueError('Density source changed during load')
@@ -242,7 +247,8 @@ def load_density(cmd,path,*,format,interpretation='auto',name=None,state=1,units
                     format=grid.metadata['source_format'],interpretation=grid.metadata['interpretation'],
                     grid=grid_metadata(grid),load_matrix=matrix,world_matrix=matrix,value_sha256=digest,
                     verified=True,derived=[],native_geometry=_native_geometry(cmd,name,state),
-                    native_precision=dict(storage='float32',max_abs_quantization_error=error))
+                    native_precision=(native['native_precision'] if native is not None else
+                                      dict(storage='float32',max_abs_quantization_error=error)))
     except BaseException:
         if name in cmd.get_names('objects'): cmd.delete(name)
         raise
