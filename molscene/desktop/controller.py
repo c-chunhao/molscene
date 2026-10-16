@@ -281,6 +281,23 @@ class WorkbenchController:
         with self._bound_selection(selection, state) as bound:
             self.cmd.label(bound, expression)
 
+    def preview_labels(self, selection, *, template='residue', state=1, expression='name'):
+        self._thread()
+        from molscene.annotations import label_plan
+        return label_plan(self.cmd, selection, template=template, state=state, expression=expression)
+
+    def apply_label_recipe(self, selection, *, template='residue', state=1, expression='name',
+                           size=14, color='black', max_labels=500):
+        self._thread()
+        from molscene.annotations import apply_labels
+        return apply_labels(self.cmd, selection, template=template, state=state,
+                            expression=expression, size=size, color=color, max_labels=max_labels)
+
+    def clear_labels(self, selection, *, state=1):
+        self._thread()
+        from molscene.annotations import clear_labels
+        return clear_labels(self.cmd, selection, state=state)
+
     def _fingerprint(self, state):
         self._thread()
         from molscene.snapshot import scene_fingerprint
