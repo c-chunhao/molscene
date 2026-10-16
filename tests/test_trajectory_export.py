@@ -2,6 +2,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import unittest
@@ -108,6 +109,35 @@ class PlotExtremeTests(unittest.TestCase):
         svg=trajectory_plots.line_svg([1e308,1e308],[1,2],title='T',xlabel='Time (ps)',ylabel='Rg (angstrom)')
         ET.fromstring(svg); self.assertNotIn('nan',svg.lower())
 
+class PlotLayoutTests(unittest.TestCase):
+    def test_long_y_ticks_clear_axis_title_and_keep_data_aligned(self):
+        for values in ([0.,1.3724e-15],[-100.0001,-100.],
+                       [-1.7976931348623157e308,-1.7976931348623155e308]):
+            with self.subTest(values=values):
+                root=ET.fromstring(trajectory_plots.line_svg([1,2],values,title='Metric',xlabel='State',ylabel='Value (angstrom)'))
+                ns={'s':'http://www.w3.org/2000/svg'}
+                ticks=[node for node in root.findall('.//s:text',ns) if node.get('text-anchor')=='end']
+                self.assertEqual(len(ticks),6)
+                # At font size 13, allow a conservative 8 px per numeric glyph.
+                # The rotated title extends half a font height right of x=22.
+                for tick in ticks:
+                    self.assertGreaterEqual(float(tick.get('x'))-8*len(tick.text),22+13/2+10)
+                paths=root.findall('.//s:path',ns)
+                axis=re.fullmatch(r'M([0-9.]+) 70 V370 H([0-9.]+)',paths[0].get('d'))
+                self.assertIsNotNone(axis)
+                left,right=map(float,axis.groups())
+                self.assertGreaterEqual(right-left,480)
+                for tick,path in zip(ticks,paths[1:]):
+                    marker=re.fullmatch(r'M([0-9.]+) 370 v5 M([0-9.]+) ([0-9.]+) h5',path.get('d'))
+                    self.assertIsNotNone(marker)
+                    self.assertAlmostEqual(float(marker.group(2))+5,left)
+                    self.assertAlmostEqual(float(tick.get('x'))+12,left)
+                points=root.find('.//s:polyline',ns).get('points').split()
+                self.assertAlmostEqual(float(points[0].split(',')[0]),left)
+                self.assertAlmostEqual(float(points[-1].split(',')[0]),right)
+                xlabel=next(node for node in root.findall('.//s:text',ns) if node.text=='State')
+                self.assertAlmostEqual(float(xlabel.get('x')),(left+right)/2)
+
 class PlotTickPrecisionTests(unittest.TestCase):
     def test_narrow_time_ranges_keep_six_distinguishable_accurate_ps_ticks(self):
         for start,step in ((1000000.,1.),(100.,.0001)):
@@ -126,7 +156,7 @@ class PlotTickPrecisionTests(unittest.TestCase):
         for low,high in ((-1000001.,-1000000.),(-100.0001,-100.)):
             with self.subTest(low=low,high=high):
                 root=ET.fromstring(trajectory_plots.line_svg([1,2],[low,high],title='Metric',xlabel='Coordinate state',ylabel='Value (angstrom)'))
-                labels=[node.text for node in root.iter('{http://www.w3.org/2000/svg}text') if node.get('x')=='78']
+                labels=[node.text for node in root.iter('{http://www.w3.org/2000/svg}text') if node.get('text-anchor')=='end']
                 self.assertEqual(len(labels),6)
                 self.assertEqual(len(set(labels)),6,labels)
                 for i,label in enumerate(labels): self.assertAlmostEqual(float(label),low+(high-low)*i/5,delta=(high-low)*1e-3)
