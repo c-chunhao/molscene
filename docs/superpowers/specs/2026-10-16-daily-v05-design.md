@@ -113,7 +113,7 @@ Preview returns exact label targets, text and count without changing the scene.
 For `custom`, preview returns targets/count and the unevaluated native expression;
 it does not execute that expression. Applying custom retains native expression
 execution semantics rather than promising a safe literal-template evaluation.
-Applying accepts size 8..48 points, color and a maximum of 500 labels; validate
+Applying accepts native positive label_size values 8..48, color and a maximum of 500 labels; validate
 everything before mutation. Label color must resolve through the native color
 API. Literal label text and per-atom color apply only to selected targets. Native
 label_size is object-state scoped in the tested backend: apply it explicitly to
