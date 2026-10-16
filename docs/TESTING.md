@@ -1,5 +1,55 @@
 # Testing and reproducibility
 
+## v0.6 assembly and trajectory verification
+
+Focused source example evidence, observed 2026-10-17 on the independent Windows
+Python 3.10/PyMOL runtime: `test_reproduce_v06` executed six tests, all passed,
+no skips, in 11.352 seconds. It actually exported deposited 3C70 assembly 1
+(two copies/10,410 atoms), a three-state fitted original tetrahedron and a
+six-frame original raw DCD. It checked hand-derived finite RMSD/population
+RMSF/equal-weight Rg, exact source/history bytes, complete nested manifests,
+backend-free help, installed-layout data lookup and relocated standalone replay
+in a process that explicitly blocks importing MolScene. This is analysis/export
+evidence, without PNG rendering or a visible GUI, and is not a final package or
+exact-commit CI claim.
+
+```sh
+python -m unittest discover -s tests -p "test_reproduce_v06.py" -v
+python examples/reproduce_v06.py --output results/gallery-v06
+python -m molscene assemblies examples/data/3c70.cif
+python -m molscene assembly examples/data/3c70.cif --assembly-id 1 --state 1 --output results/assembly-v06
+python -m molscene trajectory examples/data/trajectory-tiny-v06.pdb --object trajectory_source --selection all --no-align --trajectory examples/data/trajectory-tiny-v06.dcd --output results/trajectory-v06
+```
+
+The new focused suites are `test_assembly`, `test_assembly_export`,
+`test_trajectory`, `test_dcd`, `test_trajectory_export`, `test_molecular_cli`,
+`test_molecular_workflows`, `test_molecular_gui` and `test_reproduce_v06`.
+Pure cases cover CIF/PDB syntax, right-to-left composition, exact label/auth
+membership, resource caps, proper Kabsch rotation/reflection/degeneracy,
+analytic metrics, time/frame selection and strict DCD record scanning. Native
+cases must actually execute deposited expansion, source/live immutability,
+independent identity/coordinate reload, DCD state/order mapping, closed bundles,
+relocated replay, cancellation/protected-path failures and controller bindings.
+The original tiny trajectories are controlled analytic fixtures, not evidence
+for arbitrary chemistry, DCD atom correspondence or experimental dynamics.
+
+Full release acceptance additionally requires full backend discovery, full
+backend-free discovery with observed skip reasons, build/twine checks, wheel
+and sdist fixture/source byte identity, and source-free isolated installed-wheel
+native/scientific examples. Native GUI acceptance must exercise actual
+Build/Analyze/Load copies, complete Results tables, last-checked currentness,
+narrow layouts, cancellation/close and meaningful unmodified framebuffer
+captures. Inspect generated SVGs and relocated replay separately. A dependency
+skip does not satisfy any required new native feature case.
+
+Retain all existing required scientific, GUI, solver, encoder and filesystem/
+process protection gates. Actual five-job Linux/Windows CI must identify the
+final exact commit; a workflow definition, historical success or local focused
+run does not establish that result. Build/package validation, whole-branch
+review, final CI, downloaded-release hash verification and backed-up desktop
+upgrade are separate release evidence. Historical v0.5 records below remain
+unchanged and do not supply v0.6 acceptance counts.
+
 ## Recorded v0.5 local validation
 
 Local actual-test evidence only. Source freeze maps describe each gate input; they do not assert all frozen files equal the final public commit. Final commit and deltas belong to source-provenance/publication sidecars. Hosted CI and publication are not established here; actual CI job results belong to release publication-evidence.json. No unobserved APBS, PDB2PQR or FFmpeg version is inferred.

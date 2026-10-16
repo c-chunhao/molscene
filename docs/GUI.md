@@ -1,5 +1,81 @@
 # MolScene desktop guide / 桌面工作台指南
 
+## v0.6 assemblies and trajectories
+
+The five pages retain their order. New sections start collapsed; path browsers
+and vertically arranged fields remain available in a narrow dock. Build and
+Analyze run in independent cancellable workers while **Results** and **Cancel**
+remain accessible. Closing follows the existing owned-worker cancellation
+lifecycle. A completed job records a validated result; it does not automatically
+load molecular copies or open an external SVG viewer.
+
+In **Structure → Biological assembly**, choose **Local deposited source**
+(`pdb`, `cif` or `mmcif`) and **Read assembly catalog**. The summary shows
+deposited assembly IDs, chain/copy/operator counts and the chain namespace.
+Choose **Deposited assembly ID**, **Coordinate state** and a **New output
+directory**, then **Build biological assembly**. Results contain the full copy
+table, source hash, operator matrices and relative artifact paths. Select the
+completed assembly in Results, return to the section and choose **Load selected
+assembly copies**. Loading validates the closed bundle, creates collision-free
+copies, and preserves original objects, camera and session filename. The input
+ASU is unchanged. Source edits can stale the result and block copy loading.
+
+mmCIF chain membership means exact deposited `label_asym_id` (native `segi`),
+while `chain` remains the author identifier. Several label entities can share
+one author chain. PDB `NULL` represents a blank chain. Output copies contain
+the requested source state in their state 1. There is no assembly inference
+from contacts or generic lattice packing.
+
+In **Analysis → Trajectory**, choose **One molecular object / topology**.
+For ordinary multi-state PDB/mmCIF/PSE input, use its loaded object directly.
+Optionally choose **Optional local DCD (single-state topology)**; the object
+must then contain its original full topology in the DCD's original atom order.
+The worker imports all validated DCD frames privately starting at state 1,
+replacing the topology's dummy coordinates. Source objects remain unchanged.
+DCD has no atom identifiers and cannot itself establish chemical correspondence.
+
+**Measure selection** and **Fit selection** are independent (both default
+`name CA`). Membership resolves once at **Reference state** and remains exact.
+Set **First state**, **Last state (0 = final state)** and **Analysis state
+stride**. The reference may be outside the sampled range. At least two sampled
+states are required. **Fit copied arrays to reference** defaults on and requires
+three noncollinear fit atoms in each required fit geometry. Turn it off to
+analyze raw coordinates; disabled fit selection is then ignored. No fitted
+copies or B-factor changes are produced.
+
+**Supply physical time (ps)** is opt-in. **Time step per source state (ps)**
+must be positive; **Time at state 1 (ps)** is the offset. Sampling stride does
+not alter that source-state spacing. Without supplied time, axes use coordinate
+state; camera movie frames and DCD header timing are not inferred as time.
+Choose a fresh output directory and **Analyze trajectory**. Complete frame,
+atom and residue tables, units and local RMSD/RMSF/Rg SVG paths appear in Results;
+the JSON/CSV retains all rows even when nested on-screen details are summarized.
+
+Trajectory source status is **last checked**, not a continuously rescanned
+promise. Select the result or use **Check source** to check the bound original
+states again. Editing source membership/coordinates can stale it; moving the
+camera or adding assembly copies does not. Results keep the saved snapshot
+even when the live source becomes stale.
+
+Rg is uniformly atom-weighted; RMSF is population fluctuation after the chosen
+fit. There is no PBC imaging/unwrapping: supply whole/unwrapped molecules.
+Only the restricted full-atom little-endian CHARMM DCD subset is accepted.
+[Bounds and definitions](INTERNALS.md#v06-assembly-and-trajectory-contracts),
+[offline examples](../examples/README.md#v06-assemblies-and-trajectories).
+
+Structure 页负责读取提交定义、构建组装和明确加载副本；Analysis 页负责坐标状态轨迹。
+两个新分区默认折叠，使用新输出目录；任务中可查看 Results 与取消。拟合与测量选择独立，
+时间间隔需主动启用，不做 PBC 修正。来源状态显示上次检查结果，使用 **Check source**
+重新检查；完整 JSON/CSV 不因界面预览摘要而截断。
+
+Actual v0.6 native window captures, preserved without pixel edits:
+
+![Biological assembly catalog and build controls](screenshots/v06-assembly.png)
+
+![Trajectory selection, sampling and optional time controls](screenshots/v06-trajectory.png)
+
+![Complete trajectory tables and last-checked source status](screenshots/v06-trajectory-results.png)
+
 ## v0.5 daily controls
 
 ![v0.5 guided-label controls in the native Qt window](screenshots/daily-controls-v05.png)
@@ -261,6 +337,6 @@ coordinates/radii, map field/geometry or relevant timeline/display data can.
 不是亲和力。外部 PDB2PQR 可使用独立 Python 3.11，桌面可保持 Python 3.10。
 任务期间可取消，关闭时停止预览；新高级输出目录不提供覆盖。
 
-Trajectory statistics, automatic biological assembly, chemical hydrogen-bond
-assignment and commercial-only components remain outside the validated scope.
+Inferred assemblies, general trajectory/PBC processing, chemical hydrogen-bond
+assignment and commercial-only components remain outside this workflow scope.
 Native PyMOL commands remain available under upstream behavior and licensing.

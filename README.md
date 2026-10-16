@@ -1,4 +1,37 @@
-# MolScene 0.5
+# MolScene 0.6
+
+Version 0.6 adds deposited **biological assemblies** and fixed-topology
+**coordinate-trajectory analysis**. Inspect assembly IDs before building exact
+deposited chain/operator copies; analyze coordinate states with independent fit
+and measurement selections, RMSD, population RMSF and equal-weight Rg.
+
+```sh
+python -m molscene assemblies examples/data/3c70.cif
+python -m molscene assembly examples/data/3c70.cif --assembly-id 1 --state 1 --output results/assembly-3c70
+python -m molscene trajectory examples/data/trajectory-tiny-v06.pdb --object trajectory_source --selection all --no-align --trajectory examples/data/trajectory-tiny-v06.dcd --output results/trajectory-dcd
+python examples/reproduce_v06.py --output results/gallery-v06
+```
+
+These exports require fresh directories and use the native backend without
+rendering. The offline generator creates the deposited 3C70 dimer (two copies,
+10,410 atoms) and original analytic fitted/raw trajectories, complete tables,
+self-contained SVG plots, source copies, manifests and standalone relative
+replay. It needs PyMOL and NumPy; catalog/help need neither. NumPy comes from a
+compatible scientific runtime; no new mandatory dependency is installed.
+In Structure, expand **Biological assembly**; in Analysis, expand **Trajectory**.
+Copy loading is explicit. [Controls and source-status checks](docs/GUI.md#v06-assemblies-and-trajectories).
+
+Assembly membership uses exact deposited `label_asym_id` in mmCIF, preserving
+author chain IDs; it does not infer neighboring molecules. Trajectories use
+coordinate states, independent of camera movie frames. Rg uses equal atom
+weights, fitting uses proper rotation, RMSF uses population normalization, and
+there is no PBC correction or inferred physical time. The optional DCD reader
+accepts a restricted full-atom little-endian CHARMM subset and requires the
+caller's matching topology in its original atom order.
+[Reproduce and interpret the examples](examples/README.md#v06-assemblies-and-trajectories)
+and [scientific limits](docs/INTERNALS.md#v06-assembly-and-trajectory-contracts).
+
+The v0.5 workflow and its historical images remain below.
 
 The v0.5 daily workflow adds **PyMOL-typed polar-contact candidates**, literal
 atom/residue labels, selected coordinate export and complete PSE snapshot saves.
@@ -138,7 +171,7 @@ Representation choices are cartoon, ribbon, sticks, lines, spheres, surface, mes
 
 ## Results and interpretation
 
-Every scientific operation fixes a positive coordinate `state` (CLI default 1). Missing coordinates are rejected instead of borrowing another state's coordinates. Alignment fixes mobile and target states separately. A multi-state file is not a trajectory analysis.
+Single-state scientific operations fix a positive coordinate `state` (CLI default 1). Missing coordinates are rejected instead of borrowing another state's coordinates. Alignment fixes mobile and target states separately. The separate `trajectory` operation explicitly selects, validates and analyzes multiple coordinate states.
 
 | Operation | Outputs in addition to `report.json` |
 | --- | --- |
@@ -147,6 +180,8 @@ Every scientific operation fixes a positive coordinate `state` (CLI default 1). 
 | SASA | Scene outputs and per-residue `sasa.csv` |
 | Interface | Scene outputs and complete partner/residue `interface.csv` |
 | Inspect | `chains.csv`, `sequence.fasta`; no forced ray rendering |
+| Assembly | Original source, per-copy CIF, `assembly.pse`, `copies.csv`, `replay.pml`, manifest |
+| Trajectory | `source.pse`, optional original/DCD inputs, frame/atom/residue CSV, RMSD/RMSF/Rg SVG, replay, manifest |
 | Batch | `batch.json`, `batch.csv`, numbered per-input output directories |
 
 Reports use schema version 2, input hashes, explicit parameters, units and relative artifact paths. Existing distance/RMSD fields remain available. Output destinations require explicit `--overwrite` when occupied; unsafe links, aliases and input/output collisions are rejected. Failed computation preserves prior valid outputs. Batch failures return nonzero; cancellation preserves completed items and records pending items honestly.
@@ -165,6 +200,6 @@ The residue browser shows coordinate sites actually present, preserving object, 
 
 MolScene's original code is [MIT licensed](LICENSE). PyMOL and Qt are separate dependencies under their respective distribution licenses. The native viewport, menus, command console, molecular engine and upstream Qt resources come from PyMOL; they were not recreated or copied from a commercial installation. This independent project is not affiliated with or endorsed by Schrödinger or the PyMOL project. See the [upstream open-source license](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) and [interface analysis](docs/INTERNALS.md).
 
-This release covers common representation/coloring controls, object/scene management, state-specific geometry, geometric contacts, SASA, coordinate sequence, alignment, batch figures and the scoped advanced workflows. Camera interpolation is not trajectory analysis. Chemical hydrogen-bond assignment, automatic biological assembly, ligand force-field parameterization and commercial-only components remain outside this scope. Native PyMOL exposes further commands under its own behavior and licensing; MolScene does not claim commercial parity.
+This release also covers explicit deposited assemblies and bounded coordinate-trajectory statistics. Camera interpolation remains a separate workflow. Chemical hydrogen-bond assignment, inferred biological assemblies, general trajectory formats/PBC processing, ligand force-field parameterization and commercial-only components remain outside this scope. Native PyMOL exposes further commands under its own behavior and licensing; MolScene does not claim commercial parity.
 
 The public examples use an independent open-source runtime and retain [coordinate attribution](examples/README.md). No evaluation overlay was removed or modified. The core tool is offline; only the optional fixed-source, checksum-verified example downloader accesses the network. See [testing evidence](docs/TESTING.md) and [contribution guidance](CONTRIBUTING.md).

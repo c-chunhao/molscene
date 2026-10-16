@@ -1,5 +1,125 @@
 # Interfaces, scientific definitions and implementation boundaries
 
+## v0.6 assembly and trajectory contracts
+
+`assembly.assembly_catalog(path)` is backend-free and returns deposited IDs,
+generation rows, chain namespace and copy/operator counts. The bounded CIF1
+reader handles quotes, semicolon text, scalar/loop tables and comments; it
+rejects malformed or ambiguous input. PDB reads REMARK 350 BIOMT definitions.
+Source limit is 20 MiB, expanded copies 512 and generated atoms 200,000.
+Unknown IDs, missing members, incomplete/nonfinite/nonrigid transforms,
+unsupported operator expressions or invalid/empty source states fail.
+
+`assembly.build_assembly(cmd, source_path, assembly_id='1', state=1)` preserves
+source bytes and the live ASU. Each generation/operator copy becomes a separate
+molecular object in state 1. mmCIF `asym_id_list` refers to `label_asym_id`,
+represented by native `segi`; author `chain`, residue and atom identity remain
+intact. PDB `NULL` is the blank chain. Exact native indices select members.
+Lists, integer ranges and parenthesized Cartesian products are supported;
+`(a,b)(c,d)` emits `(a,c),(a,d),(b,c),(b,d)`, with the right operation applied
+first. Affine column-coordinate composition is `M_a @ M_c`; matrices are
+row-major with translation in the last column. Deposited operators remain
+included regardless of operator type. No contact/lattice inference occurs.
+
+`assembly_export.export_assembly(None, output_dir, request)` copies the input,
+writes each CIF, `assembly.pse`, `copies.csv`, report, manifest and relative
+replay. It scopes native assembly/auth-reader settings in an independent
+runtime. Independent reload verifies core identities and Euclidean world
+coordinate error ≤0.001 Å. Copy rows include original label/author membership,
+operator IDs/matrix, atom count and original native indices/coordinates.
+Native indices can differ from deposited serials; they are not interchangeable.
+
+`trajectory.validate_trajectory_request` is backend-free. Canonical keys are
+`object_name` (required), `selection='name CA'`, `fit_selection='name CA'`,
+`reference_state=1`, `start=1`, `stop=None`, `stride=1`, `align=True`,
+`time_step_ps=None`, `time_start_ps=0.0`, `trajectory_path=None`.
+`trajectory.trajectory_analysis(cmd, request)` analyzes one ordinary
+fixed-topology molecular object. Measurement and fit membership resolve once
+at the reference, then exact identities/coordinate presence are checked in
+every required state. Spatial/state-dependent expressions do not reselect
+members per frame. The reference may lie outside the sampled range. Discrete,
+ambiguous, changed or missing topology/coordinates and nonfinite values fail.
+At least two sampled states are required. Bounds are 2,000 sampled states,
+100,000 full-topology atoms and 2,000,000 union(fit,measurement) atoms × unique
+(sampled states plus reference). With alignment disabled, fit membership/rank
+is ignored and fitted RMSD is null.
+
+Analysis imports NumPy lazily. Uniform-weight Kabsch fitting requires at least
+three noncollinear fit atoms and a proper rotation with determinant +1. A
+reflected configuration remains valid but retains its nonzero proper-fit
+residual. The transform applies only to copied measurement arrays. For N
+measurement atoms, coordinates x_i(t), reference r_i and sampled mean μ_i:
+
+- Raw RMSD = `sqrt(mean_i(|x_i(t)-r_i|²))`; fitted RMSD substitutes the fitted
+  copied arrays. Reported `rmsd_angstrom` chooses fitted or raw according to
+  `align`, while both available values remain explicit.
+- Atom RMSF = `sqrt(mean_sampled_t(|x_i(t)-μ_i|²))`, using population
+  normalization and stable Welford accumulation after the same fit choice.
+  Residue RMSF = `sqrt(mean_atoms_in_residue(atom_RMSF²))`.
+- Rg = `sqrt(mean_i(|x_i(t)-centroid(t)|²))`, equal atom weights rather than
+  element masses. A rigid transform leaves it unchanged.
+
+Frame rows preserve sampled ordinal, original coordinate state/source frame,
+raw/fitted/selected RMSD, Rg, determinant and optional time. Time is absent
+unless the caller supplies positive finite spacing; then
+`time_ps = time_start_ps + (state-1)*time_step_ps`. No movie-frame, DCD-header
+or physical-time inference occurs. No PBC unwrapping, imaging or molecule
+reconstruction occurs: input molecules must already be whole/unwrapped.
+
+`dcd.scan_dcd` and `iter_dcd_frames` are backend-free. They accept only 32-bit
+little-endian CHARMM CORD with positive declared frame count, full atoms,
+three float32 coordinate axes, no fixed atoms, cells/extra records or fourth
+dimension. Every Fortran record size/trailer, coordinate finiteness and exact
+EOF are checked. Caps: 256 MiB, 2,000 complete source frames, 100,000 full atoms,
+and 2,000,000 full source atoms × frames before native load, independent of
+later stride. Unsupported variants fail clearly. Multi-state coordinate/PSE
+analysis remains independent of DCD import support.
+
+The native public `load_traj` call uses explicit state 1, interval 1, start 1,
+stop/max equal declared frame count, full selection, image 0 and average 1.
+It replaces private dummy topology state 1, then loads all source frames before
+sampling. Native count/topology and every decoded coordinate/order are checked.
+DCD stores no atom names: those checks cannot prove chemical correspondence
+for arbitrary inputs. The caller must supply topology in its original DCD atom
+order. The deliberately nonlexical original fixture proves this runtime's
+ordering for that controlled input only.
+
+`trajectory_export.export_trajectory(input_session, output_dir, request,
+source_input=None)` archives the byte-preserved captured PSE and optional DCD;
+an optional hash-bound original coordinate source is copied separately. It
+writes complete frames/atoms/residues CSV, escaped self-contained UTF-8 SVGs,
+report, manifest and relative public-PyMOL replay. SVGs have axes/units and no
+external scripts, URLs or plotting dependency. Analysis exports no fitted
+states and changes neither source coordinates nor B factors. These assembly
+and trajectory exports need the native backend but no Qt/OpenGL rendering,
+solvers or encoders.
+
+All new exports use closed new-directory-only Bundle publication, checked
+paths, full SHA256/size manifests, protected input/worker paths and cooperative
+cancellation. Failed/cancelled jobs publish no successful partial bundle.
+Reports use relative bundle paths. GUI completion validates the prepared
+operation/request/input-role hashes before recording a result. Assembly copy
+loading independently verifies files, allocates collision-free names, preserves
+camera/session filename and rolls back owned copies on failure. Trajectory
+freshness binds the original object and required states; the UI shows when
+source status was last checked and provides an explicit recheck, avoiding
+automatic large per-state rescans. Derived assembly copies do not change the
+original trajectory identity.
+
+Primary references, consulted 2026-10-17:
+[wwPDB REMARK 350](https://www.wwpdb.org/documentation/file-format-content/format33/remarks2.html),
+[CIF syntax](https://mmcif.wwpdb.org/docs/tutorials/mechanics/pdbx-mmcif-syntax.html),
+[label-asym membership](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_pdbx_struct_assembly_gen.asym_id_list.html),
+[operator composition](https://mmcif.wwpdb.org/docs/sw-examples/python/html/assemblies.html),
+[Kabsch 1976](https://journals.iucr.org/paper?a12999),
+[GROMACS RMSD](https://manual.gromacs.org/current/reference-manual/analysis/rmsd.html),
+[RMSF](https://manual.gromacs.org/current/onlinehelp/gmx-rmsf.html),
+[Rg weighting and whole molecules](https://manual.gromacs.org/current/onlinehelp/gmx-gyrate.html),
+[public PyMOL trajectory importer](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/importing.py),
+[upstream DCD decoder](https://github.com/schrodinger/pymol-open-source/blob/master/contrib/uiuc/plugins/molfile_plugin/src/dcdplugin.c).
+These define source semantics; actual runtime acceptance is recorded in
+[TESTING](TESTING.md), rather than inferred from upstream availability.
+
 ## v0.5 polar, label and persistence contracts
 
 `analysis.polar_contacts` freezes requested-state A/B membership, then applies

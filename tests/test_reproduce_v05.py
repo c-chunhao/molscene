@@ -31,8 +31,8 @@ class ReproduceV05Tests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('--output', result.stdout)
         from molscene import __version__
-        self.assertEqual(__version__, '0.5.0')
-        self.assertIn('version = "0.5.0"', (ROOT/'pyproject.toml').read_text())
+        self.assertEqual(__version__, '0.6.0')
+        self.assertIn('version = "0.6.0"', (ROOT/'pyproject.toml').read_text())
 
     def test_existing_output_and_historic_output_tree_are_protected(self):
         example = example_module()

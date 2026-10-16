@@ -1,4 +1,31 @@
-# MolScene 0.5
+# MolScene 0.6
+
+0.6 增加提交文件定义的**生物学组装**与固定拓扑的**坐标轨迹分析**。先查看可用
+assembly ID，再按原始链成员和操作矩阵生成副本；轨迹可分别指定拟合与测量选择，
+输出 RMSD、总体归一化 RMSF、等权重 Rg、完整表格及独立 SVG。
+
+```sh
+python -m molscene assemblies examples/data/3c70.cif
+python -m molscene assembly examples/data/3c70.cif --assembly-id 1 --state 1 --output results/assembly-3c70
+python -m molscene trajectory examples/data/trajectory-tiny-v06.pdb --object trajectory_source --selection all --no-align --trajectory examples/data/trajectory-tiny-v06.dcd --output results/trajectory-dcd
+python examples/reproduce_v06.py --output results/gallery-v06
+```
+
+输出必须使用新目录。离线生成器实际构建 3C70 二聚体（2 个副本、10,410 原子），
+并分析原创的拟合/原始坐标轨迹；包含源文件副本、完整 CSV、SVG、清单与相对路径回放。
+计算需要独立的 PyMOL/NumPy 环境，不需要渲染；元数据目录与帮助不需要后端。
+NumPy 由兼容科学运行环境提供，没有新增强制依赖。Structure 页展开
+**Biological assembly**，Analysis 页展开 **Trajectory**；组装结果需明确点击加载副本。
+[桌面控件与来源状态检查](docs/GUI.md#v06-assemblies-and-trajectories)。
+
+mmCIF 使用提交定义中的 `label_asym_id` 精确确定成员，保留作者链 ID；不推断接触或
+晶格邻居。轨迹的坐标状态与相机电影帧分别处理。Rg 为原子等权而非质量加权，拟合使用
+不含镜像的正常旋转，RMSF 使用总体归一化。不处理周期边界，也不推断物理时间。
+可选 DCD 仅支持限定的完整原子、小端 CHARMM 格式，调用者必须提供原始原子顺序一致
+的拓扑。[实例与解释](examples/README.md#v06-assemblies-and-trajectories)、
+[科学边界](docs/INTERNALS.md#v06-assembly-and-trajectory-contracts)。
+
+以下保留 v0.5 工作流及明确标注的历史图像。
 
 0.5 增加 **PyMOL 类型判定的极性接触候选**、原子/残基标签配方、所选坐标导出与完整
 PSE 快照保存。窄 dock 用完整页名选择器访问原有五页。极性候选依赖现有拓扑及原生
@@ -115,7 +142,7 @@ python -m molscene selftest --output results/selftest
 
 ## 科学口径与结果
 
-所有操作固定正整数 `state`，CLI 默认 1；缺少该态的坐标会报错，不借用其它帧。叠合分别指定 mobile/target state。多状态文件并不等于经过验证的轨迹分析。
+单状态操作固定正整数 `state`，CLI 默认 1；缺少该态的坐标会报错，不借用其它帧。叠合分别指定 mobile/target state。独立的 `trajectory` 操作明确选择、验证并分析多个坐标状态。
 
 距离端点各需一个原子；角度 A–B–C 以 B 为顶点；二面角遵循 PyMOL 的有符号约定。距离单位 Å，角度单位度，退化几何明确失败。
 
@@ -137,6 +164,6 @@ CLI 坐标工作流的 PML 使用输入副本和记录的 API 操作，可脱离
 
 MolScene 自有代码采用 [MIT](LICENSE)。PyMOL、Qt 及其原生资源遵守各自发行版的许可；上游 viewport、菜单、命令控制台和分子引擎不是从商业安装复制或重新实现的。项目独立开发，与 Schrödinger / PyMOL 无隶属或背书关系。详见 [上游开源许可](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) 和 [接口分析](docs/INTERNALS.md)。
 
-本轮范围包括常用表示与着色、对象/场景管理、指定态几何、几何接触、SASA、坐标序列、叠合、批量制图，以及明确限定的高级工作流。相机插值不是轨迹分析；氢键化学判定、自动生物学组装、配体力场参数化及商业专属组件仍在范围之外，不宣称全面商业等价。原生 PyMOL 的其它命令由上游定义行为和许可。
+本轮还包括明确提交定义的生物学组装和有资源上限的坐标轨迹统计。相机插值是独立工作流；氢键化学判定、推断式生物学组装、通用轨迹格式/PBC 处理、配体力场参数化及商业专属组件仍在范围之外。原生 PyMOL 的其它命令由上游定义行为和许可。
 
 公开示例由独立开源运行时正常生成，未移除或修改评估水印。结构数据保留 [原始归属](examples/README.md)。核心工具离线运行，仅单独调用的固定来源、校验和验证下载器联网。参阅 [验证记录](docs/TESTING.md) 与 [贡献指南](CONTRIBUTING.md)。

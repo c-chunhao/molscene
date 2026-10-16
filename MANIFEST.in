@@ -21,3 +21,8 @@ include scripts/prepare_ci_tools.py
 
 include examples/reproduce_v05.py
 include examples/data/polar-fragments.json
+include examples/reproduce_v06.py
+include examples/data/v06-sources.json
+include examples/data/trajectory-tiny-v06.dcd
+include examples/data/trajectory-tiny-v06.json
+include examples/data/trajectory-tiny-v06.md

@@ -1,6 +1,77 @@
 # Reproducible examples
 
-These examples use public RCSB PDB coordinate files. The source structures are experimental models; the MolScene figures illustrate reproducible visualization and geometric analysis.
+These examples use public RCSB PDB coordinate files and explicitly labelled original analytic fixtures. Deposited structures are experimental models; original fixtures demonstrate controlled geometry and are not experimental trajectories.
+
+## v0.6 assemblies and trajectories
+
+Run with a compatible independent PyMOL/NumPy interpreter. No network, GPU,
+PNG rendering, APBS, PDB2PQR, FFmpeg or plotting package is used. `--help` works
+without optional backends. The script resolves `data` beside itself both in a
+checkout and under an installed wheel's `share/molscene/examples` directory.
+
+```sh
+python examples/reproduce_v06.py --help
+python examples/reproduce_v06.py --output results/gallery-v06
+python -m molscene assemblies examples/data/3c70.cif
+python -m molscene assembly examples/data/3c70.cif --assembly-id 1 --state 1 --output results/assembly-v06
+python -m molscene trajectory examples/data/trajectory-tiny-v06.pdb --object trajectory_source --selection all --no-align --trajectory examples/data/trajectory-tiny-v06.dcd --output results/dcd-v06
+```
+
+After wheel installation, locate the distributed script without assuming a
+checkout or the current directory:
+
+```sh
+python -c "import sys; from pathlib import Path; print(Path(sys.prefix)/'share/molscene/examples/reproduce_v06.py')"
+python /path/printed/above/reproduce_v06.py --output /new/local/gallery-v06
+```
+
+Use a fresh output directory outside `examples/data` and historical
+`examples/outputs`. Existing outputs are rejected. Previous generators, data
+and galleries retain their exact historical bytes. Every new inner bundle and
+the gallery have closed SHA256/size manifests. Public JSON artifact/input paths
+and PML paths are relative; move each whole bundle together. PSE files require
+a compatible native reader. Run `@/moved/bundle/replay.pml` in PyMOL to replay
+original coordinates without importing MolScene. Fitted coordinates are used
+only for statistics and are never saved over the original trajectory.
+
+| Bundle | Data and hand-derived checks | Main artifacts |
+| --- | --- | --- |
+| `assembly-3c70` | Deposited assembly 1, state 1; two 5,205-atom copies, 10,410 total | Exact source CIF, two copy CIFs, `assembly.pse`, `copies.csv`, report, replay, manifest |
+| `trajectory-fit` | Original asymmetric tetrahedron in three rigidly moved states; fitted RMSD/RMSF ≈0; raw RMSD 0, √30, √11 Å; equal-weight Rg √87/4 Å | Source PSE, complete frames/atoms/residues CSV, three SVGs, report, replay, manifest |
+| `trajectory-dcd` | Original four-atom six-frame DCD; raw RMSD f√113 Å (f=0..5), Rg √22.5 Å, population RMSF √(113×35/12) Å | Topology PSE, exact original PDB/DCD, full CSV, SVG, report, replay, manifest |
+
+The generator checks finite numerical values and these fixture-specific values,
+not a second general analysis implementation. The tetrahedron's supplied 0.5 ps
+spacing is illustrative. The DCD example has no supplied physical time and its
+plots use coordinate state. Its collinear atoms deliberately require `--no-align`.
+The independent coordinate oracle is [trajectory-tiny-v06.json](data/trajectory-tiny-v06.json),
+with [format and ordering details](data/trajectory-tiny-v06.md). The tiny original
+PDB/CIF assembly fixtures separately exercise noncommuting operators, blank
+chain and distinct label identifiers sharing an author chain.
+
+3C70 is copied byte-for-byte from the [RCSB/wwPDB source](https://files.rcsb.org/download/3C70.cif),
+retrieved 2026-10-17: 817,668 bytes, SHA256
+`a3e5e2bc4997710ba916b6f8b6fd01acd85d9e6912fd063b2ac79b4d581fbb88`.
+[Source attribution](data/v06-sources.json) is separate from older source records.
+Assembly 1 lists label asym IDs A–H, while their author chain is A. The second
+deposited operation is `(x,106.344-y,-z)` and is retained even though its type
+is a crystal symmetry operation. Selection follows deposited membership;
+generic packing and assembly inference are outside this workflow.
+[Official assembly explanation](https://pdb101.rcsb.org/learn/guide-to-understanding-pdb-data/biological-assemblies).
+
+RMSD/RMSF/Rg are geometric, uniformly weighted quantities. RMSF uses sampled
+population fluctuation; residue RMSF is the root mean squared atom RMSF. No PBC
+unwrapping/imaging or physical-time inference is performed. Supply already
+whole/unwrapped molecules. DCD contains no atom names: original caller topology
+order is required, even after decoder/native coordinates agree. Only 32-bit
+little-endian CHARMM full-atom XYZ float32 records without fixed atoms, cells,
+extra blocks or fourth dimension are supported. Multi-state PDB/mmCIF/PSE
+analysis is available independently. [Full scientific contract](../docs/INTERNALS.md#v06-assembly-and-trajectory-contracts).
+
+The generator establishes offline native analysis/export/replay behavior only.
+Actual visible GUI captures and release gates are recorded separately in
+[TESTING](../docs/TESTING.md). The images and acceptance counts below retain
+their stated historical versions.
 
 ## v0.4 advanced workflows
 

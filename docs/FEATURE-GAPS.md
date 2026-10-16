@@ -1,5 +1,28 @@
 # PyMOL comparison and MolScene priorities / 功能差距与优先级
 
+## v0.6 deposited assembly and coordinate trajectory scope
+
+Assessment: 2026-10-17. Current MolScene scope adds the contracts below to the
+historical v0.5 baseline. Availability, local acceptance and actual hosted CI
+are separate facts; [TESTING](TESTING.md) records their evidence independently.
+
+| Workflow | v0.6 integrated contract | Remaining boundary |
+| --- | --- | --- |
+| Biological assembly | Catalog and explicit local PDB/mmCIF assembly ID/state; exact deposited label-asym membership and operator copies; immutable source, independently reloaded copy CIFs and native session/replay | Bounded CIF1/PDB syntax; no inferred biological assembly, contacts or generic crystal packing |
+| Coordinate-state trajectory | One fixed-topology object, frozen fit/measurement membership, proper Kabsch RMSD, population RMSF and equal-weight Rg; complete CSV/SVG/source/replay bundle | No mass weighting, topology changes, trajectory interpolation, PBC correction or inferred physical time |
+| Optional DCD | Strict record/finite/size scan, full source-frame/native coordinate mapping, original topology and DCD copies | Little-endian 32-bit CHARMM full-atom XYZ only, without fixed atoms/cell/extra/4D; caller's original atom order required |
+| Compact controls | Collapsed sections within Structure/Analysis, independent workers, Results/Cancel, explicit copy loading and last-checked source status | Actual native Qt acceptance remains environment-specific; headless exports do not establish GUI rendering |
+| Distribution | 0.6.0 metadata, original/public fixtures and separate offline v06 generator beside preserved v05 generator | No bundled PyMOL, NumPy runtime, solvers or encoders; exact-commit package/native/CI checks remain distinct release gates |
+
+Camera timelines, density, LPBE electrostatics and v0.5 polar/label/persistence
+definitions remain in place. Chemical modeling/protonation, ligand force fields,
+pi interactions, MTZ and specialized commercial components remain outside this
+workflow scope. No commercial-parity percentage or popularity claim is made.
+
+本轮新增提交定义的组装与固定拓扑坐标轨迹；相机时间线与坐标状态分别处理。
+不推断组装、不处理 PBC、不推断物理时间，Rg 原子等权；DCD 需要原始顺序匹配的拓扑。
+以下表格保留各历史版本当时的评估，不代表当前仍未实现上述限定工作流。
+
 ## v0.4 baseline to v0.5 daily workflows
 
 Assessment: 2026-10-16. The table distinguishes native command availability from
@@ -16,8 +39,8 @@ historical v0.4 successes do not establish v0.5 source/package/native/CI success
 | Compact interaction | Native window/docks | Five pages with long path/detail fields | Same five pages, full-name narrow navigation, browsable paths, concise tool/map summaries with expandable details | Qt5/Qt6 and platform acceptance require actual native execution |
 | Distribution | Independently supplied runtime | Wheel/source with optional tools | 0.5.0 metadata, separate offline daily examples; original acceptance gates retained plus daily GUI gate | No bundled runtime/solvers; exact-head five-job Linux/Windows CI and package/privacy review remain release requirements |
 
-Animation, density and LPBE electrostatics retain their v0.4 definitions and
-limits. Deferred work includes automated biological assemblies, trajectory
+At the v0.5 baseline, animation, density and LPBE retained their v0.4 definitions and
+limits. Then-deferred work included automated biological assemblies, trajectory
 statistics, protonation/chemical editing workflows, ligand force-field
 assignment, multitrack commercial parity, pi interaction and MTZ workflows.
 The public upstream `pi_interactions` and `load_mtz` implementations currently
@@ -107,7 +130,7 @@ The required Linux path uses actual Qt5/PyMOL 3.1/3.2, APBS 3.4.1 x64,
 PDB2PQR 3.7.1 and H.264. Windows Qt6 evidence cannot substitute for it.
 The [advanced guide](ADVANCED.md) states controls, limits and scientific
 assumptions. [TESTING](TESTING.md) separates implemented acceptance tests from
-recorded executions. Confirmed chemical hydrogen-bond assignment, automatic biological
+recorded executions. At that historical baseline, confirmed chemical hydrogen-bond assignment, automatic biological
 assembly, trajectory analysis and specialized commercial components remain open.
 
 ## Scientific boundaries
@@ -140,5 +163,5 @@ assembly, trajectory analysis and specialized commercial components remain open.
 - [Public querying implementation](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/querying.py)
 - [Historical release features, explicitly versioned](https://pymol.org/features.html)
 
-本轮优先完善常用制图、分析与保存。相机/状态时间线、密度配准和 LPBE 电势沿用
-v0.4 的范围；多轨编辑、轨迹统计、化学建模和专用格式仍按上表列为后续工作。
+历史 v0.5 优先完善常用制图、分析与保存。相机/状态时间线、密度配准和 LPBE 电势沿用
+当时 v0.4 的范围；上表的后续工作代表历史评估，v0.6 当前限定范围见本页开头。
