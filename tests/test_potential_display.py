@@ -66,6 +66,33 @@ class PotentialDisplayTests(unittest.TestCase):
             self.load(selection='source')
         self.assertEqual(set(self.cmd.get_names('all')), before)
 
+    def test_all_zero_selected_radii_rejected_before_creating_owned_objects(self):
+        from unittest.mock import patch
+        from molscene.potential_display import selected_atoms
+        self.cmd.pseudoatom('source', pos=[0, 0, 0], vdw=0)
+        self.cmd.alter('source', 'vdw=0')
+        before = selected_atoms(self.cmd, 'source', 1)
+        self.assertEqual([a['vdw'] for a in before], [0])
+        names = self.cmd.get_names('all')
+        with patch.object(self.cmd, 'create', wraps=self.cmd.create) as create:
+            with self.assertRaisesRegex(ValueError, 'positive.*radius'):
+                self.load(selection='source')
+            create.assert_not_called()
+        self.assertEqual(selected_atoms(self.cmd, 'source', 1), before)
+        self.assertEqual(self.cmd.get_names('all'), names)
+
+    def test_mixed_zero_and_positive_selected_radii_are_preserved(self):
+        from molscene.potential_display import selected_atoms
+        self.cmd.pseudoatom('source', name='H', pos=[0, 0, 0], vdw=0)
+        self.cmd.pseudoatom('source', name='C', pos=[1, 0, 0], vdw=2)
+        self.cmd.alter('source and name H', 'vdw=0')
+        before = selected_atoms(self.cmd, 'source', 1)
+        self.assertEqual(sorted(a['vdw'] for a in before), [0, 2])
+        record = self.load(selection='source')
+        self.assertTrue(record['coverage']['passed'])
+        self.assertEqual(selected_atoms(self.cmd, record['molecule'], 1), before)
+        self.assertEqual(selected_atoms(self.cmd, 'source', 1), before)
+
     def test_finite_float64_that_overflows_native_map_is_rejected(self):
         write_dx(self.dx, Grid((3,3,3), (-10.,)*3, ((10.,0.,0.),(0.,10.,0.),(0.,0.,10.)), array('d', [1e100]*27), 'V', {}))
         with self.assertRaises(ValueError):

@@ -269,12 +269,8 @@ class ReproduceV04Tests(unittest.TestCase):
             self.assertEqual({p.name for p in (output / 'animation/frames').iterdir()},
                 {'frame_000001.png', 'frame_000002.png', 'frame_000003.png', 'frame_000004.png'})
             for relative in ('prepared.pqr', 'potential.dx'):
-                private_lines = (original / 'potential' / relative).read_text(encoding='utf-8').splitlines()
-                public_lines = (output / 'potential' / relative).read_text(encoding='utf-8').splitlines()
-                if relative.endswith('.pqr'):
-                    private_lines = [line for line in private_lines if line.startswith(('ATOM', 'HETATM'))]
-                    public_lines = [line for line in public_lines if line.startswith(('ATOM', 'HETATM'))]
-                self.assertEqual(private_lines, public_lines)
+                self.assertEqual((original / 'potential' / relative).read_bytes(),
+                                 (output / 'potential' / relative).read_bytes())
 
 
 if __name__ == '__main__':

@@ -47,7 +47,7 @@ class DensityPanel(QtWidgets.QWidget):
         self._display_kind(self.kind.currentText())
         self._registration_kind(self.registration_mode.currentText())
         self.records = []
-        self._preferred_name = None
+        self._preferred_identity = None
         self.state.setReadOnly(True)
         for name, callback in (
             ('density_load', self.load), ('density_apply_display', self.apply_display),
@@ -76,13 +76,17 @@ class DensityPanel(QtWidgets.QWidget):
 
     def refresh(self, records, objects):
         self.records = records
-        selected = self._preferred_name or self.maps.currentData()
-        self._preferred_name = None
+        selected = self._preferred_identity or self.maps.currentData()
+        selected = tuple(selected) if selected is not None else None
+        self._preferred_identity = None
         self.maps.blockSignals(True)
         self.maps.clear()
         for record in records:
-            self.maps.addItem(f"{record['name']} · state {record['state']}", record['name'])
-        index = self.maps.findData(selected)
+            self.maps.addItem(f"{record['name']} · state {record['state']}", (record['name'], record['state']))
+        # QVariant equality for stored Python tuples differs across bindings;
+        # match the explicit identity in Python on both Qt5 and Qt6.
+        index = next((i for i, record in enumerate(records)
+                      if (record['name'], record['state']) == selected), -1)
         self.maps.setCurrentIndex(max(0, index) if records else -1)
         self.maps.blockSignals(False)
         self._show_metadata()
@@ -94,9 +98,9 @@ class DensityPanel(QtWidgets.QWidget):
                 widget.setCurrentText(selected)
 
     def _selected_record(self):
-        name = self.maps.currentData()
+        identity = tuple(self.maps.currentData() or ())
         for record in self.records:
-            if record['name'] == name:
+            if (record['name'], record['state']) == identity:
                 return record
         raise ValueError('Load or select a map first')
 
@@ -126,11 +130,11 @@ class DensityPanel(QtWidgets.QWidget):
             raise ValueError('Choose a density map path first')
         record = self.advanced.controller.density_load(path, format=self.format.currentText(),
             interpretation=self.interpretation.currentText(), state=1)
-        self._preferred_name = record['name']
+        self._preferred_identity = (record['name'], record['state'])
 
     def apply_display(self):
         record = self._selected_record()
-        return self.advanced.controller.density_display(record['name'], self.display_request())
+        return self.advanced.controller.density_display(record['name'], self.display_request(), state=record['state'])
 
     def registration_request(self):
         token = uuid.uuid4().hex[:12]
@@ -146,8 +150,8 @@ class DensityPanel(QtWidgets.QWidget):
 
     def register(self):
         record = self._selected_record()
-        result = self.advanced.controller.density_register(record['name'], self.registration_request())
-        self._preferred_name = result['record']['name']
+        result = self.advanced.controller.density_register(record['name'], self.registration_request(), state=record['state'])
+        self._preferred_identity = (result['record']['name'], result['record']['state'])
         return result
 
     def export(self):

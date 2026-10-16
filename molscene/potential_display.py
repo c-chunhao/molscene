@@ -89,6 +89,8 @@ def load_potential_copy(cmd, *, pqr_path=None, selection=None, state=1, dx_path,
         atoms = selected_atoms(cmd, selection, state)
         radius_key = 'vdw'
         convention = 'existing molecule vdw radii'
+    if not any(atom[radius_key] > 0 for atom in atoms):
+        raise ValueError('Molecular surface requires at least one positive display radius')
     coverage = validate_coverage(grid, atoms, probe_radius, radius_key=radius_key)
     token = uuid.uuid4().hex
     prefix = 'molscene_potential_'+token

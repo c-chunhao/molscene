@@ -590,27 +590,30 @@ class WorkbenchController:
         self._advanced_maps.append(record)
         return deepcopy(record)
 
-    def _map_record(self, name):
+    def _map_record(self, name, state=None):
         self._thread()
-        records = [r for r in self.advanced_inventory()['maps'] if r['name'] == name]
+        if state is not None and (type(state) is not int or not 1 <= state <= 100000):
+            raise ValueError('Map state must be a positive integer')
+        records = [r for r in self.advanced_inventory()['maps'] if r['name'] == name
+                   and (state is None or r['state'] == state)]
         if len(records) != 1:
             raise ValueError('Choose an unambiguous map state')
         return records[0]
 
-    def density_display(self, name, display):
+    def density_display(self, name, display, *, state=None):
         self._thread()
         from molscene.density import display_density
-        record = self._map_record(name)
+        record = self._map_record(name, state)
         result = display_density(self.cmd, record, display)
         for stored in self._advanced_maps:
             if (stored['name'], stored['state']) == (record['name'], record['state']):
                 stored['derived'] = record['derived']
         return result
 
-    def density_register(self, name, registration):
+    def density_register(self, name, registration, *, state=None):
         self._thread()
         from molscene.density import register_density
-        result = register_density(self.cmd, self._map_record(name), registration)
+        result = register_density(self.cmd, self._map_record(name, state), registration)
         self._advanced_maps.append(result['record'])
         return result
 

@@ -176,7 +176,17 @@ jobs:
       - name: Require desktop test dependencies
         run: python -c "import runpy; tests = runpy.run_path('tests/test_desktop.py'); assert tests['HAS_PYMOL'] and tests['HAS_QT'], 'Required native tests cannot skip for missing dependencies'"
       - name: Run full test suite with real PyMOL
-        run: xvfb-run -a -s '-screen 0 1920x1080x24 +extension GLX' python -m unittest discover -s tests -v 2>&1 | tee artifacts/tests.txt
+        run: |
+          xvfb-run -a -s '-screen 0 1920x1080x24 +extension GLX' python - <<'PY' 2>&1 | tee artifacts/tests.txt
+          import unittest
+          from pathlib import Path
+          # Backend/PID/native diagnostics stay on stdout/stderr. Only the
+          # runner writes status, so diagnostics cannot split or spoof an ok.
+          with Path('artifacts/tests-status.txt').open('x', encoding='utf-8') as status:
+              suite = unittest.defaultTestLoader.discover('tests')
+              result = unittest.TextTestRunner(stream=status, verbosity=2).run(suite)
+          raise SystemExit(not result.wasSuccessful())
+          PY
       # The full suite already invokes the real harness normally and with clean
       # preferences. Require actual execution, without repeating the same runs.
       - name: Require native GL, mouse, pick and lifecycle tests to have passed
@@ -184,7 +194,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          log = Path('artifacts/tests.txt').read_text()
+          log = Path('artifacts/tests-status.txt').read_text(encoding='utf-8')
           required = {
               'test_native_startup_events_framebuffer_and_shutdown': 'test_desktop.NativeDesktopTests',
               'test_native_clean_preferences_startup_and_shutdown': 'test_desktop.NativeDesktopTests',
@@ -207,7 +217,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          log = Path('artifacts/tests.txt').read_text()
+          log = Path('artifacts/tests-status.txt').read_text(encoding='utf-8')
           required = {
               'test_publish_exact_inventory_hashes_and_empty_log': 'test_bundles.BundleTests',
               'test_nested_symlink_rejected_and_cleanup_preserves_target': 'test_bundles.BundleTests',

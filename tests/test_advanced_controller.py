@@ -147,6 +147,37 @@ class AdvancedControllerTests(unittest.TestCase):
         path.write_text('object 1 class gridpositions counts 2 2 2\norigin 0 0 0\ndelta 1 0 0\ndelta 0 1 0\ndelta 0 0 1\nobject 2 class gridconnections counts 2 2 2\nobject 3 class array type double rank 0 items 8 data follows\n0 1 2 3 4 5 6 7\n')
         return path
 
+    def test_density_operations_bind_explicit_map_state_and_preserve_both_sources(self):
+        from tests.advanced_map_fixture import two_state_map
+        from molscene.density import map_fingerprint
+        name, paths = two_state_map(self.controller, self.root)
+        records = self.controller.advanced_inventory()['maps']
+        self.assertEqual([r['state'] for r in records], [1, 2])
+        self.assertTrue(all(r['verified'] for r in records))
+        before = [map_fingerprint(self.cmd, r) for r in records]
+        source_bytes = [p.read_bytes() for p in paths]
+        with self.assertRaisesRegex(ValueError, 'unambiguous'):
+            self.controller.density_display(name, dict(kind='mesh', level=10))
+        matrix = [0,-1,0,11, 1,0,0,-7, 0,0,1,3, 0,0,0,1]
+        with self.assertRaisesRegex(ValueError, 'unambiguous'):
+            self.controller.density_register(name, dict(kind='matrix', matrix=matrix, copy_name='ambiguous'))
+        for state in (1, 2):
+            with self.subTest(state=state):
+                displayed = self.controller.density_display(name, dict(kind='mesh', level=10), state=state)
+                self.assertEqual((displayed['source_state'], displayed['state']), (state, 1))
+                registered = self.controller.density_register(name,
+                    dict(kind='matrix', matrix=matrix, copy_name=f'copy_{state}'), state=state)['record']
+                self.assertEqual(registered['state'], 1)
+                self.assertEqual(self.cmd.get_volume_field(registered['name'], state=1, copy=1).tolist(),
+                                 self.cmd.get_volume_field(name, state=state, copy=1).tolist())
+                # Existing name-only callers remain valid for a single-state map.
+                self.assertEqual(self.controller.density_display(registered['name'], dict(kind='mesh'))['source_state'], 1)
+        legacy = self.controller.density_register('copy_1',
+            dict(kind='matrix', matrix=matrix, copy_name='legacy_copy'))
+        self.assertEqual(legacy['record']['state'], 1)
+        self.assertEqual([map_fingerprint(self.cmd, r) for r in records], before)
+        self.assertEqual([p.read_bytes() for p in paths], source_bytes)
+
     def test_map_identity_checks_values_matrix_bytes_and_unassociated_map(self):
         from molscene.advanced_snapshot import capture_identity, result_status
         record = self.controller.density_load(self._map(), format='dx')

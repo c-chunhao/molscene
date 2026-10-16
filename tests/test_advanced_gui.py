@@ -377,8 +377,9 @@ class AdvancedWorkflowTests(AdvancedControlTests):
         self.assertEqual(map_fingerprint(self.cmd, original), before)
         self.assertIn('verified', view.metadata.text().lower())
         self.assertIn('Registered / transformed placement', view.metadata.text())
-        selected_copy = view.maps.currentData()
+        selected_copy, selected_state = view.maps.currentData()
         self.assertNotEqual(selected_copy, original['name'])
+        self.assertEqual(selected_state, 1)
         view.output.setText(str(self.root / 'registered-export'))
         with patch.object(self.panel.jobs, 'start') as start:
             view.actions['density_export'].click()
@@ -391,6 +392,44 @@ class AdvancedWorkflowTests(AdvancedControlTests):
         view.actions['density_load'].click()
         self.assertTrue(self.panel.status.text().startswith('Error'))
         self.assertEqual(self.cmd.get_names('objects'), names)
+
+    def test_density_two_state_selection_refresh_display_registration_and_export(self):
+        from tests.advanced_map_fixture import two_state_map
+        from molscene.density import map_fingerprint
+        name, paths = two_state_map(self.controller, self.root)
+        originals = self.controller.advanced_inventory()['maps']
+        fingerprints = [map_fingerprint(self.cmd, r) for r in originals]
+        source_bytes = [p.read_bytes() for p in paths]
+        view = self.advanced().density
+        self.panel.refresh()
+        for state in (1, 2):
+            with self.subTest(state=state):
+                view.maps.setCurrentIndex(state - 1)
+                self.assertEqual(view.state.value(), state)
+                self.assertEqual(view._selected_record()['state'], state)
+                self.assertEqual(view._selected_record()['grid']['origin_angstrom'], [state * 3, 2, 1])
+                self.panel.refresh()
+                self.assertEqual(tuple(view.maps.currentData()), (name, state))
+                self.assertEqual(view.state.value(), state)
+                display = view.apply_display()
+                self.assertEqual((display['source_state'], display['state']), (state, 1))
+                view.output.setText(str(self.root / f'export-state-{state}'))
+                with patch.object(self.panel.jobs, 'start') as start:
+                    view.actions['density_export'].click()
+                    self.assertEqual(start.call_count, 1, self.panel.status.text())
+                    job = json.loads(Path(start.call_args.args[0]).read_text())
+                request = job['parameters']['request']
+                self.assertEqual((request['map_name'], request['source_state']), (name, state))
+                self.assertEqual(Path(request['map_path']).read_bytes(), source_bytes[state - 1])
+                registered = view.register()['record']
+                self.assertEqual(registered['state'], 1)
+                self.assertEqual(self.cmd.get_volume_field(registered['name'], copy=1).tolist(),
+                                 self.cmd.get_volume_field(name, state=state, copy=1).tolist())
+                # Register chooses its new copy at the next refresh; reset the
+                # preference so the next loop explicitly exercises the source.
+                view._preferred_identity = None
+        self.assertEqual([map_fingerprint(self.cmd, r) for r in originals], fingerprints)
+        self.assertEqual([p.read_bytes() for p in paths], source_bytes)
 
     def test_timeline_project_and_animation_dispatch_use_the_document_and_output(self):
         view = self.advanced().timeline
@@ -550,7 +589,8 @@ class AdvancedWorkflowTests(AdvancedControlTests):
         write_dx(path, Grid((3,3,3), (-5,-5,-5), ((5,0,0),(0,5,0),(0,0,5)), array('d', range(27)), 'unknown', {}))
         view.path.setText(str(path))
         view.actions['density_load'].click()
-        original = view.maps.currentData()
+        original, original_state = view.maps.currentData()
+        self.assertEqual(original_state, 1)
         self.panel.advanced.timeline.width.setValue(64)
         self.panel.advanced.timeline.height.setValue(48)
         view.output.setText(str(self.root / 'density'))
@@ -562,6 +602,49 @@ class AdvancedWorkflowTests(AdvancedControlTests):
             self.panel.advanced.potential.actions['potential_load_result'].click()
         self.assertEqual(view.maps.count(), 2, self.panel.status.text())
         self.assertIn(original, self.cmd.get_names('objects'))
+
+
+def _isolated_controls(case):
+    """Keep each public case identity while running its QWidget body in a child.
+
+    Discovery may already have created a process-global QCoreApplication. A
+    fresh child owns QApplication for the entire original class, and the
+    parent accepts only its complete actual successful TestResult identities.
+    """
+    methods = unittest.defaultTestLoader.getTestCaseNames(case)
+    name = case.__name__
+
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory(prefix='advanced-controls-') as folder:
+            report_path = Path(folder) / 'result.json'
+            root = Path(__file__).resolve().parents[1]
+            process = subprocess.run([sys.executable, '-B', '-m', 'tests.test_advanced_gui',
+                '--advanced-controls-child', name, str(report_path)], cwd=root,
+                env=dict(os.environ, PYTHONPATH=str(root), QT_QPA_PLATFORM='offscreen'),
+                capture_output=True, text=True, timeout=180)
+            # Retain all backend and child status diagnostics in the raw log.
+            print(process.stdout + process.stderr, end='', flush=True)
+            if process.returncode != 0:
+                raise AssertionError(f'{name} child exited {process.returncode}')
+            report = json.loads(report_path.read_text(encoding='utf-8'))
+            expected = [f'__main__.{name}.{method}' for method in methods]
+            if report['successes'] != expected or report['tests_run'] != len(expected):
+                raise AssertionError(f'Incomplete isolated controls: {report}')
+            cls.child_successes = report['successes']
+            print('ADVANCED_CONTROLS ' + json.dumps(report), flush=True)
+
+    def passed(self):
+        self.assertIn(f'__main__.{name}.{self._testMethodName}', self.child_successes)
+
+    isolated = type(name, (unittest.TestCase,), dict(__module__=__name__,
+        setUpClass=setUpClass, **{method: passed for method in methods}))
+    return unittest.skipUnless(HAS_GUI, 'requires PyMOL and its Qt binding')(isolated)
+
+
+if '--advanced-controls-child' not in sys.argv:
+    AdvancedControlTests = _isolated_controls(AdvancedControlTests)
+    AdvancedWorkflowTests = _isolated_controls(AdvancedWorkflowTests)
 
 
 @unittest.skipUnless(os.environ.get('MOLSCENE_REQUIRE_ADVANCED') == '1' or
@@ -599,4 +682,24 @@ class AdvancedNativeTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    if len(sys.argv) == 4 and sys.argv[1] == '--advanced-controls-child':
+        name, report_path = sys.argv[2:]
+        if name not in ('AdvancedControlTests', 'AdvancedWorkflowTests'):
+            raise ValueError('Unknown control suite')
+
+        class ControlResult(unittest.TextTestResult):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.successes = []
+
+            def addSuccess(self, test):
+                super().addSuccess(test)
+                self.successes.append(test.id())
+
+        suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[name])
+        result = unittest.TextTestRunner(verbosity=2, resultclass=ControlResult).run(suite)
+        Path(report_path).write_text(json.dumps(dict(pid=os.getpid(), parent_pid=os.getppid(),
+            tests_run=result.testsRun, successes=result.successes)), encoding='utf-8')
+        raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+    else:
+        unittest.main()

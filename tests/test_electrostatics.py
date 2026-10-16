@@ -110,6 +110,37 @@ class ElectrostaticsTests(unittest.TestCase):
                 self.assertAlmostEqual(atom.vdw,2.7,places=6)
 
     @unittest.skipUnless(HAS_PYMOL, 'PyMOL unavailable')
+    def test_all_zero_molecule_import_fails_before_objects_or_publication(self):
+        import pymol2
+        from molscene.potential_display import selected_atoms
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            snapshot, dx, output = root/'source.pse', root/'field.dx', root/'out'
+            write_dx(dx, Grid((3,3,3), (-10.,)*3, ((10.,0.,0.),(0.,10.,0.),(0.,0.,10.)),
+                             array('d', [0.]*27), 'unknown', {}))
+            with pymol2.PyMOL() as pm:
+                pm.cmd.pseudoatom('source', pos=[1, 2, 3], vdw=0)
+                pm.cmd.alter('source', 'vdw=0')
+                original = selected_atoms(pm.cmd, 'source', 1)
+                self.assertEqual([a['vdw'] for a in original], [0])
+                pm.cmd.save(str(snapshot))
+            before = snapshot.read_bytes(), dx.read_bytes()
+            # Observe real backend creation: invalid input must fail before an
+            # owned molecule is created, rather than relying on later cleanup.
+            with patch('pymol.creating.create', wraps=__import__('pymol').creating.create) as create:
+                with self.assertRaisesRegex(ValueError, 'positive.*radius'):
+                    export_potential(snapshot, output, dict(mode='import', dx_path=str(dx),
+                        selection='source', render={'width':32, 'height':32}))
+                create.assert_not_called()
+            self.assertFalse(output.exists())
+            self.assertFalse(list(root.glob('.molscene-stage-*')))
+            self.assertEqual((snapshot.read_bytes(), dx.read_bytes()), before)
+            with pymol2.PyMOL() as pm:
+                pm.cmd.load(str(snapshot))
+                self.assertEqual(pm.cmd.get_names('objects'), ['source'])
+                self.assertEqual(selected_atoms(pm.cmd, 'source', 1), original)
+
+    @unittest.skipUnless(HAS_PYMOL, 'PyMOL unavailable')
     def test_import_and_standalone_replay_accept_connections_after_data(self):
         import pymol2
         with tempfile.TemporaryDirectory() as folder:
