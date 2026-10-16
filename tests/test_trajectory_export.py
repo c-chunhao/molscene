@@ -107,3 +107,26 @@ class PlotExtremeTests(unittest.TestCase):
     def test_constant_large_time_range_does_not_divide_by_zero(self):
         svg=trajectory_plots.line_svg([1e308,1e308],[1,2],title='T',xlabel='Time (ps)',ylabel='Rg (angstrom)')
         ET.fromstring(svg); self.assertNotIn('nan',svg.lower())
+
+class PlotTickPrecisionTests(unittest.TestCase):
+    def test_narrow_time_ranges_keep_six_distinguishable_accurate_ps_ticks(self):
+        for start,step in ((1000000.,1.),(100.,.0001)):
+            with self.subTest(start=start,step=step):
+                svg=trajectory_plots.line_svg([start,start+step],[1,2],title='Trajectory',xlabel='Time (ps, user supplied)',ylabel='Rg (angstrom)')
+                root=ET.fromstring(svg)
+                labels=[node.text for node in root.iter('{http://www.w3.org/2000/svg}text') if node.get('y')=='395']
+                self.assertEqual(len(labels),6)
+                self.assertEqual(len(set(labels)),6,labels)
+                for i,label in enumerate(labels): self.assertAlmostEqual(float(label),start+step*i/5,delta=step*1e-3)
+                self.assertIn('Time (ps, user supplied)',svg)
+
+    def test_narrow_y_ranges_use_the_same_distinguishable_tick_precision(self):
+        # The generic renderer accepts negative values; these expose narrow y
+        # ranges because positive trajectory metrics intentionally include zero.
+        for low,high in ((-1000001.,-1000000.),(-100.0001,-100.)):
+            with self.subTest(low=low,high=high):
+                root=ET.fromstring(trajectory_plots.line_svg([1,2],[low,high],title='Metric',xlabel='Coordinate state',ylabel='Value (angstrom)'))
+                labels=[node.text for node in root.iter('{http://www.w3.org/2000/svg}text') if node.get('x')=='78']
+                self.assertEqual(len(labels),6)
+                self.assertEqual(len(set(labels)),6,labels)
+                for i,label in enumerate(labels): self.assertAlmostEqual(float(label),low+(high-low)*i/5,delta=(high-low)*1e-3)
