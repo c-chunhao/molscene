@@ -1,4 +1,29 @@
-# MolScene 0.4
+# MolScene 0.5
+
+The v0.5 daily workflow adds **PyMOL-typed polar-contact candidates**, literal
+atom/residue labels, selected coordinate export and complete PSE snapshot saves.
+At narrow dock widths, a page selector keeps all five existing pages reachable.
+Polar candidates depend on existing topology and native typing; they are not
+confirmed hydrogen bonds. [Definitions and remaining gaps](docs/FEATURE-GAPS.md).
+
+```sh
+python -m molscene polar examples/data/1ubq.pdb --selection-a "name N" --selection-b "name O" --state 1 --cutoff 3.5 --angle 45 --output results/polar
+python -m molscene coordinates examples/data/1ubq.pdb --selection "chain A and name CA" --state 1 --format cif --output results/coordinates
+python -m molscene session-save results/polar/scene.pse --output results/saved-session
+python examples/reproduce_v05.py --output results/gallery-v05
+```
+
+Each save requires a new output directory. Coordinates produce one numbered file
+per source object plus complete source membership; a PSE save preserves the full
+captured session. Neither save requires rendering. Labels are in the Figure page:
+preview exact targets before applying; native positive `label_size` 8..48 is
+shared by labels in each affected object/state. Text/color belong to atom
+identities shared across ordinary coordinate states. [Daily controls](docs/GUI.md#v05-daily-controls).
+
+The images and measured acceptance records below retain their original release
+labels. [v0.5 release gates](docs/TESTING.md#v05-release-acceptance) distinguish
+required execution from historical evidence; gallery generation alone does not
+establish native GUI, external solver or final hosted-CI acceptance.
 
 [![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
 

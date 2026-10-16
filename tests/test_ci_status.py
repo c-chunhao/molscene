@@ -34,14 +34,19 @@ class CIStatusTests(unittest.TestCase):
             required_node = next(n for n in tree.body if isinstance(n, ast.Assign)
                                  and any(isinstance(t, ast.Name) and t.id == 'required' for t in n.targets))
             required = ast.literal_eval(required_node.value)
-            self.assertEqual(len(required), 12 if gate_name == gate_names[0] else 8)
-            target_name = next(iter(required))
+            self.assertEqual(len(required), 13 if gate_name == gate_names[0] else 8)
+            target_name = ('test_native_daily_polar_labels_exports_and_narrow_navigation'
+                           if gate_name == gate_names[0] else next(iter(required)))
+            if gate_name == gate_names[0]:
+                self.assertEqual(required[target_name], 'test_daily_gui.NativeDailyTests')
             # Exercise every unchanged mandatory identity in each gate.
-            for outcome in ('pass', 'skip', 'fail', 'missing', 'unrelated', 'spoof'):
+            for outcome in ('pass', 'skip', 'fail', 'missing', 'unrelated', 'spoof', 'same-prefix', 'noise'):
                 with self.subTest(gate=gate_name, outcome=outcome), tempfile.TemporaryDirectory() as directory:
                     suite = unittest.TestSuite()
                     for name, case in required.items():
                         module, cls_name = case.rsplit('.', 1)
+                        if outcome == 'same-prefix' and name == target_name:
+                            cls_name += 'Extra'
                         if outcome == 'unrelated' and name == target_name:
                             cls_name = 'UnrelatedTests'
                         def test(case_self, selected=(name == target_name), name=name, case=case):
@@ -68,6 +73,9 @@ class CIStatusTests(unittest.TestCase):
                                 exec(compile(runner, 'ci-runner', 'exec'), {})
                         self.assertEqual(exit_status.exception.code, int(outcome == 'fail'))
                         Path('artifacts/tests.txt').write_text(diagnostics.getvalue(), encoding='utf-8')
+                        if outcome == 'noise':
+                            status_path = Path('artifacts/tests-status.txt')
+                            status_path.write_text(status_path.read_text().replace(target_name+' (', 'noise '+target_name+' ('))
                         self.assertIn('PID_CLEANUP', diagnostics.getvalue())
                         self.assertIn('Advanced native evidence:', diagnostics.getvalue())
                         if outcome == 'pass':

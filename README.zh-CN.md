@@ -1,4 +1,23 @@
-# MolScene 0.4
+# MolScene 0.5
+
+0.5 增加 **PyMOL 类型判定的极性接触候选**、原子/残基标签配方、所选坐标导出与完整
+PSE 快照保存。窄 dock 用完整页名选择器访问原有五页。极性候选依赖现有拓扑及原生
+供体/受体判定，不等同于已确认氢键，也不是结合能。
+
+```sh
+python -m molscene polar examples/data/1ubq.pdb --selection-a "name N" --selection-b "name O" --state 1 --cutoff 3.5 --angle 45 --output results/polar
+python -m molscene coordinates examples/data/1ubq.pdb --selection "chain A and name CA" --state 1 --format cif --output results/coordinates
+python -m molscene session-save results/polar/scene.pse --output results/saved-session
+python examples/reproduce_v05.py --output results/gallery-v05
+```
+
+保存必须使用未创建的新目录；坐标按原始对象分别编号，并附完整来源映射。PSE 保存捕获
+的完整会话，两种保存均不要求渲染。Figure 页可预览并应用标签；原生正 `label_size`
+值为 8..48，同一对象/状态中的其它标签也共享大小。文字/颜色附着于原子身份，普通坐标
+状态之间共享。[操作与格式限制](docs/GUI.md#v05-daily-controls)、[科学边界](docs/INTERNALS.md#v05-polar-label-and-persistence-contracts)。
+
+下方图像及测试数字保留历史版本标识。[v0.5 验收要求](docs/TESTING.md#v05-release-acceptance)
+不是已完成验收的声明；示例运行不替代原生 GUI、真实外部求解器或最终公开提交的 CI。
 
 **在 PyMOL 原生桌面中完成结构分析与可复现制图。**
 

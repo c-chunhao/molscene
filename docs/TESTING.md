@@ -1,5 +1,62 @@
 # Testing and reproducibility
 
+## v0.5 release acceptance
+
+The v0.5 daily workflow has focused tests in `test_polar`, `test_polar_workflow`,
+`test_annotations`, `test_persistence`, `test_persistence_worker`, `test_daily_gui`
+and `test_reproduce_v05`. The gallery uses CPU ray with pinned public coordinates
+and an original bonded synthetic fixture; it verifies complete inventories,
+source mappings, literal label rows, candidate rows and relocated replay.
+Headless success establishes those operations only. No v0.5 final source,
+installed-package, native GUI, solver or hosted-CI success is inferred from these
+test definitions or the historical counts below.
+
+```sh
+python -m unittest tests.test_reproduce_v05 tests.test_ci_status -v
+python examples/reproduce_v05.py --output results/gallery-v05
+python -m molscene polar examples/data/1ubq.pdb --selection-a "name N" --selection-b "name O" --output results/polar-v05
+python -m molscene coordinates examples/data/1ubq.pdb --selection "chain A and name CA" --state 1 --format cif --output results/coordinates-v05
+python -m molscene session-save results/polar-v05/scene.pse --output results/session-v05
+```
+
+Keep all twelve v0.4 required native/science/replay/encoder identities below and
+add this exact thirteenth identity:
+`test_daily_gui.NativeDailyTests.test_native_daily_polar_labels_exports_and_narrow_navigation`.
+It must use actual native widgets, narrow navigation, meaningful framebuffer
+content, polar rows/annotation, literal labels, coordinate/session save+reload,
+job locking/cancellation, chooser cancellation and normal owned-process cleanup.
+An offscreen widget, object names, or dependency skip does not meet this gate.
+
+The dedicated Linux status channel must contain all **21** exact successful
+identities: the thirteen above plus these unchanged eight protection cases:
+
+| Case | Required methods |
+| --- | --- |
+| `test_bundles.BundleTests` | `test_publish_exact_inventory_hashes_and_empty_log`, `test_nested_symlink_rejected_and_cleanup_preserves_target`, `test_hardlink_alias_rejected_without_source_damage`, `test_destination_created_between_check_and_rename_is_not_replaced` |
+| `test_external_tools.ExternalToolsTests` | `test_timeout_reaps_child_and_grandchild`, `test_cancellation_during_run_reaps_descendants`, `test_forced_worker_death_reaps_descendants`, `test_forced_guardian_death_reaps_descendants` |
+
+Diagnostics remain separate from runner status. `test_ci_status` executes the
+actual workflow runner/gates and rejects skips, failures, missing identities,
+wrong classes, same-prefix classes, noise and spoofed stdout successes. Four
+plain Ubuntu/Windows × Python 3.10/3.13 jobs remain; Windows must execute the
+actual NTFS junction/hardlink guards. Actual solver and encoder probes remain
+mandatory in the fifth Linux job. Test counts and skip reasons must come from
+the exact frozen source; a workflow file is not proof of CI execution.
+
+Before publication, independently review the whole branch, freeze runtime/tests/
+examples/metadata/CI, then run complete backend and plain suites and all thirteen
+required native/science/replay/encoder cases. Serialize native/GL phases. Build
+wheel/sdist in fresh staging, install outside source and verify origins under
+`-I`; run installed daily workflows and all preserved gates. Safely extract the
+sdist and execute its own example/CLI, then replay with MolScene unavailable.
+Compare historical example/pinned bytes; inspect decoded images, PNG metadata,
+PSE contents and all text for privacy and scientific appearance. Preserve original
+PSE/PNG/scientific bytes in public projections and retain original hashes.
+Finally require five successful jobs and all 21 actual Linux successes on the
+exact public head, downloaded evidence, actual resolved tool versions, archive
+inventories/hashes and complete downloaded release-asset verification. Record
+these results only after those runs; no dependency skip is native acceptance.
+
 This document separates a test definition from a recorded successful run. A dependency skip is not backend or desktop validation. The [v0.3 validation record](validation-v03.json) identifies the frozen source and actual release checks; the [historical v0.2 record](validation.json) remains intact.
 
 ## Reproduce locally
@@ -71,7 +128,8 @@ tools and encoder assertions run before the suite. `MOLSCENE_REQUIRE_ADVANCED=1`
 and an absolute `MOLSCENE_TOOLS_CONFIG` make missing science dependencies fail.
 Xvfb/Mesa uses xcb and a 24-bit GLX display.
 
-The exact twelve native/science/replay/encoder cases below must each produce
+The twelve preserved v0.4 native/science/replay/encoder cases below, plus the
+v0.5 daily identity above, must each produce
 their full `test_name (module.Case) ... ok` line. A skip cannot satisfy a gate.
 Windows NTFS unit jobs also require actual junction/hardlink safeguards; Linux
 requires actual symlink/hardlink/no-replace and process-tree lifetime tests.

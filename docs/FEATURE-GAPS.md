@@ -1,14 +1,49 @@
 # PyMOL comparison and MolScene priorities / 功能差距与优先级
 
-Assessment date: 2026-10-15; v0.4 workflow documentation updated 2026-10-16.
-Baseline: MolScene v0.2.0. The installed
+## v0.4 baseline to v0.5 daily workflows
+
+Assessment: 2026-10-16. The table distinguishes native command availability from
+an integrated MolScene contract and from actual recorded release acceptance.
+The [testing record](TESTING.md#v05-release-acceptance) lists remaining final gates;
+historical v0.4 successes do not establish v0.5 source/package/native/CI success.
+
+| Workflow | Native PyMOL capability | v0.4 baseline | v0.5 integrated contract | Remaining boundary |
+| --- | --- | --- | --- | --- |
+| Polar interactions | `donors`, `acceptors`, `find_pairs` | Geometric contacts only | Explicit-state typed donor→acceptor candidates, complete rows/CSV, frozen annotation/replay and chemistry freshness | Native coarse orientation/typing; not confirmed hydrogen bonds, protonation repair or affinity |
+| Labels | `label`, atom color and object-state size settings | Raw native expression controls | Literal atom/residue/chain-residue preview/apply/clear; custom expression retained | ≤500 labels; positive size 8..48 shared in each affected object/state; text/color shared across coordinate states |
+| Coordinates | Native `save` | Figure/session-oriented export | One numbered cif/pdb file per object at one state, source membership and independent identity/geometry reload | ≤200,000 atoms/1,000 objects; fixed-width/precision/identity losses fail; no full topology/style round trip |
+| Session save | Native PSE save/load | Figure workflows include PSE | Complete byte-preserved captured PSE, closed new-directory bundle, manifest and portable replay without rendering | Saved snapshot does not verify later live scene; compatible native session reader required |
+| Compact interaction | Native window/docks | Five pages with long path/detail fields | Same five pages, full-name narrow navigation, browsable paths, concise tool/map summaries with expandable details | Qt5/Qt6 and platform acceptance require actual native execution |
+| Distribution | Independently supplied runtime | Wheel/source with optional tools | 0.5.0 metadata, separate offline daily examples; original acceptance gates retained plus daily GUI gate | No bundled runtime/solvers; exact-head five-job Linux/Windows CI and package/privacy review remain release requirements |
+
+Animation, density and LPBE electrostatics retain their v0.4 definitions and
+limits. Deferred work includes automated biological assemblies, trajectory
+statistics, protonation/chemical editing workflows, ligand force-field
+assignment, multitrack commercial parity, pi interaction and MTZ workflows.
+The public upstream `pi_interactions` and `load_mtz` implementations currently
+raise Incentive-only exceptions; native availability varies by distribution.
+No proprietary code, binaries or license material is included.
+
+Native orientation explicitly omits chemical type checks; MolScene applies
+native donor/acceptor predicates first. Its default 3.5 Å cutoff is strict `<`,
+while conservative preflight counts typed pairs at `≤` cutoff before angle/bond
+exclusions. Angle 45° is endpoint tolerance, not D–H–A ≥135°. The public source
+and [command reference](https://pymol.org/pymol-command-ref.html) are comparison
+sources, not evidence that every feature ran in this installed backend.
+[Querying](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/querying.py),
+[importing](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/importing.py)
+and [native setting scopes](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/SettingInfo.h)
+were checked 2026-10-16. Exact scientific contracts are in [INTERNALS](INTERNALS.md#v05-polar-label-and-persistence-contracts).
+
+Assessment date: 2026-10-16; v0.5 daily workflow assessment.
+Current comparison baseline: MolScene v0.4.0. The historical v0.2/v0.3 assessment is retained below. The installed
 Incentive PyMOL reports 3.1.6.1 through its public version API. This is a
 workflow comparison based on official documentation, the installed public API
 and MolScene's code/tests; it is not a claim that every commercial feature has
 been independently exercised. Official pages describe different releases, so
 their feature lists are not treated as an exhaustive current SKU matrix.
 
-## Daily workflow priorities
+## Historical v0.2/v0.3 daily workflow priorities
 
 | Workflow | Official PyMOL capability | MolScene v0.2 baseline | v0.3 workflow | Priority |
 |---|---|---|---|---|
@@ -72,7 +107,7 @@ The required Linux path uses actual Qt5/PyMOL 3.1/3.2, APBS 3.4.1 x64,
 PDB2PQR 3.7.1 and H.264. Windows Qt6 evidence cannot substitute for it.
 The [advanced guide](ADVANCED.md) states controls, limits and scientific
 assumptions. [TESTING](TESTING.md) separates implemented acceptance tests from
-recorded executions. Chemical hydrogen-bond assignment, automatic biological
+recorded executions. Confirmed chemical hydrogen-bond assignment, automatic biological
 assembly, trajectory analysis and specialized commercial components remain open.
 
 ## Scientific boundaries

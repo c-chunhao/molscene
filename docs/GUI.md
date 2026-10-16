@@ -1,5 +1,63 @@
 # MolScene desktop guide / 桌面工作台指南
 
+## v0.5 daily controls
+
+The five pages keep their order: **Structure, Figure, Analysis, Results,
+Advanced**. At 360–540 logical pixels the full-name page selector replaces the
+tab bar; widening the dock restores tabs. Both routes stay synchronized. During
+an asynchronous job the mutation pages are locked; Results and Cancel remain
+available. Cancel requests cooperative cleanup; normal window close waits for
+owned work to finish cancelling.
+
+In **Analysis**, set Selection / target (A), Partner B and an explicit positive state, then
+choose **Calculate polar candidates**. Defaults are cutoff 3.5 Å, native angle
+45°, and primary blank+A altloc. Distance is strictly **less than** cutoff;
+angle is a permissive native endpoint orientation tolerance, not a measured
+D–H–A angle. Results retain complete directed donor→acceptor rows and CSV;
+annotation draws at most 200. At most 100,000 preflight candidates and separately
+100,000 directed outputs are allowed. A topology, typing, charge or coordinate
+change makes the result stale; camera motion alone does not. Recalculate stale
+results before annotation. These candidates depend on native typing and existing
+bonds/protonation; they are not confirmed hydrogen bonds or affinity estimates.
+
+In **Figure**, use the Structure selection/state, choose a label recipe, then
+**Preview** before **Apply recipe**. `atom`
+prints the atom name; `residue` prints residue name plus full residue identifier
+(e.g. `GLY12A`); `chain_residue` prints `A:GLY12A`, or `(blank):GLY12A` for a
+blank chain. Each residue gets one selected anchor: CA, then P, then a heavy atom,
+then any atom; within a class prefer blank, A, then the lowest native index.
+Recipes never expand outside selected membership. `custom` explicitly evaluates
+your native expression; its preview leaves the expression unevaluated. At most
+500 labels apply. Size accepts native positive values 8..48 and is shared by
+all labels in each target object at the requested state, including other labels
+there. Text and color affect only target atom identities and are shared across
+ordinary coordinate states. Clearing labels leaves their styles intact.
+
+The **Figure** save controls export selected coordinates (`cif` default or `pdb`)
+at one chosen positive state, or save the complete current captured PSE. Choose
+a new output directory. Coordinate export writes `objects/0001.cif`, etc., one
+file per original source object, plus `membership.csv`, report, manifest and
+portable replay. Reload checks preserve core atom identity and world coordinates
+within 0.001 Å; widths/identity that the native writer cannot preserve fail.
+PDB has narrow ASCII fields; use cif for wider identifiers. Coordinates do not
+preserve all styling, maps, states, charges, radii or complete bond topology.
+The full PSE preserves the captured session bytes, including states, maps,
+scenes and labels. Results calls these **Saved snapshot**; later live changes do
+not turn a save into current scientific analysis. Open the saved PSE explicitly
+to restore it. These saves require no PNG, ray tracer or OpenGL operation.
+
+Advanced map/PQR/DX/tools/timeline path rows have Browse controls. Cancel leaves
+the field unchanged. Output browse selects a parent plus an uncreated leaf;
+selecting an existing directory does not authorize replacement. Mode changes
+hide the whole unused row. Tool summaries retain availability/version/actual
+architecture; full paths, argv and errors are in Details/tooltips. Density
+summaries retain shape, origin, units and raw thresholds; matrices/hashes are in
+Details. Full-table CSV export is independent of preview search/sort.
+
+示例与离线命令见 [Examples](../examples/README.md#v05-daily-workflows)。五个主页面及其顺序不变；
+窄面板用完整页名选择器，任务期间仍可进入 Results 并取消。坐标与会话结果显示“Saved
+snapshot”，不会把冻结快照误作后来现场状态的科学验证。
+
 Start the native window with an explicit workspace:
 
 Use a Python 3.10–3.13 environment for the pinned PySide6-Essentials 6.8.1 extra; its upstream Python constraint is `<3.14`. The tested/recommended starting combination is Python 3.10.18 with the backend recorded in [TESTING.md](TESTING.md). MolScene's core CLI remains Python 3.10+.

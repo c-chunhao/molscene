@@ -214,3 +214,60 @@ Observed with open-source PyMOL native 3.2.0a on 2026-10-15:
 The B-factor surface uses the actual 2.0–46.9 range; it is not an electrostatic map. The SASA image shows the structure context rather than an area heatmap. Eight main figures were visually inspected for expected backbone/ligand/surface/annotation/alignment content and absence of an evaluation overlay. The manifest records exact file bytes; image hashes need not match across different PyMOL builds.
 
 The wheel stores pinned coordinate inputs in `share/molscene/examples/data` under the installation prefix; the sdist retains this guide, downloader, source tests and original `examples/data` paths. Offline selftest creates synthetic fixtures itself. The public gallery and screenshots must be regenerated and reviewed on the exact release implementation; historical v0.1 images do not prove new scientific/GUI workflows.
+
+## v0.5 daily workflows
+
+```sh
+python examples/reproduce_v05.py --output results/gallery-v05
+```
+
+Use a new directory outside historical `examples/outputs`; previous galleries
+and pinned inputs are preserved. This offline generator requires installed
+MolScene plus a separately supplied PyMOL backend. It uses CPU ray for figures;
+no external solvers, encoder or native GUI is invoked. A source/sdist invocation
+uses its adjacent package. For isolated wheel verification, copy the script
+outside every checkout and run it with `python -I`; it finds pinned inputs under
+`share/molscene/examples/data`. The wheel also installs the script under
+`share/molscene/examples`. No tests or private probes are imported.
+
+| Bundle | Source and purpose | Closed payload (plus report/manifest) |
+| --- | --- | --- |
+| `polar-public` | Pinned RCSB 1UBQ, native N/O candidate illustration | Copied input PDB, complete polar CSV, CPU-ray PNG, PSE, standalone scene PML |
+| `polar-synthetic` | Original bonded amine/carbonyl fixture | Same; controlled N→O separation 3 Å produces one candidate |
+| `labels` | Pinned 1UBQ CA atoms of residues 1..5 | Input PDB, literal label JSON/CSV, PNG/PSE and replay |
+| `coordinates` | Frozen labelled ubiquitin; five selected CA atoms, state 1 | `source.pse`, `objects/0001.cif`, complete `membership.csv`, replay |
+| `session-save` | Complete captured labelled ubiquitin session | Byte-preserved `session.pse` and replay |
+
+The gallery root has a closed manifest and `validation.json`. Every bundle is
+audited against its exact inventory; added files/directories, missing data or
+changed hashes fail. Numbered coordinate filenames map to original object
+`ubiquitin`; membership retains original index/ID/state and core identities.
+Reload uses an independent backend and ≤0.001 Å Euclidean tolerance. Coordinate
+files have format/precision limits and do not preserve a complete native session.
+Labels are exactly `A:MET1`, `A:GLN2`, `A:ILE3`, `A:PHE4`, `A:VAL5` at native
+positive size 18. `label_size` is shared by all labels in the affected
+object/state; label text/color are atom identities shared across coordinate states.
+
+The separate original MIT fixture `data/polar-fragments.json` specifies atom
+names/elements/coordinates and explicit bond orders: an N–H donor with two
+N–C bonds and an O=C acceptor with C–C/C–H neighbors. Its N is at (0,0,0), O at
+(3,0,0). The synthetic figure uses native N-blue/O-red/C-gray70/H-gray85
+colors; its replay records these commands. The raw engine figure is retained
+privately and its hashes are recorded in `gallery_display`; no pixels are edited.
+The generator pins its exact SHA-256 along with the unchanged 1UBQ PDB
+hash recorded in `data/sources.json`. It is illustrative geometry for existing
+native typing/orientation, not an experimental structure or biological claim.
+Primary blank+A, cutoff 3.5 Å with strict native `<`, native angle tolerance 45°
+and pair caps are reported. No hydrogen addition, protonation repair or affinity
+calculation is performed. Complete successful JSON/CSV is retained; at most
+200 candidate distances are drawn.
+
+Original bundles stay in a fresh sibling `.molscene-v05-private-*` directory.
+Public projection redacts local text paths, retains numerical data/source
+identities and records every original artifact hash plus original manifest hash.
+It rebuilds derivative report/manifest hashes. PDB/cif, PSE and PNG bytes are
+copied unchanged; private paths in scientific inputs cause failure. Binary PSE,
+PNG metadata and scientific appearance require independent review before public
+release. Replay uses relative distributed files and public PyMOL calls with
+MolScene unavailable; no analysis is silently recalculated. This gallery does
+not establish full native GUI, optional solver or hosted-CI acceptance.

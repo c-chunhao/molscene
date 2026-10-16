@@ -96,7 +96,7 @@ def apply_labels(cmd, selection, *, template='residue', state=1, expression='nam
     """
     if (isinstance(size, bool) or not isinstance(size, (int, float))
             or not 8 <= size <= 48 or not math.isfinite(size)):
-        raise ValueError('label size must be a finite positive number within 8..48 points')
+        raise ValueError('label size must be a finite native positive label_size value within 8..48')
     if type(max_labels) is not int or not 1 <= max_labels <= 500:
         raise ValueError('max_labels must be an integer within 1..500')
     if not isinstance(color, str) or not color.strip():

@@ -1,5 +1,64 @@
 # Interfaces, scientific definitions and implementation boundaries
 
+## v0.5 polar, label and persistence contracts
+
+`analysis.polar_contacts` freezes requested-state A/B membership, then applies
+native `donors`/`acceptors` and excludes H/D/T endpoints. Public
+`find_pairs(mode=1)` supplies coarse orientation in both A/B directions;
+orientation alone does not perform atom typing. Defaults: state 1, strict native
+`distance < 3.5 Å`, angle 45°, `primary` blank+A, 100,000 pairs. Finite cutoff
+0.1..10 Å and angle 0..90 are accepted. The native coarse angle may accept a
+favorable orientation at either endpoint; 45° must not be interpreted as a
+D–H–A ≥135° requirement. Existing geometry-only `contacts` keeps its inclusive
+heavy-distance meaning.
+
+Preflight counts unique undirected typed heavy A/B non-self pairs at distance
+≤ cutoff, before orientation and direct-bond exclusion. The declared cap also
+separately bounds final unique directed donor→acceptor outputs; exceeding either
+fails without truncation. Reciprocal pairs remain when both atoms have both
+roles. Directly covalently bonded endpoints and self-pairs are excluded. `all`
+altloc excludes different nonblank labels within one source object, a
+conservative convention rather than proof of conformer correlation; cross-object
+alt labels imply no correlation. Empty typed membership gives zero rows; empty
+original selections or absent requested states fail. Reports retain full
+identities, role/filter counts, parameters, backend version and limitations.
+Chemistry freshness binds donor/acceptor roles, formal charges, bonds and bonded
+neighbors as well as requested-state geometry. Complete JSON/CSV is retained;
+only the shortest 200 candidates may be annotated. Frozen replay uses public
+PyMOL calls and saved rows without analysis recalculation. Native typing relies
+on supplied bonds/valence/protonation; no hydrogens or chemistry repairs are added.
+
+`annotations.label_plan` returns exact targets/count without mutation. Literal
+recipes print `name`, `resn+resi`, or `(chain or '(blank)')+':'+resn+resi`.
+Residue grouping uses object/segi/chain/full resi/resn. Selected CA, then P,
+then heavy atom, then any selected atom wins; blank/A alternatives and native
+index resolve ties. `custom` preview retains an unevaluated expression; apply
+explicitly invokes native expression semantics. `apply_labels` validates color,
+finite native positive size 8..48 and count ≤500 before mutation. Text/color
+are scoped to target identities shared across ordinary coordinate states;
+size is object-state scoped and returns `size_scope='object_state'` and
+`size_objects`. Other labels in those same object/states share the size. It
+preserves unrelated objects/states settings, chemistry, coordinates and camera.
+
+`persistence.export_persistence` consumes a frozen protected PSE and uses
+new-directory-only closed Bundle publication with cooperative cancellation.
+Coordinates export one positive state, at most 200,000 atoms and 1,000 objects,
+to numbered cif/pdb files plus complete original object/index/ID/state mapping.
+Independent headless reload matches element/name/resn/full resi/chain/segi/alt
+and Euclidean world-coordinate error ≤0.001 Å, independent of reloaded atom
+indices. Native writing uses three decimal coordinate places. PDB ASCII/width
+limits and actual cif identity losses cause failure. B-factor/occupancy precision
+and charges/radii/bonds are declared format limits, not complete topology
+round-trip promises. `session_save` copies the full captured PSE byte-for-byte.
+Reports identify `result_kind='saved_snapshot'`; annotation is disabled. Neither
+operation renders or needs OpenGL. Controller snapshot creation restores native
+`session_file` even after writer errors.
+
+These are integrated contracts; availability of additional native commands does
+not establish MolScene workflow validation. [Public querying source](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/querying.py)
+and [setting scopes](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/SettingInfo.h)
+were checked 2026-10-16; actual installed-backend tests establish observed behavior.
+
 MolScene is independent MIT software around public PyMOL APIs. PyMOL supplies the native molecular engine, Qt viewport, menus and console. MolScene supplies the dock, validation, scientific definitions, provenance and file workflows. No commercial binaries, license material or UI assets are redistributed. [Upstream source](https://github.com/schrodinger/pymol-open-source), [license](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) and [command reference](https://pymol.org/pymol-command-ref.html) document the separate dependency.
 
 ## Runtime boundaries

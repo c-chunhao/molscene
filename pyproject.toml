@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "molscene"
-version = "0.4.0"
+version = "0.5.0"
 description = "Native PyMOL workbench, reproducible molecular scenes and structural analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,4 +27,6 @@ molscene = "molscene.cli:main"
 include = ["molscene*"]
 
 [tool.setuptools.data-files]
-"share/molscene/examples/data" = ["examples/data/1ubq.pdb", "examples/data/1ubq.cif", "examples/data/1hsg.pdb", "examples/data/sources.json"]
+"share/molscene/examples/data" = ["examples/data/1ubq.pdb", "examples/data/1ubq.cif", "examples/data/1hsg.pdb", "examples/data/sources.json", "examples/data/polar-fragments.json"]
+
+"share/molscene/examples" = ["examples/reproduce_v05.py", "examples/README.md"]

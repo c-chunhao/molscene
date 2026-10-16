@@ -18,3 +18,6 @@ include docs/*.md docs/*.json
 recursive-include docs/screenshots *.png *.json
 recursive-include examples/outputs *.png *.pse *.pml *.json *.csv *.fasta *.pdb *.cif
 include scripts/prepare_ci_tools.py
+
+include examples/reproduce_v05.py
+include examples/data/polar-fragments.json
