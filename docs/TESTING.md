@@ -140,6 +140,27 @@ No v0.4 full-suite, package, native or remote CI success is inferred from the
 historical v0.3 tables below. Record new counts/versions/commit/CI URL after the
 corresponding frozen-source runs; until then these are acceptance requirements.
 
+## Recorded v0.4 local acceptance
+
+Final source and sdist test freeze: `99e09702`; retained wheel build code: `7ea9a28`. Runtime modules match the retained wheel and final source. Only `tests/test_workbench.py` changed between these code freezes. Post-suite CI-only commit `b43305b5287666f24c944f46d1b8b98cda4cb463` changes two workflow regexes; CI bytes differ from the s4 freeze. Local affected-test evidence is recorded separately and public-head runtime/test/example byte identity still requires final confirmation. Public commit, CI and final downloaded release hashes are recorded separately in `publication-evidence.json`; no CI success is claimed here.
+
+| Run | Discovered | Passed | Skipped | Failed/errors | Seconds |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Windows source backend | 440 | 420 | 20 | 0/0 | 1051.703 |
+| Windows source plain | 440 | 155 | 285 | 0/0 | 52.591 |
+| Independent wheel required cases | 12 | 12 | 0 | 0/0 | 709.065 |
+
+All twelve required cases executed in the complete backend and isolated installed-wheel runs. Plain dependency/platform skips do not validate backend/desktop behavior; exact passed IDs and sanitized per-case skip reasons are retained in `validation-v04.json`.
+
+The wheel and sdist audit records 41 matching modules; the sdist contains 201 members with 199 source files byte-matched. Archive hashes and exact bytes are in the JSON record. Installed and plain package origins were checked independently.
+
+Actual advanced gallery potential, public projection identity/privacy, isolated relocated replay and nine offline selftest checks passed their recorded gates. The extracted-sdist example explicitly skipped potential and establishes secondary packaging behavior only. Legacy gallery manifest bytes and image header dimensions were checked; this aggregator does not itself decode images or inspect scientific appearance. Refer to their generator/audit evidence.
+
+LPBE, raw scalar thresholds, surface-radius/unit assumptions and GPU-dependent OpenGL opacity remain explicit scientific limits. Camera interpolation is not molecular dynamics; grid extrema are not surface extrema.
+
+The twenty backend-run skips are filesystem link/junction/8.3-alias capabilities. No backend, Qt, solver, encoder or required acceptance case skipped. The corrected CI identity parser also passed the unchanged affected test under actual Python 3.10, 3.11 and 3.13. [Machine-readable v0.4 record](validation-v04.json).
+
+
 ## Environment and scope notes
 
 The v0.2 local desktop runtime is an independent open-source community build: Windows, Python 3.10.18, `pymol-open-source` package 3.2.0a0/native 3.2.0a, NumPy 2.2.6, PySide6-Essentials/shiboken6 6.8.1 and Pillow 12.3.0. The PyMOL package is prerelease. Numerical/API observations from the older installed Incentive PyMOL 3.1.6.1 are historical, not a desktop compatibility claim. Larger exports in that separate installation showed an evaluation overlay; the public gallery is generated normally with the independent open-source build.

@@ -10,7 +10,18 @@ MolScene 在上游 PyMOL Qt 主窗口中加入工作台 dock，保留原生的�
 标量图显示与配准，以及可选 APBS/PDB2PQR 电势工作流。等值线使用原始数值，
 体渲染使用明确的传递函数；计算电势使用 LPBE，并记录单位、半径及制备假设。
 [高级指南](docs/ADVANCED.md) 说明工具配置、项目与 JSON 的区别、回放、状态语义、
-资源上限和取消。下方截图及数值仍是明确标注的历史 v0.3 证据。
+资源上限和取消。
+
+| v0.4 泛素 LPBE 电势 | v0.4 配准后的合成密度 |
+| --- | --- |
+| ![真实 APBS 泛素电势](docs/screenshots/ubiquitin-potential-v04.png) | ![刚性配准的合成网格](docs/screenshots/registered-density-v04.png) |
+
+电势图来自实际 PDB2PQR/APBS：PARSE、pH 7、65³ 网格、±5 kBT/e 色阶。
+合成标量场为 17×15×13、非零原点，按 z 轴旋转 90° 并平移 (8, −2, 3) Å；
+它用于展示几何处理，不是实验电子密度。
+[下载完整回放结果包](https://github.com/c-chunhao/molscene/releases/tag/v0.4.0)，
+[查看 v0.4 验证记录](docs/TESTING.md#recorded-v04-local-acceptance)。
+后面的桌面截图和 v0.3 图库仍保留历史版本标注。
 
 ![真实原生 PyMOL 视口与 MolScene 界面分析](docs/screenshots/workbench-v03.png)
 

@@ -1,0 +1,2701 @@
+{
+  "schema_version": 1,
+  "molscene_version": "0.4.0",
+  "recorded_at": "2026-10-16T10:09:26.509920+00:00",
+  "status": "local_acceptance_recorded_no_ci_claim",
+  "provenance": {
+    "wheel_build_code_commit": "7ea9a28639c395755d24077d2a4890642db0c5a2",
+    "final_test_and_sdist_commit_prefix": "99e09702",
+    "source_change_since_wheel": [
+      "tests/test_workbench.py"
+    ],
+    "public_commit": null,
+    "ci": null,
+    "post_full_suite_ci_only_delta": {
+      "base": "99e09702e892ec6de8dacafa9f12746356d16742",
+      "head": "b43305b5287666f24c944f46d1b8b98cda4cb463",
+      "changed_files": [
+        ".github/workflows/ci.yml"
+      ],
+      "change": "Only two required-status regexes accept exact class-only or class.same-method unittest identity forms.",
+      "runtime_and_test_bytes_unchanged_in_local_delta_evidence": true,
+      "required_dictionaries_unchanged": true,
+      "required_identity_counts": [
+        12,
+        8
+      ],
+      "accepted_exact_formats": 40,
+      "rejected_invalid_formats": 140,
+      "affected_ci_test_proof": {
+        "python310": {
+          "unchanged_test_module": "tests/test_ci_status.py",
+          "tests": 1,
+          "log_sha256": "b37c343b8a0b4a290c5b507349b4219d4e24db7d4687ede135cc01a8195c9038"
+        },
+        "python311": {
+          "unchanged_test_module": "tests/test_ci_status.py",
+          "tests": 1,
+          "log_sha256": "8b5d1e9cc095f5e1cfc26161b80b391e8440a9af0e1a9e7487093865ca7c077b"
+        },
+        "python313": {
+          "capture": {
+            "returncode": 0,
+            "seconds": 1.2660000000032596
+          },
+          "scope": "Actual affected-test command returned zero; see local capture for test diagnostics."
+        }
+      },
+      "root_finalization_required": {
+        "public_head_runtime_test_example_byte_identity": {
+          "checked_at_ci_code_commit": "b43305b5287666f24c944f46d1b8b98cda4cb463",
+          "runtime_tests_examples_equal_full_suite_commit": true,
+          "full_suite_commit": "99e09702e892ec6de8dacafa9f12746356d16742",
+          "changed_frozen_files": [
+            ".github/workflows/ci.yml"
+          ],
+          "note": "Final public commit adds static documentation only; final Git blob checks and CI are in release publication-evidence.json."
+        },
+        "public_evidence_links": [],
+        "exact_head_github_five_jobs": null
+      },
+      "scope_note": "This is a post-full-suite CI-only delta. The CI workflow differs from the s4 freeze. Local affected-test evidence does not establish final GitHub CI success.",
+      "root_affected_test_matrix": {
+        "3.10": {
+          "python": "3.10.18 | packaged by conda-forge | (main, Jun  4 2025, 14:42:04) [MSC v.1943 64 bit (AMD64)]",
+          "tests": 1,
+          "adversarial_outcome_subscenarios": 12,
+          "returncode": 0,
+          "seconds": 1.7810000000026776,
+          "status_sha256": "44d3879780d32c11acb1e5bed0f2cd06d4e88fd57a7edf7d86ef9def6e7088e7"
+        },
+        "3.11": {
+          "python": "3.11.14 (main, Jan 14 2026, 19:28:21) [MSC v.1944 64 bit (AMD64)]",
+          "tests": 1,
+          "adversarial_outcome_subscenarios": 12,
+          "returncode": 0,
+          "seconds": 4.343000000008033,
+          "status_sha256": "bd56eecaafd66507135f2def06e3ff6d49498a185c68d6dc8012b36f4fae9164"
+        },
+        "3.13": {
+          "python": "3.13.11 | packaged by Anaconda, Inc. | (main, Dec 10 2025, 21:21:58) [MSC v.1929 64 bit (AMD64)]",
+          "tests": 1,
+          "adversarial_outcome_subscenarios": 12,
+          "returncode": 0,
+          "seconds": 1.6089999999967404,
+          "status_sha256": "5f06eb67f50ee940d899749ffcfa7dafd1354e94ecbaa7b0810a44a1da69a789"
+        }
+      }
+    },
+    "publication_note": "Public commit, exact-head CI and final server/download evidence belong to release publication-evidence.json. The recorded post-suite CI-only delta changes the workflow; do not claim its CI bytes equal the s4 freeze. Verify runtime/test/example byte identity to the public head; later static evidence additions are recorded separately."
+  },
+  "frozen_source_sha256": {
+    ".github/workflows/ci.yml": "9eacf2b5ead89f6a524b417874aa55de7b33f9b329397e58ec3a51c9483690df",
+    "examples/advanced-tools.example.json": "b97efe4ca528ac995efb9ae24b35453997c2d3dcd66ff253fc98115266368d1b",
+    "examples/data/1hsg.pdb": "d430675c358060808ef614002cfdcfcfa824714d89f1240adf5749d2ba60fed2",
+    "examples/data/1ubq.cif": "056f98710cb2b36f633c45e41902a02eb446e82871da21ff2dd44f74a56ca0f6",
+    "examples/data/1ubq.pdb": "d4a6812d8951cf6594e6a0763f089e35f5a80b62acb3c117b2c5565228a7b161",
+    "examples/data/sources.json": "de92ee947d4539cb1fb666a3956db1ae2a658f177c5fa774d9eb52921510abae",
+    "examples/download_examples.py": "5697e7920f44d64116a8038ede8d972dc0c7fd52695c53f31a9bdeb96957aa2d",
+    "examples/reproduce_v02.py": "6a1589367b85106797b5d078be70281e15d41f8920c16d25dac73c006f475670",
+    "examples/reproduce_v03.py": "40e5d3c3c2c5640f41723f486d09dde596f06bf8b67a80f448792eee8ee66e7a",
+    "examples/reproduce_v04.py": "a895b09541a1ab49ff13a81dea2320e9cf9dc7ee864051eaa2d7cd331164eca4",
+    "MANIFEST.in": "2f2ae3158696606add1438ef9d3f31c43a7afae77378e8fcc59ab4d2848e058e",
+    "molscene/__init__.py": "c6c6b0789f4bb49ce0a7891f76e663d09aeb2e81b95a63fc1af1e2027b3fdb02",
+    "molscene/__main__.py": "084c51488a3f064a81dd863f49ce4631adc79a962ab41d859867064724a0df11",
+    "molscene/advanced.py": "9cf24a3c5a2f59d8cc35bc2312cb50daedddeabef9fd0352299284f9b8371228",
+    "molscene/advanced_snapshot.py": "e31a3a251c02ee9582520d6d3f75b684942ca1ffbbfe3fb9c4a8eb280539e23c",
+    "molscene/analysis.py": "3ea7628ecde145c6130131ad9379b96a29cd65b050a7aed592440979888fd6e9",
+    "molscene/animation.py": "ac478d33c68f40c0307513d36e4649bdeed3d2c77bf52bc95f947fd6c2d85377",
+    "molscene/artifacts.py": "3ef98648ed8c137d01bac263237d5aa0dc20dd1d03d29d55e55a3d48b7d072eb",
+    "molscene/batch.py": "fc013b9fbab078c32d9bda7b2f93898ce07ceb670d9c38f6c18d9a6646f26929",
+    "molscene/bundles.py": "a040390946692eff6209643aba43259c6125b2a999c1788ba17a163ec8d14810",
+    "molscene/cli.py": "1d8a39ce8b89248be0db049ea67e519d20ec4f6ec40a85bf09bbfb4009becf77",
+    "molscene/density.py": "5077664149e5844ee0f96c9b1cc92472606bae067d0d69528c4951ab9fb8bb9f",
+    "molscene/density_export.py": "04a74ddfa97c1bdb04a4e979be377a32f5984d61df75c92842cd5b10d3af5f4c",
+    "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
+    "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
+    "molscene/desktop/advanced_panel.py": "abae7abe2844002771715c912cc6c4c1d616c97b015a74e81f21cb9a1894b381",
+    "molscene/desktop/controller.py": "acc4a630ec0e50d0ccb26d36fccb48294c629bc4e99b6a004d1fa0c9d8279d5e",
+    "molscene/desktop/density_panel.py": "a1848f1458fbe06e9d79359d2944607e3a020617e0e060a182be003620559f19",
+    "molscene/desktop/jobs.py": "af50cb95233eeca6ba9df2dd4467963a110fd957d69fda87e4f66e5b41381e4f",
+    "molscene/desktop/navigation_panel.py": "b6c48388eeb02b0bf11b1e84e161f4bcd64ba79d2cd52685b085989dbb919572",
+    "molscene/desktop/panel.py": "a2128e35bdc79169e72f66665e120beaecf4e34af76959acbad0fef33519c8f9",
+    "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
+    "molscene/desktop/plugin/startup/__init__.py": "3c9b7e9214210642f6e93080026722d011a97b6f6a87dbc80e8d54dcd904ad61",
+    "molscene/desktop/plugin/startup/molscene_workbench.py": "f2cfbc8243185c87a792132e20b7c27acfd6757d25e6146dcc0a05d87fc89166",
+    "molscene/desktop/potential_panel.py": "3bff4455e973749c666bd6bf777ccdea1b975f8649a5e9ff0dd64bb5f5947f12",
+    "molscene/desktop/structure.py": "4b4eaa990aae3c2e2feed34c7b617074a23342dcb15df3653f4d57168b5fd85e",
+    "molscene/desktop/timeline_panel.py": "7488d4f22e429c39f2dadece1c332c3fbffdb98d32555ddcc3e6702d2b3f98e2",
+    "molscene/electrostatics.py": "bc8debe809dd853e37cf1bc52ff495568ad9bcbbbd5798c5c55d570aff585764",
+    "molscene/engine.py": "20d07628205fe365de93a5c5e43282d975f41b2cbade117e4c0d8a5befcc600b",
+    "molscene/external_tools.py": "796b321c60148aa24bee5f65f440d1cf526efbbbd69fe0363f11f3ca09f94a74",
+    "molscene/grids.py": "bee49df5b213d29f10ef8d3eebb807767df53356f86281a7f29b5c1f6aacd04b",
+    "molscene/native_maps.py": "144c1cb1ae4fa4e2a176a02f9c0db1a4974168e0282e194779fa0693f083466f",
+    "molscene/native_render.py": "575f1d1c80566411896c1a0edfb2c990575e6a151fcc524974fb4c47fef73f36",
+    "molscene/native_render_child.py": "daaf737809594d822a9f82bd742e24fa4af4717f2fa406ca658e6a23d48f8844",
+    "molscene/potential_display.py": "e43a8924e0d014d8a382ca6d88982b5042dcc33cbc32009fa6e905891a6addbb",
+    "molscene/pqr.py": "fdfb1a12c4d1cd371d2f49e7e9ccaeeff9d991e8a9b80a54270b22ec78eadf74",
+    "molscene/process_guardian.py": "b84072caa49ca8333724cd40147c52217527196baeb618341fa9f80ece9a9b19",
+    "molscene/selftest.py": "a6fadcb7ff5e0d085d0f2fcc5dc410d8e15556719515c5400da890bfd9485539",
+    "molscene/snapshot.py": "3b5c0a033a4909f01068c0b67d5331ec1019f9e4b4ed830d37b67b28b942f8ce",
+    "molscene/styles.py": "d22b6d20601d84b07c83a5fcad33452d26ab32e6e229c081d2e0a1c22ef9ca8b",
+    "molscene/timeline.py": "37374b2a3a4a33e90a7534cb6b8922cd7e6137c82fa847a3146a06d4861efd08",
+    "molscene/worker.py": "eb7d253d5166ce568670c2d851e98dd817f8d384831805a51ac815e91f1ca6f9",
+    "pyproject.toml": "743b26fdacc895786d040cfa048e9e827ec0a8ff55bea1e0f50d1d45a20a8516",
+    "tests/advanced_map_fixture.py": "16536bd42c275ffeb2b66dc408e9ca02a628815d1af0c1a998eab7825bbac1c6",
+    "tests/advanced_native.py": "05e21eda19dd857171fc8fea223cb5c939c5e0549a3655631435afa17ea235a2",
+    "tests/fixtures/advanced/born/apbs-mol-auto.in": "b4286963a9c80af8a75ed72c131f86bd0f149f80c86b3a927205221d99ef5ef4",
+    "tests/fixtures/advanced/born/ion.pqr": "0df6d4081bae54397203c2ef7f98498cb73d62b2ca8c5db565a1d58e80cd142b",
+    "tests/fixtures/advanced/born/LICENSE.md": "19cd9ef5c456d914d64b2a3c1ea1618f87b9ff659baab38fe18a69b7e9a50349",
+    "tests/fixtures/advanced/born/SOURCES.md": "8519abfc50503e3595c8f3799fa6c8678471ec404d7ab66494a2c72640979992",
+    "tests/fixtures/advanced/born/UPSTREAM_README.md": "cd16d6388d3f66898aabcf67351cfbaf258dc28ba780bd8631b5e820d0c8be25",
+    "tests/fixtures/advanced/fake_tool.py": "4328f2cef86da27d1f3be546f459ec00fb1cf1a19a1b5e2d00300b1b7171b6a8",
+    "tests/navigation_native.py": "8c2cae7faca5d6ff9669b8b27597a37ffde78468bd79ab83a92ed022571058b5",
+    "tests/test_advanced_cli.py": "869c5c2eeac0e2cdb9c0a2a99ac1cb4a4be8e960539758f85d2b7872f2b8d8fe",
+    "tests/test_advanced_controller.py": "bc397692ff71e5c7191633ebcaec66f3f3840d32c73b67ed8a05a683d232847f",
+    "tests/test_advanced_gui.py": "41145474044decbe6dcaa0789d61f6b8a35cf27c82ca7d4b125d61d54b88124e",
+    "tests/test_advanced_worker.py": "fdb998f026bdd05d013cad84e913ed2e2b06f674f723cea81010162a8757162a",
+    "tests/test_analysis.py": "3dc5a43dd8bbd5145fb38ea21bb6c4cd7c4bc5b4bcea9852a9d939b5882f93ac",
+    "tests/test_animation.py": "db89996a3c4f8f9ab4b89240ee6406feab63f9d779f706f84a5d85f6152a5640",
+    "tests/test_batch.py": "357a1af2912da5f51ffa54bbf0b779d2d1a18fab74077acff2668562b9f88ec7",
+    "tests/test_bundles.py": "83402a1bdd0ddab20b05ddf3bde21304ad0b981f676e534bb12ad18008b9cedb",
+    "tests/test_ci_status.py": "c7129f34a06ac731808fff500bff1119e535bd47f8ae6deef7ea539b2afdb157",
+    "tests/test_cli.py": "d15dc6d73f4719ae81942c7601955d73317660a2d42103e87cbbae1dec2418dd",
+    "tests/test_density.py": "d869a8d215312703fbaa6ec6f4d1d0e38f551dc3e45f8581b4f2e7911091a73c",
+    "tests/test_density_engine.py": "82144d8d55073c277e9d694b8366a8616007510767aaf61b6a260c4c81c8ce42",
+    "tests/test_desktop.py": "85734a97559021b4cf447d88a3db2f1fbccc03750330e0eaaacf31e29ff5213d",
+    "tests/test_electrostatics.py": "7c00bc37fe1dadd48c31e49532177425cf0090ea8ce1d037b82a78b2ec193954",
+    "tests/test_electrostatics_real.py": "f8095333e8f40f078623a640a31ec2bc8ad44d66e78bd79da26c984001b03809",
+    "tests/test_engine.py": "b84d00a7fb6afaa1c99d6369729629931097879baec70516e1461bc04ca6494b",
+    "tests/test_external_tools.py": "6d49a9418230f993248b0ec03109e7bef91132b1a5c57228db2b903628c6df1a",
+    "tests/test_grids.py": "e0b08df649cc0a443d01c180cd6094e756cf2b837014634ebbf4d78a9d6ab50f",
+    "tests/test_integration.py": "c128433af26aab368cb43d5f21114f6200584c0a19122b47830215ece1cbd0d2",
+    "tests/test_interface.py": "55dc3b030f57b0fe9184020e8210938505134dd8cf7aade86fce4bdafbe9c267",
+    "tests/test_interface_engine.py": "42f0e85cacd0ff97e8e9805278db8532148f033f4454c636258c67383a70f9d3",
+    "tests/test_native_maps.py": "fa0c952d4fa722ceb507335e1cd602e6a2aad81d46b37bc793ee2a483b27939a",
+    "tests/test_native_render.py": "55a2ed53362637cd1f378776876e07c4a48d6a009f9344bb5dafc443badf1b97",
+    "tests/test_navigation_gui.py": "be17aa13585b3d6316819bfc8ae32247c8dcc0ecc439099c8c9efeaf0fffef1d",
+    "tests/test_potential_display.py": "257a57952339758a7aa2eca71828bfc6d39b8e03089d451ad5dff8f9b0db26f3",
+    "tests/test_pqr.py": "d08b7fa3c81ded04111e7b296c0b407407b57b345a6833c56f5b929673cb5ab5",
+    "tests/test_reproduce_v02.py": "ef0f9a9cbfadac15fefdd5ff746f2bf3121481e61918ff7c4716878bc117d174",
+    "tests/test_reproduce_v03.py": "e12816b3e3e0d5143918882f6f53350417afb814d064e23fabdbdd64f11037ca",
+    "tests/test_reproduce_v04.py": "5dfb985667635300c74f7209cd8afca28d229d99ebd27adde0a5d83acd0d5a87",
+    "tests/test_structure_tools.py": "041d69b6dfc5ca320c531537850ecc931713934e6c335fa30d736861721256f3",
+    "tests/test_timeline.py": "2f22c56489e1a73f4dc2e0705486c142bb3a4e36b462bd16c5eb06bc1ea81181",
+    "tests/test_v02_cli.py": "9f5fa1aa6594a7061f19af6f04946a529dc1bc2a34548cd8cc96ff0e7c861b8d",
+    "tests/test_v02_engine.py": "a516901bd016fb313abd52adba268045042e40c324457aaa1ff3410acc09123d",
+    "tests/test_workbench.py": "c12563e6935d59795f3aeacdda049fef7ba5817cf22a79a31470b6d25bd68c67",
+    "tests/test_worker.py": "2416ebd33bbaed9271837ce319c6921257e8ffd0d8ff8daf034aa862a2e21496",
+    "tests/workbench_native.py": "5ae595be33021607565c3f7039a1be11ce5c4bae605b669135e48a8b2dbef3b8"
+  },
+  "module_sha256": {
+    "molscene/__init__.py": "c6c6b0789f4bb49ce0a7891f76e663d09aeb2e81b95a63fc1af1e2027b3fdb02",
+    "molscene/__main__.py": "084c51488a3f064a81dd863f49ce4631adc79a962ab41d859867064724a0df11",
+    "molscene/advanced.py": "9cf24a3c5a2f59d8cc35bc2312cb50daedddeabef9fd0352299284f9b8371228",
+    "molscene/advanced_snapshot.py": "e31a3a251c02ee9582520d6d3f75b684942ca1ffbbfe3fb9c4a8eb280539e23c",
+    "molscene/analysis.py": "3ea7628ecde145c6130131ad9379b96a29cd65b050a7aed592440979888fd6e9",
+    "molscene/animation.py": "ac478d33c68f40c0307513d36e4649bdeed3d2c77bf52bc95f947fd6c2d85377",
+    "molscene/artifacts.py": "3ef98648ed8c137d01bac263237d5aa0dc20dd1d03d29d55e55a3d48b7d072eb",
+    "molscene/batch.py": "fc013b9fbab078c32d9bda7b2f93898ce07ceb670d9c38f6c18d9a6646f26929",
+    "molscene/bundles.py": "a040390946692eff6209643aba43259c6125b2a999c1788ba17a163ec8d14810",
+    "molscene/cli.py": "1d8a39ce8b89248be0db049ea67e519d20ec4f6ec40a85bf09bbfb4009becf77",
+    "molscene/density.py": "5077664149e5844ee0f96c9b1cc92472606bae067d0d69528c4951ab9fb8bb9f",
+    "molscene/density_export.py": "04a74ddfa97c1bdb04a4e979be377a32f5984d61df75c92842cd5b10d3af5f4c",
+    "molscene/electrostatics.py": "bc8debe809dd853e37cf1bc52ff495568ad9bcbbbd5798c5c55d570aff585764",
+    "molscene/engine.py": "20d07628205fe365de93a5c5e43282d975f41b2cbade117e4c0d8a5befcc600b",
+    "molscene/external_tools.py": "796b321c60148aa24bee5f65f440d1cf526efbbbd69fe0363f11f3ca09f94a74",
+    "molscene/grids.py": "bee49df5b213d29f10ef8d3eebb807767df53356f86281a7f29b5c1f6aacd04b",
+    "molscene/native_maps.py": "144c1cb1ae4fa4e2a176a02f9c0db1a4974168e0282e194779fa0693f083466f",
+    "molscene/native_render.py": "575f1d1c80566411896c1a0edfb2c990575e6a151fcc524974fb4c47fef73f36",
+    "molscene/native_render_child.py": "daaf737809594d822a9f82bd742e24fa4af4717f2fa406ca658e6a23d48f8844",
+    "molscene/potential_display.py": "e43a8924e0d014d8a382ca6d88982b5042dcc33cbc32009fa6e905891a6addbb",
+    "molscene/pqr.py": "fdfb1a12c4d1cd371d2f49e7e9ccaeeff9d991e8a9b80a54270b22ec78eadf74",
+    "molscene/process_guardian.py": "b84072caa49ca8333724cd40147c52217527196baeb618341fa9f80ece9a9b19",
+    "molscene/selftest.py": "a6fadcb7ff5e0d085d0f2fcc5dc410d8e15556719515c5400da890bfd9485539",
+    "molscene/snapshot.py": "3b5c0a033a4909f01068c0b67d5331ec1019f9e4b4ed830d37b67b28b942f8ce",
+    "molscene/styles.py": "d22b6d20601d84b07c83a5fcad33452d26ab32e6e229c081d2e0a1c22ef9ca8b",
+    "molscene/timeline.py": "37374b2a3a4a33e90a7534cb6b8922cd7e6137c82fa847a3146a06d4861efd08",
+    "molscene/worker.py": "eb7d253d5166ce568670c2d851e98dd817f8d384831805a51ac815e91f1ca6f9",
+    "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
+    "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
+    "molscene/desktop/advanced_panel.py": "abae7abe2844002771715c912cc6c4c1d616c97b015a74e81f21cb9a1894b381",
+    "molscene/desktop/controller.py": "acc4a630ec0e50d0ccb26d36fccb48294c629bc4e99b6a004d1fa0c9d8279d5e",
+    "molscene/desktop/density_panel.py": "a1848f1458fbe06e9d79359d2944607e3a020617e0e060a182be003620559f19",
+    "molscene/desktop/jobs.py": "af50cb95233eeca6ba9df2dd4467963a110fd957d69fda87e4f66e5b41381e4f",
+    "molscene/desktop/navigation_panel.py": "b6c48388eeb02b0bf11b1e84e161f4bcd64ba79d2cd52685b085989dbb919572",
+    "molscene/desktop/panel.py": "a2128e35bdc79169e72f66665e120beaecf4e34af76959acbad0fef33519c8f9",
+    "molscene/desktop/potential_panel.py": "3bff4455e973749c666bd6bf777ccdea1b975f8649a5e9ff0dd64bb5f5947f12",
+    "molscene/desktop/structure.py": "4b4eaa990aae3c2e2feed34c7b617074a23342dcb15df3653f4d57168b5fd85e",
+    "molscene/desktop/timeline_panel.py": "7488d4f22e429c39f2dadece1c332c3fbffdb98d32555ddcc3e6702d2b3f98e2",
+    "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
+    "molscene/desktop/plugin/startup/__init__.py": "3c9b7e9214210642f6e93080026722d011a97b6f6a87dbc80e8d54dcd904ad61",
+    "molscene/desktop/plugin/startup/molscene_workbench.py": "f2cfbc8243185c87a792132e20b7c27acfd6757d25e6146dcc0a05d87fc89166"
+  },
+  "environment": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.18 | packaged by conda-forge | (main, Jun  4 2025, 14:42:04) [MSC v.1943 64 bit (AMD64)]",
+    "bits": 64,
+    "qt_binding": "PySide6",
+    "qt_version": "6.8.1",
+    "pillow": "12.3.0",
+    "numpy": "2.2.6",
+    "pymol_distribution": "3.2.0a0",
+    "pymol_native": "3.2.0a"
+  },
+  "source_backend": {
+    "discovered": 440,
+    "passed": 420,
+    "skipped": 20,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 1051.703,
+    "source_unchanged": true,
+    "passed_ids": [
+      "test_advanced_cli.AdvancedCliTests.test_actual_timeline_and_animation_cli_worker_share_parameters",
+      "test_advanced_cli.AdvancedCliTests.test_advanced_commands_reject_overwrite_and_expose_exact_flags",
+      "test_advanced_cli.AdvancedCliTests.test_density_matrix_and_volume_ramp_are_protected_json_files",
+      "test_advanced_cli.AdvancedCliTests.test_potential_requires_explicit_mode_inputs_and_config",
+      "test_advanced_cli.AdvancedCliTests.test_pure_request_validation_rejects_unknowns_and_bool_sizes",
+      "test_advanced_cli.AdvancedCliTests.test_real_prepared_pqr_cli_worker_scientific_parity",
+      "test_advanced_cli.AdvancedCliTests.test_timeline_validation_and_help_without_optional_backend",
+      "test_advanced_cli.AdvancedCliTests.test_tools_empty_config_is_readonly_success",
+      "test_advanced_controller.AdvancedControllerTests.test_aligned_density_copy_uses_replay_transform_and_original_members",
+      "test_advanced_controller.AdvancedControllerTests.test_bound_source_removal_is_stale_even_with_equal_owned_copy",
+      "test_advanced_controller.AdvancedControllerTests.test_density_operations_bind_explicit_map_state_and_preserve_both_sources",
+      "test_advanced_controller.AdvancedControllerTests.test_density_result_copy_preserves_source_and_bundle",
+      "test_advanced_controller.AdvancedControllerTests.test_malformed_nested_map_metadata_is_unverified",
+      "test_advanced_controller.AdvancedControllerTests.test_map_identity_checks_values_matrix_bytes_and_unassociated_map",
+      "test_advanced_controller.AdvancedControllerTests.test_map_raw_values_and_timeline_document_changes_stale_identity",
+      "test_advanced_controller.AdvancedControllerTests.test_partial_or_boolean_identity_cannot_authorize_currentness",
+      "test_advanced_controller.AdvancedControllerTests.test_partial_timeline_add_captures_view_and_updates_preserve_it",
+      "test_advanced_controller.AdvancedControllerTests.test_potential_pqr_import_job_has_no_snapshot_and_loads_owned_copy",
+      "test_advanced_controller.AdvancedControllerTests.test_potential_selected_copy_and_ramp_keep_original_all_identity",
+      "test_advanced_controller.AdvancedControllerTests.test_prepared_result_binding_rejects_operation_mode_and_input_role_changes",
+      "test_advanced_controller.AdvancedControllerTests.test_result_bundle_wrong_snapshot_cannot_reuse_private_context",
+      "test_advanced_controller.AdvancedControllerTests.test_selection_identity_binds_originals_ignores_camera_and_owned_copies",
+      "test_advanced_controller.AdvancedControllerTests.test_session_input_role_is_bound_separately_from_snapshot_id",
+      "test_advanced_controller.AdvancedControllerTests.test_set_state_preserves_native_movie_mapping",
+      "test_advanced_controller.AdvancedControllerTests.test_timeline_project_open_replaces_session_and_restores_document",
+      "test_advanced_controller.AdvancedControllerTests.test_timeline_scene_rename_updates_references_and_delete_is_guarded",
+      "test_advanced_controller.AdvancedControllerTests.test_tools_job_never_saves_snapshot",
+      "test_advanced_controller.AdvancedControllerTests.test_worker_detects_modified_private_session_before_export",
+      "test_advanced_controller.AdvancedJobsTests.test_before_commit_cancel_without_envelope_is_cancelled",
+      "test_advanced_controller.AdvancedJobsTests.test_late_cancel_retains_confirmed_success",
+      "test_advanced_controller.AdvancedJobsTests.test_slow_tools_is_async_cancellable_without_session",
+      "test_advanced_controller.AdvancedJobsTests.test_stdout_partial_line_is_bounded",
+      "test_advanced_controller.AdvancedJobsTests.test_tools_preparation_needs_no_live_backend",
+      "test_advanced_controller.PrivateIdentityShapeTests.test_malformed_nested_evidence_is_unverified_before_backend_access",
+      "test_advanced_gui.AdvancedControlTests.test_advanced_job_history_uses_explicit_request_state_and_keeps_analysis_default",
+      "test_advanced_gui.AdvancedControlTests.test_advanced_worker_lock_leaves_results_and_cancel_reachable",
+      "test_advanced_gui.AdvancedControlTests.test_density_volume_uses_explicit_transfer_ramp_and_disables_isolevel",
+      "test_advanced_gui.AdvancedControlTests.test_dock_close_stops_preview_without_needing_a_native_window",
+      "test_advanced_gui.AdvancedControlTests.test_failed_tools_worker_retains_each_diagnostic_in_tools_and_results",
+      "test_advanced_gui.AdvancedControlTests.test_fifth_tab_preserves_existing_workflows_and_exposes_named_controls",
+      "test_advanced_gui.AdvancedControlTests.test_missing_tool_config_is_an_actionable_error_without_starting_a_worker",
+      "test_advanced_gui.AdvancedControlTests.test_narrow_advanced_forms_do_not_create_hidden_horizontal_overflow",
+      "test_advanced_gui.AdvancedControlTests.test_panel_close_stops_preview_without_resetting_position",
+      "test_advanced_gui.AdvancedControlTests.test_potential_parameters_keep_units_states_and_model_assumptions_explicit",
+      "test_advanced_gui.AdvancedControlTests.test_prepared_pqr_request_does_not_require_a_hidden_live_selection",
+      "test_advanced_gui.AdvancedControlTests.test_structured_tool_status_survives_reusing_the_same_configuration",
+      "test_advanced_gui.AdvancedControlTests.test_timeline_render_defaults_scene_inheritance_and_independent_cursor",
+      "test_advanced_gui.AdvancedControlTests.test_tools_path_prefill_is_existing_only_and_parsing_is_explicit",
+      "test_advanced_gui.AdvancedNativeTests.test_native_advanced_timeline_density_potential_and_close",
+      "test_advanced_gui.AdvancedWorkflowTests.test_advanced_job_history_uses_explicit_request_state_and_keeps_analysis_default",
+      "test_advanced_gui.AdvancedWorkflowTests.test_advanced_worker_lock_leaves_results_and_cancel_reachable",
+      "test_advanced_gui.AdvancedWorkflowTests.test_capture_edit_reorder_and_remove_change_the_real_timeline",
+      "test_advanced_gui.AdvancedWorkflowTests.test_density_export_worker_and_result_loading_preserve_original",
+      "test_advanced_gui.AdvancedWorkflowTests.test_density_two_state_selection_refresh_display_registration_and_export",
+      "test_advanced_gui.AdvancedWorkflowTests.test_density_volume_uses_explicit_transfer_ramp_and_disables_isolevel",
+      "test_advanced_gui.AdvancedWorkflowTests.test_density_widget_load_display_and_registration_preserve_source",
+      "test_advanced_gui.AdvancedWorkflowTests.test_dock_close_stops_preview_without_needing_a_native_window",
+      "test_advanced_gui.AdvancedWorkflowTests.test_epoch_change_and_failed_seek_stop_preview_before_further_mutation",
+      "test_advanced_gui.AdvancedWorkflowTests.test_failed_tools_worker_retains_each_diagnostic_in_tools_and_results",
+      "test_advanced_gui.AdvancedWorkflowTests.test_fifth_tab_preserves_existing_workflows_and_exposes_named_controls",
+      "test_advanced_gui.AdvancedWorkflowTests.test_import_potential_dispatch_preserves_explicit_state_and_needs_no_tools",
+      "test_advanced_gui.AdvancedWorkflowTests.test_load_json_uses_controller_validation_before_replacing_timeline",
+      "test_advanced_gui.AdvancedWorkflowTests.test_missing_tool_config_is_an_actionable_error_without_starting_a_worker",
+      "test_advanced_gui.AdvancedWorkflowTests.test_narrow_advanced_forms_do_not_create_hidden_horizontal_overflow",
+      "test_advanced_gui.AdvancedWorkflowTests.test_panel_close_stops_preview_without_resetting_position",
+      "test_advanced_gui.AdvancedWorkflowTests.test_potential_parameters_keep_units_states_and_model_assumptions_explicit",
+      "test_advanced_gui.AdvancedWorkflowTests.test_potential_worker_loads_owned_copy_and_stale_source_blocks_ramp",
+      "test_advanced_gui.AdvancedWorkflowTests.test_prepared_pqr_request_does_not_require_a_hidden_live_selection",
+      "test_advanced_gui.AdvancedWorkflowTests.test_preview_tick_does_not_rebuild_or_hash_the_entire_live_inventory",
+      "test_advanced_gui.AdvancedWorkflowTests.test_preview_uses_elapsed_clock_and_stops_at_last_frame_without_movie_changes",
+      "test_advanced_gui.AdvancedWorkflowTests.test_project_open_validates_bundle_then_replaces_session_and_stops_timer",
+      "test_advanced_gui.AdvancedWorkflowTests.test_structured_tool_status_survives_reusing_the_same_configuration",
+      "test_advanced_gui.AdvancedWorkflowTests.test_timeline_project_and_animation_dispatch_use_the_document_and_output",
+      "test_advanced_gui.AdvancedWorkflowTests.test_timeline_render_defaults_scene_inheritance_and_independent_cursor",
+      "test_advanced_gui.AdvancedWorkflowTests.test_tools_path_prefill_is_existing_only_and_parsing_is_explicit",
+      "test_advanced_worker.AdvancedWorkerTests.test_advanced_source_and_envelope_collisions_never_write_source",
+      "test_advanced_worker.AdvancedWorkerTests.test_failed_managed_solver_envelope_keeps_retained_evidence",
+      "test_advanced_worker.AdvancedWorkerTests.test_invalid_advanced_parameters_report_error_envelope",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_cancel_marker_cannot_collide_with_envelope",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_failure_retains_each_status_and_nonzero",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_without_session_has_compatible_envelope_and_progress",
+      "test_advanced_worker.AdvancedWorkerTests.test_worker_refuses_changed_private_input_copy",
+      "test_analysis.AnalysisTests.test_all_scientific_operations_use_requested_state_and_reject_fallback",
+      "test_analysis.AnalysisTests.test_contacts_match_brute_force_with_overlap_boundary_and_object_identity",
+      "test_analysis.AnalysisTests.test_coordinate_sequences_preserve_segi_blank_chain_insertion_alt_and_unknown",
+      "test_analysis.AnalysisTests.test_explicit_state_changes_geometry_and_rejects_singleton_fallback",
+      "test_analysis.AnalysisTests.test_geometry_distance_angle_and_signed_dihedral",
+      "test_analysis.AnalysisTests.test_geometry_rejects_invalid_selection_duplicate_points_and_collinearity",
+      "test_analysis.AnalysisTests.test_real_hsg_ligand_contacts_oracle_and_context_sasa",
+      "test_analysis.AnalysisTests.test_real_ubiquitin_pdb_cif_inspection_sasa_and_contacts_parity",
+      "test_analysis.AnalysisTests.test_sasa_default_context_excludes_other_objects_solvent_hydrogen_and_alt_b",
+      "test_analysis.AnalysisTests.test_sasa_single_sphere_merged_occlusion_subset_and_nonmutation",
+      "test_analysis.AnalysisTests.test_spatial_membership_is_evaluated_only_in_requested_state",
+      "test_analysis.AnalysisTests.test_spatial_resolution_cleanup_preserves_named_selections_and_view",
+      "test_animation.AnimationEncoderTests.test_cancellation_at_encode_boundary_never_publishes",
+      "test_animation.AnimationEncoderTests.test_missing_libx264_fails_before_render",
+      "test_animation.AnimationEncoderTests.test_real_h264_frame_count_and_duration",
+      "test_animation.AnimationEncoderTests.test_zero_byte_and_failing_video_never_publish_and_retain_logs",
+      "test_animation.AnimationReplayTests.test_cancellation_between_frames_and_before_commit_publishes_nothing",
+      "test_animation.AnimationReplayTests.test_mp4_preconditions_and_invalid_render_fail_without_output",
+      "test_animation.AnimationReplayTests.test_png_exact_inventory_dimensions_decoded_changes_progress",
+      "test_animation.AnimationReplayTests.test_project_closed_inventory_hashes_and_immutable_sources",
+      "test_animation.AnimationReplayTests.test_relocated_timeline_replay_without_molscene",
+      "test_batch.BatchErrorPrivacyTests.test_backend_path_errors_are_sanitized_in_summaries_and_callbacks_and_stay_failed",
+      "test_batch.BatchErrorPrivacyTests.test_unc_and_device_error_paths_keep_basename_without_absolute_location",
+      "test_batch.BatchRenderTests.test_cancel_after_first_completed_retains_pending_for_reopened_ui",
+      "test_batch.BatchRenderTests.test_failed_overwrite_preserves_previous_item_artifacts",
+      "test_batch.BatchRenderTests.test_same_stems_get_distinct_output_directories",
+      "test_batch.BatchRenderTests.test_sorted_success_failure_and_persisted_callback_snapshot",
+      "test_batch.BatchSafetyTests.test_cancel_before_first_item_persists_pending_and_not_passed",
+      "test_batch.BatchSafetyTests.test_nonempty_output_and_empty_input_rejected_before_summaries",
+      "test_batch.BatchSafetyTests.test_nonsharing_publish_error_propagates_without_retry_or_clobber",
+      "test_batch.BatchSafetyTests.test_persistent_progress_reader_fails_within_bound_and_preserves_previous_json",
+      "test_batch.BatchSafetyTests.test_progress_publish_survives_a_real_transient_reader",
+      "test_batch.BatchSafetyTests.test_progress_retry_rechecks_changed_destination_type",
+      "test_batch.BatchSafetyTests.test_rejects_both_ancestry_directions_without_mutation",
+      "test_bundles.BundleTests.test_bounded_failure_logs_do_not_copy_scientific_inputs",
+      "test_bundles.BundleTests.test_cancellation_after_manifest_prevents_commit",
+      "test_bundles.BundleTests.test_cancellation_before_commit_retains_only_registered_logs",
+      "test_bundles.BundleTests.test_copied_source_change_before_publish_is_rejected",
+      "test_bundles.BundleTests.test_destination_created_between_check_and_rename_is_not_replaced",
+      "test_bundles.BundleTests.test_empty_race_created_destination_is_not_replaced",
+      "test_bundles.BundleTests.test_existing_destination_becomes_nonempty_before_removal",
+      "test_bundles.BundleTests.test_failure_log_path_must_be_owned",
+      "test_bundles.BundleTests.test_failure_metadata_write_error_does_not_mask_operation_error",
+      "test_bundles.BundleTests.test_input_copy_does_not_write_a_replaced_leaf",
+      "test_bundles.BundleTests.test_invalid_inventory_paths_and_aliases",
+      "test_bundles.BundleTests.test_log_copy_failure_preserves_original_error_and_failure_metadata",
+      "test_bundles.BundleTests.test_log_roles_reject_case_aliases_and_windows_devices",
+      "test_bundles.BundleTests.test_missing_extra_and_undeclared_frame_fail",
+      "test_bundles.BundleTests.test_post_manifest_payload_change_or_extra_entry_prevents_publish",
+      "test_bundles.BundleTests.test_protected_ancestry_and_nonempty_destination",
+      "test_bundles.BundleTests.test_publish_exact_inventory_hashes_and_empty_log",
+      "test_bundles.BundleTests.test_published_logs_must_respect_bound",
+      "test_bundles.BundleTests.test_readonly_scratch_is_cleaned_before_success",
+      "test_bundles.BundleTests.test_replaced_owned_directory_is_preserved_by_cleanup",
+      "test_bundles.BundleTests.test_scientific_copies_cannot_be_registered_as_failure_logs",
+      "test_bundles.BundleTests.test_scratch_cleanup_failure_never_commits",
+      "test_bundles.BundleTests.test_scratch_log_survives_late_publication_failure",
+      "test_bundles.BundleTests.test_source_change_during_copy_fails_without_publishing",
+      "test_ci_status.CIStatusTests.test_noisy_success_skip_failure_missing_and_spoofed_ok",
+      "test_cli.CliTests.test_failed_selftest_returns_one_and_names_failure",
+      "test_cli.CliTests.test_help_and_version_without_pymol",
+      "test_cli.CliTests.test_measure_and_align_print_scientific_values",
+      "test_cli.CliTests.test_output_messages_expand_quoted_home_paths",
+      "test_cli.CliTests.test_real_validation_failure_is_actionable_without_success",
+      "test_cli.CliTests.test_render_dispatch_preserves_options",
+      "test_cli.CliTests.test_required_inputs_and_selections_return_usage_error",
+      "test_cli.CliTests.test_runtime_failure_has_exit_one",
+      "test_cli.CliTests.test_successful_selftest_and_doctor",
+      "test_density.DensityTests.test_import_does_not_load_optional_backend",
+      "test_density.DensityTests.test_json_numeric_contract_rejects_tuple_matrix_and_huge_integers",
+      "test_density.DensityTests.test_request_defaults_and_exact_types",
+      "test_density.DensityTests.test_volume_ramp_and_registration_are_separate_typed_contracts",
+      "test_density_engine.DensityEngineTests.test_aligned_copy_verifies_every_atom_and_preserves_originals",
+      "test_density_engine.DensityEngineTests.test_all_six_axes_raw_values_and_oblique_physical_points",
+      "test_density_engine.DensityEngineTests.test_associated_existing_display_exports_new_owned_display_and_replays",
+      "test_density_engine.DensityEngineTests.test_associated_export_retains_unrelated_colliding_object",
+      "test_density_engine.DensityEngineTests.test_associated_state_export_preserves_current_transform_and_source",
+      "test_density_engine.DensityEngineTests.test_backend_precision_zero_maps_and_nonrepresentable_values",
+      "test_density_engine.DensityEngineTests.test_cancellation_after_render_never_publishes",
+      "test_density_engine.DensityEngineTests.test_display_failure_and_invalid_input_leave_only_originals",
+      "test_density_engine.DensityEngineTests.test_displays_of_distinct_source_states_do_not_overwrite_each_other",
+      "test_density_engine.DensityEngineTests.test_explicit_display_name_still_rejects_unowned_objects",
+      "test_density_engine.DensityEngineTests.test_explicit_state_owned_displays_and_unverified_inventory",
+      "test_density_engine.DensityEngineTests.test_export_invalid_or_cancelled_leaves_no_completed_bundle",
+      "test_density_engine.DensityEngineTests.test_failed_registration_cleans_owned_copies_only",
+      "test_density_engine.DensityEngineTests.test_gaussian_positive_negative_contours_converge",
+      "test_density_engine.DensityEngineTests.test_load_failure_restores_normalizer_and_only_owned_names",
+      "test_density_engine.DensityEngineTests.test_matrix_mode_two_alignment_rejected_in_isolated_process",
+      "test_density_engine.DensityEngineTests.test_native_cell_metadata_change_is_stale_even_with_retained_corners",
+      "test_density_engine.DensityEngineTests.test_registered_density_relocated_replay",
+      "test_density_engine.DensityEngineTests.test_registered_origin_map_world_composition",
+      "test_density_engine.DensityEngineTests.test_registered_state_two_becomes_single_state_one",
+      "test_density_engine.DensityEngineTests.test_registration_preflight_rejects_stale_ttt_movie_collision",
+      "test_density_engine.DensityEngineTests.test_replay_matches_saved_contour_geometry_and_aligned_copy",
+      "test_density_engine.DensityEngineTests.test_same_values_changed_native_origin_invalidate_association_and_fingerprint",
+      "test_density_engine.DensityEngineTests.test_transformed_model_mode_one_replay_in_isolated_process",
+      "test_density_engine.DensityEngineTests.test_unknown_schema_is_display_only_and_volume_has_explicit_ramp",
+      "test_density_engine.DensityEngineTests.test_wide_dx_export_relocated_standalone_replay_preserves_values",
+      "test_density_engine.DensityEngineTests.test_wide_dx_writer_values_load_exactly_without_changing_source",
+      "test_desktop.ControllerTests.test_background_thread_cannot_mutate_live_objects",
+      "test_desktop.ControllerTests.test_capture_all_omits_absent_state_objects_but_direct_selection_fails",
+      "test_desktop.ControllerTests.test_capture_spatial_membership_uses_requested_state_and_preserves_view",
+      "test_desktop.ControllerTests.test_discrete_capture_identity_and_named_members_match_same_state_atoms",
+      "test_desktop.ControllerTests.test_live_state_and_appearance_validation_preserve_other_objects",
+      "test_desktop.ControllerTests.test_load_unique_names_scene_and_session_preserve_view",
+      "test_desktop.ControllerTests.test_object_actions_are_explicit_and_refresh_native_changes",
+      "test_desktop.ControllerTests.test_selection_capture_rejects_empty_invalid_and_multi_atom",
+      "test_desktop.DesktopDependencyTests.test_import_is_lazy_and_missing_gui_has_actionable_diagnostic",
+      "test_desktop.DesktopDependencyTests.test_without_site_packages_import_stays_lazy_and_gui_reports_dependency",
+      "test_desktop.NativeDesktopTests.test_native_clean_preferences_startup_and_shutdown",
+      "test_desktop.NativeDesktopTests.test_native_startup_events_framebuffer_and_shutdown",
+      "test_electrostatics.ElectrostaticsTests.test_all_zero_molecule_import_fails_before_objects_or_publication",
+      "test_electrostatics.ElectrostaticsTests.test_architecture_and_memory_preflight_never_silently_coarsens",
+      "test_electrostatics.ElectrostaticsTests.test_cancelled_export_never_publishes_and_preserves_inputs",
+      "test_electrostatics.ElectrostaticsTests.test_exact_si_unit_conversion_and_unknown",
+      "test_electrostatics.ElectrostaticsTests.test_existing_molecule_import_replay_preserves_exact_state_coordinates_and_vdw",
+      "test_electrostatics.ElectrostaticsTests.test_fixed_solver_input_and_coverage_padding",
+      "test_electrostatics.ElectrostaticsTests.test_import_and_standalone_replay_accept_connections_after_data",
+      "test_electrostatics.ElectrostaticsTests.test_import_retains_original_and_converts_display_only",
+      "test_electrostatics.ElectrostaticsTests.test_missing_solver_output_and_nonzero_failure_retain_logs",
+      "test_electrostatics.ElectrostaticsTests.test_request_strict_defaults_independence_and_temperature",
+      "test_electrostatics.ElectrostaticsTests.test_wrong_solver_geometry_and_convergence_diagnostics_fail_closed",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_born_dielectric_boundary",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_uniform_sign_dielectric_translation_convergence",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_pdb2pqr_ubiquitin_surface_and_replay",
+      "test_engine.SceneTests.test_align_same_named_inputs_and_compound_selection",
+      "test_engine.SceneTests.test_cartoon_trace_is_scoped_to_ca_only_protein",
+      "test_engine.SceneTests.test_full_atom_ubiquitin_cartoon_does_not_trace_sidechains",
+      "test_engine.SceneTests.test_measure_and_failed_overwrite_preserves_previous_outputs",
+      "test_engine.SceneTests.test_missing_and_unsupported_inputs",
+      "test_engine.SceneTests.test_nonfinite_radius_and_dimensions_are_rejected_before_runtime",
+      "test_engine.SceneTests.test_nonprotein_render_is_rejected_without_committing_artifacts",
+      "test_engine.SceneTests.test_occupied_output_and_input_collision_are_rejected",
+      "test_engine.SceneTests.test_output_parent_file_is_a_clear_validation_error",
+      "test_engine.SceneTests.test_real_pdb_and_cif_counts",
+      "test_engine.SceneTests.test_real_pocket_neighborhood_and_representations",
+      "test_engine.SceneTests.test_render_and_relocated_literal_replay",
+      "test_engine.ValidationTests.test_missing_and_unsupported_inputs",
+      "test_engine.ValidationTests.test_nonfinite_radius_and_dimensions_are_rejected_before_runtime",
+      "test_engine.ValidationTests.test_occupied_output_and_input_collision_are_rejected",
+      "test_engine.ValidationTests.test_output_parent_file_is_a_clear_validation_error",
+      "test_external_tools.ExternalToolsTests.test_apbs_version_exit_13_is_probe_only",
+      "test_external_tools.ExternalToolsTests.test_argv_paths_and_child_environment",
+      "test_external_tools.ExternalToolsTests.test_cancellation_before_launch_creates_no_logs",
+      "test_external_tools.ExternalToolsTests.test_cancellation_during_run_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_failed_run_probe_retains_registered_logs",
+      "test_external_tools.ExternalToolsTests.test_forced_guardian_death_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_forced_worker_death_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_invalid_config_rejected_before_spawn",
+      "test_external_tools.ExternalToolsTests.test_load_tools_rejects_unknown_keys_duplicates_and_boolean_version",
+      "test_external_tools.ExternalToolsTests.test_manifest_uses_actual_probe_identity",
+      "test_external_tools.ExternalToolsTests.test_missing_output_is_visible_for_caller_validation",
+      "test_external_tools.ExternalToolsTests.test_nonzero_exit_retains_diagnostics",
+      "test_external_tools.ExternalToolsTests.test_pdb2pqr_rejects_real_interpreter_older_than_311",
+      "test_external_tools.ExternalToolsTests.test_probe_forwards_cancellation_at_launch_boundary",
+      "test_external_tools.ExternalToolsTests.test_ready_guardian_and_launcher_death_preserves_error_and_cleanup",
+      "test_external_tools.ExternalToolsTests.test_reject_string_args_and_architecture_mismatch",
+      "test_external_tools.ExternalToolsTests.test_stdout_stderr_flood_is_bounded_and_fails",
+      "test_external_tools.ExternalToolsTests.test_successful_parent_exit_still_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_timeout_reaps_child_and_grandchild",
+      "test_external_tools.ExternalToolsTests.test_truncated_executable_headers_raise_value_error",
+      "test_external_tools.ExternalToolsTests.test_version_missing_or_false_rejected",
+      "test_external_tools.RealToolProbeTests.test_configured_real_tool_identities",
+      "test_grids.GridTests.test_byte_bound_precedes_parser_and_statistics_remain_finite",
+      "test_grids.GridTests.test_dx_asymmetric_world_and_order",
+      "test_grids.GridTests.test_dx_rejects_unsupported_and_malformed_before_use",
+      "test_grids.GridTests.test_mrc_all_permutations_partial_oblique",
+      "test_grids.GridTests.test_mrc_origin_only_auto_and_source_provenance",
+      "test_grids.GridTests.test_mrc_origin_requires_explicit_resolution_when_starts_present",
+      "test_grids.GridTests.test_mrc_rejects_headers_and_payload",
+      "test_grids.GridTests.test_rigid_and_general_affine_composition",
+      "test_integration.OfflineIntegrationTests.test_explicit_checks_survive_optimized_python",
+      "test_integration.OfflineIntegrationTests.test_missing_runtime_is_recorded_as_failed_json",
+      "test_integration.OfflineIntegrationTests.test_nonempty_directory_requires_explicit_overwrite",
+      "test_integration.OfflineIntegrationTests.test_offline_checks_record_geometry_scene_session_image_and_portable_replay",
+      "test_integration.OfflineIntegrationTests.test_replay_printed_errors_fail_even_when_scene_state_is_correct",
+      "test_integration.SelftestValidationTests.test_explicit_checks_survive_optimized_python",
+      "test_integration.SelftestValidationTests.test_missing_runtime_is_recorded_as_failed_json",
+      "test_integration.SelftestValidationTests.test_nonempty_directory_requires_explicit_overwrite",
+      "test_interface.InterfaceTests.test_discrete_state_membership_retains_correct_original_residue",
+      "test_interface.InterfaceTests.test_equal_spheres_analytic_area_and_half_sum",
+      "test_interface.InterfaceTests.test_exact_union_excludes_same_object_and_other_object_outsiders",
+      "test_interface.InterfaceTests.test_filtering_and_counts_ignore_shared_excluded_atoms",
+      "test_interface.InterfaceTests.test_partner_swap_and_complete_residue_sums_preserve_original_identity",
+      "test_interface.InterfaceTests.test_primary_alternate_filter_is_case_sensitive_like_existing_sasa",
+      "test_interface.InterfaceTests.test_rejects_overlap_empty_filtered_partners_and_invalid_parameters",
+      "test_interface.InterfaceTests.test_requested_state_spatial_membership_and_no_singleton_fallback",
+      "test_interface.InterfaceTests.test_sasa_preserves_selection_visibility_and_auto_hide_setting",
+      "test_interface.InterfaceTests.test_separated_spheres_keep_zero_loss_residue_rows",
+      "test_interface.InterfaceTests.test_signed_backend_difference_is_not_clamped",
+      "test_interface.InterfaceTests.test_source_view_settings_and_selection_preserved_on_success_and_failure",
+      "test_interface.InterfaceTests.test_split_same_residue_keeps_two_partner_rows",
+      "test_interface_engine.InterfaceCliTests.test_dispatch_preserves_state_altloc_and_presents_area_definition",
+      "test_interface_engine.InterfaceCliTests.test_help_and_imports_work_without_backend_or_qt",
+      "test_interface_engine.InterfaceEngineTests.test_all_alternates_requested_state_and_figures_agree",
+      "test_interface_engine.InterfaceEngineTests.test_complete_artifacts_csv_raw_areas_and_exact_nonprotein_replay",
+      "test_interface_engine.InterfaceEngineTests.test_controller_preflight_rejects_boolean_request_state_before_snapshot",
+      "test_interface_engine.InterfaceEngineTests.test_isolated_and_disconnected_cartoon_guides_remain_visible",
+      "test_interface_engine.InterfaceEngineTests.test_owned_interface_table_replacement_and_unrelated_file_retained",
+      "test_interface_engine.InterfaceEngineTests.test_protein_partners_without_cartoon_guides_are_visible",
+      "test_interface_engine.InterfaceEngineTests.test_real_1hsg_dimer_cli_complete_table_and_colored_protein_replay",
+      "test_interface_engine.InterfaceEngineTests.test_requested_state_spatial_membership_and_no_singleton_fallback",
+      "test_interface_engine.InterfaceEngineTests.test_signed_analysis_fields_are_not_clamped_in_report_or_csv",
+      "test_interface_engine.InterfaceEngineTests.test_snapshot_worker_provenance_staleness_and_preflight",
+      "test_interface_engine.InterfaceEngineTests.test_staged_commit_rechecks_interface_table_destination_before_replacement",
+      "test_interface_engine.InterfaceEngineTests.test_validation_collisions_and_failed_overwrite_leave_sources_intact",
+      "test_interface_engine.InterfaceEngineTests.test_worker_rejects_bad_parameters_and_result_source_collisions",
+      "test_native_maps.NativeMapTests.test_canonical_text_round_trips_native_precision_without_changing_source",
+      "test_native_maps.NativeMapTests.test_overflow_rejected_before_backend",
+      "test_native_maps.NativeMapTests.test_public_load_and_standalone_replay_verify_full_field_geometry_and_source_hash",
+      "test_native_maps.NativeMapTests.test_standalone_parser_matches_complete_scientific_dx_document",
+      "test_native_render.FigureRenderRoutingTests.test_figure_native_bounds_are_actionable_and_cpu_dimensions_remain_legacy",
+      "test_native_render.FigureRenderRoutingTests.test_figure_native_failure_and_cancellation_retain_only_reachable_bounded_diagnostics",
+      "test_native_render.FigureRenderRoutingTests.test_figure_routes_native_and_preserves_final_session_replay_and_analysis",
+      "test_native_render.NativeRenderProtocolTests.test_backend_considers_disabled_volume_when_timeline_can_enable_it",
+      "test_native_render.NativeRenderProtocolTests.test_json_rejects_duplicates_nonfinite_and_oversized_data",
+      "test_native_render.NativeRenderProtocolTests.test_native_evidence_directory_prefers_override_and_creates_standard_fallback",
+      "test_native_render.NativeRenderProtocolTests.test_nonzero_managed_exit_rejects_even_valid_image_result",
+      "test_native_render.NativeRenderProtocolTests.test_parent_accepts_flat_valid_image_and_rejects_corrupt_identity_or_pixels",
+      "test_native_render.NativeRenderProtocolTests.test_parent_rejects_missing_partial_or_mismatched_result",
+      "test_native_render.NativeRenderProtocolTests.test_png_rejects_partial_crc_and_trailing_data",
+      "test_native_render.NativeRenderProtocolTests.test_process_metadata_distinguishes_renderer_parent_and_guardian",
+      "test_native_render.NativeRenderProtocolTests.test_progress_update_survives_a_concurrent_windows_reader",
+      "test_native_render.NativeRenderProtocolTests.test_request_bounds_paths_and_independent_copy",
+      "test_native_render.NativeRenderTests.test_native_volume_frames_and_cancel_cleanup",
+      "test_navigation_gui.NativeNavigationTests.test_native_navigation_presets_and_interface_workflow",
+      "test_navigation_gui.NavigationQtTests.test_exact_navigation_handoff_presets_and_full_result_filter",
+      "test_navigation_gui.NavigationQtTests.test_open_session_replaces_same_count_residue_cache",
+      "test_potential_display.PotentialDisplayTests.test_all_zero_selected_radii_rejected_before_creating_owned_objects",
+      "test_potential_display.PotentialDisplayTests.test_existing_molecule_uses_explicit_state_and_preserves_vdw_settings",
+      "test_potential_display.PotentialDisplayTests.test_finite_float64_that_overflows_native_map_is_rejected",
+      "test_potential_display.PotentialDisplayTests.test_insufficient_surface_coverage_fails_without_owned_leaks",
+      "test_potential_display.PotentialDisplayTests.test_long_precision_dx_values_are_not_silently_misparsed_by_native_loader",
+      "test_potential_display.PotentialDisplayTests.test_mixed_zero_and_positive_selected_radii_are_preserved",
+      "test_potential_display.PotentialDisplayTests.test_native_asymmetric_values_preserve_axes_and_field",
+      "test_potential_display.PotentialDisplayTests.test_pqr_radii_remain_attached_to_identity_when_atoms_are_unsorted",
+      "test_potential_display.PotentialDisplayTests.test_pqr_radius_fixed_ramp_legend_and_owned_update",
+      "test_pqr.PQRTests.test_ambiguous_hetero_element_is_not_guessed",
+      "test_pqr.PQRTests.test_assignment_only_cannot_drop_original_hydrogens",
+      "test_pqr.PQRTests.test_dropped_ligand_or_protein_heavy_atom_fails",
+      "test_pqr.PQRTests.test_invalid_numeric_duplicate_empty_and_heavy_radius",
+      "test_pqr.PQRTests.test_optional_chain_zero_net_and_charged_zero_radius_h",
+      "test_pqr.PQRTests.test_preparation_preserves_heavy_identity_coordinates_and_reports_changes",
+      "test_reproduce_v02.GalleryInventoryTests.test_batch_cannot_redirect_item_report_into_unowned_descendant",
+      "test_reproduce_v02.GalleryInventoryTests.test_reported_unowned_or_escaping_paths_are_rejected",
+      "test_reproduce_v02.GalleryInventoryTests.test_unrelated_nested_file_is_unchanged_and_not_in_manifest",
+      "test_reproduce_v03.GalleryV03Tests.test_complete_manifest_lf_hashes_and_unrelated_same_name_sentinels",
+      "test_reproduce_v03.GalleryV03Tests.test_deterministic_numeric_contract_rejects_inconsistent_or_nonfinite_data",
+      "test_reproduce_v03.GalleryV03Tests.test_directory_in_owned_file_slot_is_rejected_before_backend_runs",
+      "test_reproduce_v03.GalleryV03Tests.test_existing_owned_file_requires_overwrite_before_backend_runs",
+      "test_reproduce_v03.GalleryV03Tests.test_report_cannot_extend_inventory_or_redirect_inputs",
+      "test_reproduce_v03.GalleryV03Tests.test_signed_surface_difference_is_preserved",
+      "test_reproduce_v04.ReproduceV04Tests.test_bundle_audit_rejects_missing_unexpected_and_changed_payloads",
+      "test_reproduce_v04.ReproduceV04Tests.test_bundle_audit_rejects_unlisted_empty_directory",
+      "test_reproduce_v04.ReproduceV04Tests.test_default_requires_explicit_tools_without_creating_output",
+      "test_reproduce_v04.ReproduceV04Tests.test_direct_script_checks_required_tools_outside_checkout_without_backend",
+      "test_reproduce_v04.ReproduceV04Tests.test_help_does_not_require_backend_or_tools",
+      "test_reproduce_v04.ReproduceV04Tests.test_occupied_output_is_preserved_before_backend_launch",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_preserves_scientific_input_bytes_and_validates_as_bundle",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_redacts_discovered_runtime_paths_and_preserves_selections",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_refuses_private_paths_in_immutable_scientific_inputs",
+      "test_reproduce_v04.ReproduceV04Tests.test_public_coordinate_falls_back_to_installed_data_and_checks_pinned_bytes",
+      "test_reproduce_v04.ReproduceV04Tests.test_public_projection_preserves_original_and_rebuilds_hashes",
+      "test_reproduce_v04.ReproduceV04Tests.test_real_cli_gallery_inventory_provenance_and_original_preservation",
+      "test_structure_tools.StructureToolsTests.test_adversarial_identifiers_order_altloc_state_and_stale_rows",
+      "test_structure_tools.StructureToolsTests.test_clean_all_alternates_and_deuterium_tritium_filter",
+      "test_structure_tools.StructureToolsTests.test_clean_copy_exact_subset_preserves_source_all_states_properties_bonds",
+      "test_structure_tools.StructureToolsTests.test_clean_validation_empty_and_backend_failure_cleanup",
+      "test_structure_tools.StructureToolsTests.test_coordinate_order_partial_residues_discrete_states_and_atomic_rejection",
+      "test_structure_tools.StructureToolsTests.test_focus_and_hide_context_preserve_source_and_unselected_display",
+      "test_structure_tools.StructureToolsTests.test_named_selections_names_collisions_delete_and_session",
+      "test_structure_tools.StructureToolsTests.test_navigation_workflows_reject_background_thread_before_backend_calls",
+      "test_structure_tools.StructureToolsTests.test_observed_ubiquitin_and_exact_capture_summary",
+      "test_structure_tools.StructureToolsTests.test_overview_renders_sparse_guides_and_unbonded_atoms_at_requested_state",
+      "test_structure_tools.StructureToolsTests.test_overview_surface_are_scoped_and_validate_before_mutation",
+      "test_structure_tools.StructureToolsTests.test_pocket_matches_independent_requested_state_distance_oracle",
+      "test_structure_tools.StructureToolsTests.test_preset_marker_scale_is_atom_scoped_and_preserves_unselected_styles",
+      "test_structure_tools.StructureToolsTests.test_read_display_and_copy_preserve_existing_selection_visibility",
+      "test_structure_tools.StructureToolsTests.test_scene_update_rename_preserves_other_scenes_and_reopen",
+      "test_structure_tools.StructureToolsTests.test_selection_backend_failure_removes_partial_without_touching_existing",
+      "test_timeline.TimelineNativeTests.test_random_seek_display_states_movie_and_fingerprints",
+      "test_timeline.TimelineTests.test_analytic_slerp_exact_endpoints_shortest_arc_and_hold",
+      "test_timeline.TimelineTests.test_edits_recompute_duration_and_leave_original_untouched",
+      "test_timeline.TimelineTests.test_finite_camera_translation_does_not_overflow_interpolation",
+      "test_timeline.TimelineTests.test_hold_allows_projection_cut_and_scene_reference_rename",
+      "test_timeline.TimelineTests.test_rejects_invalid_documents_without_mutating_input",
+      "test_timeline.TimelineTests.test_scene_and_state_cut_only_at_keyframe",
+      "test_v02_cli.V02CliTests.test_batch_dispatch_and_unsuccessful_result_exit_one",
+      "test_v02_cli.V02CliTests.test_contacts_sasa_inspect_typed_dispatch_and_summaries",
+      "test_v02_cli.V02CliTests.test_geometry_dispatches_selections_dimensions_and_state",
+      "test_v02_cli.V02CliTests.test_gui_lazy_launch_and_missing_dependency_error",
+      "test_v02_cli.V02CliTests.test_new_help_works_without_site_packages_and_gui_import",
+      "test_v02_cli.V02CliTests.test_new_usage_errors_and_dependency_errors_keep_exit_contract",
+      "test_v02_cli.V02CliTests.test_render_and_alignment_new_options_preserve_types",
+      "test_v02_cli.V02CliTests.test_unsupported_cealign_is_a_usage_error_and_absent_from_help",
+      "test_v02_cli.V02CliTests.test_unsupported_representation_and_coloring_are_usage_errors",
+      "test_v02_engine.V02EngineTests.test_alignment_super_explicit_states_survive_replay_and_invalid_state_preserves_output",
+      "test_v02_engine.V02EngineTests.test_all_representations_bind_spatial_membership_and_replay_colors",
+      "test_v02_engine.V02EngineTests.test_contacts_export_all_pairs_but_draw_at_most_200_and_accept_zero",
+      "test_v02_engine.V02EngineTests.test_contacts_sasa_inspect_complete_portable_tables",
+      "test_v02_engine.V02EngineTests.test_explicit_render_nonprotein_and_unrenderable_selection",
+      "test_v02_engine.V02EngineTests.test_export_preserves_view_names_and_labels_old_snapshot_records",
+      "test_v02_engine.V02EngineTests.test_generic_render_styling_portable_replay_and_transparent_alpha",
+      "test_v02_engine.V02EngineTests.test_geometry_report_annotation_session_and_replay_use_requested_state",
+      "test_v02_engine.V02EngineTests.test_nonprotein_analysis_figures_show_molecules_in_png_session_and_replay",
+      "test_v02_engine.V02EngineTests.test_owned_csv_wrong_type_rejected_without_replacing_old_report",
+      "test_v02_engine.V02EngineTests.test_polymer_without_guide_atoms_is_rejected_by_explicit_cartoon",
+      "test_v02_engine.V02EngineTests.test_real_cli_alignment_super_states_and_batch",
+      "test_v02_engine.V02EngineTests.test_real_new_cli_workflows",
+      "test_v02_engine.V02EngineTests.test_semantic_fingerprint_ignores_camera_and_changes_with_source_coordinates",
+      "test_workbench.QtWorkbenchTests.test_native_fixtures_exports_and_cooperative_window_close",
+      "test_workbench.QtWorkbenchTests.test_qt_controls_and_process_failure_cancel_recovery",
+      "test_workbench.QtWorkbenchTests.test_repeated_export_history_is_bounded_and_preserves_science",
+      "test_workbench.WorkbenchControllerTests.test_alignment_tracks_both_states_in_live_and_exported_records",
+      "test_workbench.WorkbenchControllerTests.test_alignment_transforms_live_mobile_and_has_explicit_states",
+      "test_workbench.WorkbenchControllerTests.test_batch_input_requires_existing_directory_before_creating_job",
+      "test_workbench.WorkbenchControllerTests.test_contact_annotations_are_capped_but_csv_retains_every_pair",
+      "test_workbench.WorkbenchControllerTests.test_inspection_has_full_rows_and_safe_csv_fasta_exports",
+      "test_workbench.WorkbenchControllerTests.test_job_snapshot_is_immutable_and_explicit_result_path",
+      "test_workbench.WorkbenchControllerTests.test_labels_resolve_spatial_selection_in_requested_state",
+      "test_workbench.WorkbenchControllerTests.test_legacy_mixed_state_alignment_cannot_verify_missing_target_provenance",
+      "test_workbench.WorkbenchControllerTests.test_live_geometry_records_requested_state_and_actual_annotation",
+      "test_workbench.WorkbenchControllerTests.test_relative_batch_input_survives_worker_directory_change",
+      "test_workbench.WorkbenchControllerTests.test_result_fingerprint_excludes_camera_and_rejects_changed_coordinates_or_state",
+      "test_workbench.WorkbenchControllerTests.test_sasa_retains_request_selections_alongside_scientific_parameters",
+      "test_worker.WorkerTests.test_batch_cancel_file_preserves_pending_and_atomic_progress",
+      "test_worker.WorkerTests.test_batch_cancel_marker_cannot_alias_job_session_result_or_output",
+      "test_worker.WorkerTests.test_batch_rejects_direct_and_nested_source_markers_before_output_mutation",
+      "test_worker.WorkerTests.test_contacts_sasa_inspect_worker_dispatch_and_default_export_envelope",
+      "test_worker.WorkerTests.test_distinct_science_output_and_envelope_and_snapshot_identity",
+      "test_worker.WorkerTests.test_error_written_atomically_and_nonzero",
+      "test_worker.WorkerTests.test_existing_result_job_and_snapshot_collisions_never_clobber_sources",
+      "test_worker.WorkerTests.test_export_uses_separate_envelope_and_preserves_snapshot",
+      "test_worker.WorkerTests.test_geometry_live_names_success_without_importing_gui",
+      "test_worker.WorkerTests.test_invalid_parameters_write_actionable_error_envelope",
+      "test_worker.WorkerTests.test_nonray_export_produces_visible_structure_with_requested_dimensions",
+      "test_worker.WorkerTests.test_unsafe_error_parent_and_bad_schema_return_stderr",
+      "test_worker.WorkerTests.test_worker_import_and_science_does_not_require_gui"
+    ],
+    "skips": [
+      {
+        "test": "test_batch.BatchSafetyTests.test_hardlinked_input_rejected",
+        "reason": "Filesystem cannot create hardlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_linked_summary_and_input_file_rejected",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_progress_retry_rejects_a_new_link_without_touching_external_file",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_symlinked_input_and_output_rejected",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_hardlink_alias_rejected_without_source_damage",
+        "reason": "filesystem does not support creating hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_nested_symlink_rejected_and_cleanup_preserves_target",
+        "reason": "filesystem does not support creating symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_windows_junction_rejected_without_traversal",
+        "reason": "filesystem does not support junction reparse data: WinError 1"
+      },
+      {
+        "test": "test_engine.SceneTests.test_hardlinked_owned_target_preserves_other_inode_name",
+        "reason": "[WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_engine.ValidationTests.test_hardlinked_owned_target_preserves_other_inode_name",
+        "reason": "[WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_engine.WindowsAliasTests.test_short_output_alias_cannot_contain_original_input",
+        "reason": "Windows short names are disabled or no distinct 8.3 alias is available"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_reported_hardlink_is_rejected_before_reading",
+        "reason": "Filesystem cannot create hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_reported_symlink_is_rejected_before_reading",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_unrelated_hardlink_is_not_read_or_written",
+        "reason": "Filesystem cannot create hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_unrelated_symlink_is_not_read_or_written",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_directory_link_rejected_before_resolve",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_hardlink_rejected_before_resolve",
+        "reason": "Filesystem cannot create hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_symlink_rejected_before_resolve",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_junction_output_is_rejected_lexically",
+        "reason": "Filesystem cannot create junctions"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_linked_owned_table_and_output_parent_are_rejected",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_batch_input_rejects_links_before_resolving_directory",
+        "reason": "Directory symlinks unavailable: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      }
+    ],
+    "required_executed": {
+      "test_native_advanced_timeline_density_potential_and_close": true,
+      "test_native_clean_preferences_startup_and_shutdown": true,
+      "test_native_fixtures_exports_and_cooperative_window_close": true,
+      "test_native_navigation_presets_and_interface_workflow": true,
+      "test_native_startup_events_framebuffer_and_shutdown": true,
+      "test_native_volume_frames_and_cancel_cleanup": true,
+      "test_real_apbs_born_dielectric_boundary": true,
+      "test_real_apbs_uniform_sign_dielectric_translation_convergence": true,
+      "test_real_h264_frame_count_and_duration": true,
+      "test_real_pdb2pqr_ubiquitin_surface_and_replay": true,
+      "test_registered_density_relocated_replay": true,
+      "test_relocated_timeline_replay_without_molscene": true
+    },
+    "driver_sha256": "cd87a27d3ab2329b824b8402fe124a8d2fb14713f896d4f097bb4887e26d1f92"
+  },
+  "source_plain": {
+    "discovered": 440,
+    "passed": 155,
+    "skipped": 285,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 52.591,
+    "source_unchanged": true,
+    "passed_ids": [
+      "test_advanced_cli.AdvancedCliTests.test_advanced_commands_reject_overwrite_and_expose_exact_flags",
+      "test_advanced_cli.AdvancedCliTests.test_density_matrix_and_volume_ramp_are_protected_json_files",
+      "test_advanced_cli.AdvancedCliTests.test_potential_requires_explicit_mode_inputs_and_config",
+      "test_advanced_cli.AdvancedCliTests.test_pure_request_validation_rejects_unknowns_and_bool_sizes",
+      "test_advanced_cli.AdvancedCliTests.test_timeline_validation_and_help_without_optional_backend",
+      "test_advanced_cli.AdvancedCliTests.test_tools_empty_config_is_readonly_success",
+      "test_advanced_controller.PrivateIdentityShapeTests.test_malformed_nested_evidence_is_unverified_before_backend_access",
+      "test_advanced_worker.AdvancedWorkerTests.test_advanced_source_and_envelope_collisions_never_write_source",
+      "test_advanced_worker.AdvancedWorkerTests.test_invalid_advanced_parameters_report_error_envelope",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_cancel_marker_cannot_collide_with_envelope",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_failure_retains_each_status_and_nonzero",
+      "test_advanced_worker.AdvancedWorkerTests.test_tools_without_session_has_compatible_envelope_and_progress",
+      "test_advanced_worker.AdvancedWorkerTests.test_worker_refuses_changed_private_input_copy",
+      "test_batch.BatchErrorPrivacyTests.test_backend_path_errors_are_sanitized_in_summaries_and_callbacks_and_stay_failed",
+      "test_batch.BatchErrorPrivacyTests.test_unc_and_device_error_paths_keep_basename_without_absolute_location",
+      "test_batch.BatchSafetyTests.test_cancel_before_first_item_persists_pending_and_not_passed",
+      "test_batch.BatchSafetyTests.test_nonempty_output_and_empty_input_rejected_before_summaries",
+      "test_batch.BatchSafetyTests.test_nonsharing_publish_error_propagates_without_retry_or_clobber",
+      "test_batch.BatchSafetyTests.test_persistent_progress_reader_fails_within_bound_and_preserves_previous_json",
+      "test_batch.BatchSafetyTests.test_progress_publish_survives_a_real_transient_reader",
+      "test_batch.BatchSafetyTests.test_progress_retry_rechecks_changed_destination_type",
+      "test_batch.BatchSafetyTests.test_rejects_both_ancestry_directions_without_mutation",
+      "test_bundles.BundleTests.test_bounded_failure_logs_do_not_copy_scientific_inputs",
+      "test_bundles.BundleTests.test_cancellation_after_manifest_prevents_commit",
+      "test_bundles.BundleTests.test_cancellation_before_commit_retains_only_registered_logs",
+      "test_bundles.BundleTests.test_copied_source_change_before_publish_is_rejected",
+      "test_bundles.BundleTests.test_destination_created_between_check_and_rename_is_not_replaced",
+      "test_bundles.BundleTests.test_empty_race_created_destination_is_not_replaced",
+      "test_bundles.BundleTests.test_existing_destination_becomes_nonempty_before_removal",
+      "test_bundles.BundleTests.test_failure_log_path_must_be_owned",
+      "test_bundles.BundleTests.test_failure_metadata_write_error_does_not_mask_operation_error",
+      "test_bundles.BundleTests.test_input_copy_does_not_write_a_replaced_leaf",
+      "test_bundles.BundleTests.test_invalid_inventory_paths_and_aliases",
+      "test_bundles.BundleTests.test_log_copy_failure_preserves_original_error_and_failure_metadata",
+      "test_bundles.BundleTests.test_log_roles_reject_case_aliases_and_windows_devices",
+      "test_bundles.BundleTests.test_missing_extra_and_undeclared_frame_fail",
+      "test_bundles.BundleTests.test_post_manifest_payload_change_or_extra_entry_prevents_publish",
+      "test_bundles.BundleTests.test_protected_ancestry_and_nonempty_destination",
+      "test_bundles.BundleTests.test_publish_exact_inventory_hashes_and_empty_log",
+      "test_bundles.BundleTests.test_published_logs_must_respect_bound",
+      "test_bundles.BundleTests.test_readonly_scratch_is_cleaned_before_success",
+      "test_bundles.BundleTests.test_replaced_owned_directory_is_preserved_by_cleanup",
+      "test_bundles.BundleTests.test_scientific_copies_cannot_be_registered_as_failure_logs",
+      "test_bundles.BundleTests.test_scratch_cleanup_failure_never_commits",
+      "test_bundles.BundleTests.test_scratch_log_survives_late_publication_failure",
+      "test_bundles.BundleTests.test_source_change_during_copy_fails_without_publishing",
+      "test_ci_status.CIStatusTests.test_noisy_success_skip_failure_missing_and_spoofed_ok",
+      "test_cli.CliTests.test_failed_selftest_returns_one_and_names_failure",
+      "test_cli.CliTests.test_help_and_version_without_pymol",
+      "test_cli.CliTests.test_measure_and_align_print_scientific_values",
+      "test_cli.CliTests.test_output_messages_expand_quoted_home_paths",
+      "test_cli.CliTests.test_real_validation_failure_is_actionable_without_success",
+      "test_cli.CliTests.test_render_dispatch_preserves_options",
+      "test_cli.CliTests.test_required_inputs_and_selections_return_usage_error",
+      "test_cli.CliTests.test_runtime_failure_has_exit_one",
+      "test_cli.CliTests.test_successful_selftest_and_doctor",
+      "test_density.DensityTests.test_import_does_not_load_optional_backend",
+      "test_density.DensityTests.test_json_numeric_contract_rejects_tuple_matrix_and_huge_integers",
+      "test_density.DensityTests.test_request_defaults_and_exact_types",
+      "test_density.DensityTests.test_volume_ramp_and_registration_are_separate_typed_contracts",
+      "test_desktop.DesktopDependencyTests.test_import_is_lazy_and_missing_gui_has_actionable_diagnostic",
+      "test_desktop.DesktopDependencyTests.test_without_site_packages_import_stays_lazy_and_gui_reports_dependency",
+      "test_electrostatics.ElectrostaticsTests.test_architecture_and_memory_preflight_never_silently_coarsens",
+      "test_electrostatics.ElectrostaticsTests.test_exact_si_unit_conversion_and_unknown",
+      "test_electrostatics.ElectrostaticsTests.test_fixed_solver_input_and_coverage_padding",
+      "test_electrostatics.ElectrostaticsTests.test_request_strict_defaults_independence_and_temperature",
+      "test_electrostatics.ElectrostaticsTests.test_wrong_solver_geometry_and_convergence_diagnostics_fail_closed",
+      "test_engine.ValidationTests.test_missing_and_unsupported_inputs",
+      "test_engine.ValidationTests.test_nonfinite_radius_and_dimensions_are_rejected_before_runtime",
+      "test_engine.ValidationTests.test_occupied_output_and_input_collision_are_rejected",
+      "test_engine.ValidationTests.test_output_parent_file_is_a_clear_validation_error",
+      "test_external_tools.ExternalToolsTests.test_apbs_version_exit_13_is_probe_only",
+      "test_external_tools.ExternalToolsTests.test_argv_paths_and_child_environment",
+      "test_external_tools.ExternalToolsTests.test_cancellation_before_launch_creates_no_logs",
+      "test_external_tools.ExternalToolsTests.test_cancellation_during_run_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_failed_run_probe_retains_registered_logs",
+      "test_external_tools.ExternalToolsTests.test_forced_guardian_death_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_forced_worker_death_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_invalid_config_rejected_before_spawn",
+      "test_external_tools.ExternalToolsTests.test_load_tools_rejects_unknown_keys_duplicates_and_boolean_version",
+      "test_external_tools.ExternalToolsTests.test_manifest_uses_actual_probe_identity",
+      "test_external_tools.ExternalToolsTests.test_missing_output_is_visible_for_caller_validation",
+      "test_external_tools.ExternalToolsTests.test_nonzero_exit_retains_diagnostics",
+      "test_external_tools.ExternalToolsTests.test_pdb2pqr_rejects_real_interpreter_older_than_311",
+      "test_external_tools.ExternalToolsTests.test_probe_forwards_cancellation_at_launch_boundary",
+      "test_external_tools.ExternalToolsTests.test_ready_guardian_and_launcher_death_preserves_error_and_cleanup",
+      "test_external_tools.ExternalToolsTests.test_reject_string_args_and_architecture_mismatch",
+      "test_external_tools.ExternalToolsTests.test_stdout_stderr_flood_is_bounded_and_fails",
+      "test_external_tools.ExternalToolsTests.test_successful_parent_exit_still_reaps_descendants",
+      "test_external_tools.ExternalToolsTests.test_timeout_reaps_child_and_grandchild",
+      "test_external_tools.ExternalToolsTests.test_truncated_executable_headers_raise_value_error",
+      "test_external_tools.ExternalToolsTests.test_version_missing_or_false_rejected",
+      "test_grids.GridTests.test_byte_bound_precedes_parser_and_statistics_remain_finite",
+      "test_grids.GridTests.test_dx_asymmetric_world_and_order",
+      "test_grids.GridTests.test_dx_rejects_unsupported_and_malformed_before_use",
+      "test_grids.GridTests.test_mrc_all_permutations_partial_oblique",
+      "test_grids.GridTests.test_mrc_origin_only_auto_and_source_provenance",
+      "test_grids.GridTests.test_mrc_origin_requires_explicit_resolution_when_starts_present",
+      "test_grids.GridTests.test_mrc_rejects_headers_and_payload",
+      "test_grids.GridTests.test_rigid_and_general_affine_composition",
+      "test_integration.SelftestValidationTests.test_explicit_checks_survive_optimized_python",
+      "test_integration.SelftestValidationTests.test_missing_runtime_is_recorded_as_failed_json",
+      "test_integration.SelftestValidationTests.test_nonempty_directory_requires_explicit_overwrite",
+      "test_interface_engine.InterfaceCliTests.test_dispatch_preserves_state_altloc_and_presents_area_definition",
+      "test_interface_engine.InterfaceCliTests.test_help_and_imports_work_without_backend_or_qt",
+      "test_native_maps.NativeMapTests.test_canonical_text_round_trips_native_precision_without_changing_source",
+      "test_native_maps.NativeMapTests.test_overflow_rejected_before_backend",
+      "test_native_maps.NativeMapTests.test_standalone_parser_matches_complete_scientific_dx_document",
+      "test_native_render.NativeRenderProtocolTests.test_backend_considers_disabled_volume_when_timeline_can_enable_it",
+      "test_native_render.NativeRenderProtocolTests.test_json_rejects_duplicates_nonfinite_and_oversized_data",
+      "test_native_render.NativeRenderProtocolTests.test_native_evidence_directory_prefers_override_and_creates_standard_fallback",
+      "test_native_render.NativeRenderProtocolTests.test_nonzero_managed_exit_rejects_even_valid_image_result",
+      "test_native_render.NativeRenderProtocolTests.test_parent_accepts_flat_valid_image_and_rejects_corrupt_identity_or_pixels",
+      "test_native_render.NativeRenderProtocolTests.test_parent_rejects_missing_partial_or_mismatched_result",
+      "test_native_render.NativeRenderProtocolTests.test_png_rejects_partial_crc_and_trailing_data",
+      "test_native_render.NativeRenderProtocolTests.test_process_metadata_distinguishes_renderer_parent_and_guardian",
+      "test_native_render.NativeRenderProtocolTests.test_progress_update_survives_a_concurrent_windows_reader",
+      "test_native_render.NativeRenderProtocolTests.test_request_bounds_paths_and_independent_copy",
+      "test_pqr.PQRTests.test_ambiguous_hetero_element_is_not_guessed",
+      "test_pqr.PQRTests.test_assignment_only_cannot_drop_original_hydrogens",
+      "test_pqr.PQRTests.test_dropped_ligand_or_protein_heavy_atom_fails",
+      "test_pqr.PQRTests.test_invalid_numeric_duplicate_empty_and_heavy_radius",
+      "test_pqr.PQRTests.test_optional_chain_zero_net_and_charged_zero_radius_h",
+      "test_pqr.PQRTests.test_preparation_preserves_heavy_identity_coordinates_and_reports_changes",
+      "test_reproduce_v03.GalleryV03Tests.test_deterministic_numeric_contract_rejects_inconsistent_or_nonfinite_data",
+      "test_reproduce_v03.GalleryV03Tests.test_directory_in_owned_file_slot_is_rejected_before_backend_runs",
+      "test_reproduce_v03.GalleryV03Tests.test_existing_owned_file_requires_overwrite_before_backend_runs",
+      "test_reproduce_v03.GalleryV03Tests.test_report_cannot_extend_inventory_or_redirect_inputs",
+      "test_reproduce_v03.GalleryV03Tests.test_signed_surface_difference_is_preserved",
+      "test_reproduce_v04.ReproduceV04Tests.test_bundle_audit_rejects_missing_unexpected_and_changed_payloads",
+      "test_reproduce_v04.ReproduceV04Tests.test_bundle_audit_rejects_unlisted_empty_directory",
+      "test_reproduce_v04.ReproduceV04Tests.test_default_requires_explicit_tools_without_creating_output",
+      "test_reproduce_v04.ReproduceV04Tests.test_direct_script_checks_required_tools_outside_checkout_without_backend",
+      "test_reproduce_v04.ReproduceV04Tests.test_help_does_not_require_backend_or_tools",
+      "test_reproduce_v04.ReproduceV04Tests.test_occupied_output_is_preserved_before_backend_launch",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_preserves_scientific_input_bytes_and_validates_as_bundle",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_redacts_discovered_runtime_paths_and_preserves_selections",
+      "test_reproduce_v04.ReproduceV04Tests.test_projection_refuses_private_paths_in_immutable_scientific_inputs",
+      "test_reproduce_v04.ReproduceV04Tests.test_public_coordinate_falls_back_to_installed_data_and_checks_pinned_bytes",
+      "test_reproduce_v04.ReproduceV04Tests.test_public_projection_preserves_original_and_rebuilds_hashes",
+      "test_timeline.TimelineTests.test_analytic_slerp_exact_endpoints_shortest_arc_and_hold",
+      "test_timeline.TimelineTests.test_edits_recompute_duration_and_leave_original_untouched",
+      "test_timeline.TimelineTests.test_finite_camera_translation_does_not_overflow_interpolation",
+      "test_timeline.TimelineTests.test_hold_allows_projection_cut_and_scene_reference_rename",
+      "test_timeline.TimelineTests.test_rejects_invalid_documents_without_mutating_input",
+      "test_timeline.TimelineTests.test_scene_and_state_cut_only_at_keyframe",
+      "test_v02_cli.V02CliTests.test_batch_dispatch_and_unsuccessful_result_exit_one",
+      "test_v02_cli.V02CliTests.test_contacts_sasa_inspect_typed_dispatch_and_summaries",
+      "test_v02_cli.V02CliTests.test_geometry_dispatches_selections_dimensions_and_state",
+      "test_v02_cli.V02CliTests.test_gui_lazy_launch_and_missing_dependency_error",
+      "test_v02_cli.V02CliTests.test_new_help_works_without_site_packages_and_gui_import",
+      "test_v02_cli.V02CliTests.test_new_usage_errors_and_dependency_errors_keep_exit_contract",
+      "test_v02_cli.V02CliTests.test_render_and_alignment_new_options_preserve_types",
+      "test_v02_cli.V02CliTests.test_unsupported_cealign_is_a_usage_error_and_absent_from_help",
+      "test_v02_cli.V02CliTests.test_unsupported_representation_and_coloring_are_usage_errors"
+    ],
+    "skips": [
+      {
+        "test": "test_advanced_cli.AdvancedCliTests.test_actual_timeline_and_animation_cli_worker_share_parameters",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_cli.AdvancedCliTests.test_real_prepared_pqr_cli_worker_scientific_parity",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_aligned_density_copy_uses_replay_transform_and_original_members",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_bound_source_removal_is_stale_even_with_equal_owned_copy",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_density_operations_bind_explicit_map_state_and_preserve_both_sources",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_density_result_copy_preserves_source_and_bundle",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_malformed_nested_map_metadata_is_unverified",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_map_identity_checks_values_matrix_bytes_and_unassociated_map",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_map_raw_values_and_timeline_document_changes_stale_identity",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_partial_or_boolean_identity_cannot_authorize_currentness",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_partial_timeline_add_captures_view_and_updates_preserve_it",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_potential_pqr_import_job_has_no_snapshot_and_loads_owned_copy",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_potential_selected_copy_and_ramp_keep_original_all_identity",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_prepared_result_binding_rejects_operation_mode_and_input_role_changes",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_result_bundle_wrong_snapshot_cannot_reuse_private_context",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_selection_identity_binds_originals_ignores_camera_and_owned_copies",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_session_input_role_is_bound_separately_from_snapshot_id",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_set_state_preserves_native_movie_mapping",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_timeline_project_open_replaces_session_and_restores_document",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_timeline_scene_rename_updates_references_and_delete_is_guarded",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_tools_job_never_saves_snapshot",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedControllerTests.test_worker_detects_modified_private_session_before_export",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedJobsTests.test_before_commit_cancel_without_envelope_is_cancelled",
+        "reason": "requires Qt and PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedJobsTests.test_late_cancel_retains_confirmed_success",
+        "reason": "requires Qt and PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedJobsTests.test_slow_tools_is_async_cancellable_without_session",
+        "reason": "requires Qt and PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedJobsTests.test_stdout_partial_line_is_bounded",
+        "reason": "requires Qt and PyMOL"
+      },
+      {
+        "test": "test_advanced_controller.AdvancedJobsTests.test_tools_preparation_needs_no_live_backend",
+        "reason": "requires Qt and PyMOL"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_advanced_job_history_uses_explicit_request_state_and_keeps_analysis_default",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_advanced_worker_lock_leaves_results_and_cancel_reachable",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_density_volume_uses_explicit_transfer_ramp_and_disables_isolevel",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_dock_close_stops_preview_without_needing_a_native_window",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_failed_tools_worker_retains_each_diagnostic_in_tools_and_results",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_fifth_tab_preserves_existing_workflows_and_exposes_named_controls",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_missing_tool_config_is_an_actionable_error_without_starting_a_worker",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_narrow_advanced_forms_do_not_create_hidden_horizontal_overflow",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_panel_close_stops_preview_without_resetting_position",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_potential_parameters_keep_units_states_and_model_assumptions_explicit",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_prepared_pqr_request_does_not_require_a_hidden_live_selection",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_structured_tool_status_survives_reusing_the_same_configuration",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_timeline_render_defaults_scene_inheritance_and_independent_cursor",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedControlTests.test_tools_path_prefill_is_existing_only_and_parsing_is_explicit",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedNativeTests.test_native_advanced_timeline_density_potential_and_close",
+        "reason": "requires allocated native desktop focus"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_advanced_job_history_uses_explicit_request_state_and_keeps_analysis_default",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_advanced_worker_lock_leaves_results_and_cancel_reachable",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_capture_edit_reorder_and_remove_change_the_real_timeline",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_density_export_worker_and_result_loading_preserve_original",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_density_two_state_selection_refresh_display_registration_and_export",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_density_volume_uses_explicit_transfer_ramp_and_disables_isolevel",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_density_widget_load_display_and_registration_preserve_source",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_dock_close_stops_preview_without_needing_a_native_window",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_epoch_change_and_failed_seek_stop_preview_before_further_mutation",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_failed_tools_worker_retains_each_diagnostic_in_tools_and_results",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_fifth_tab_preserves_existing_workflows_and_exposes_named_controls",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_import_potential_dispatch_preserves_explicit_state_and_needs_no_tools",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_load_json_uses_controller_validation_before_replacing_timeline",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_missing_tool_config_is_an_actionable_error_without_starting_a_worker",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_narrow_advanced_forms_do_not_create_hidden_horizontal_overflow",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_panel_close_stops_preview_without_resetting_position",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_potential_parameters_keep_units_states_and_model_assumptions_explicit",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_potential_worker_loads_owned_copy_and_stale_source_blocks_ramp",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_prepared_pqr_request_does_not_require_a_hidden_live_selection",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_preview_tick_does_not_rebuild_or_hash_the_entire_live_inventory",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_preview_uses_elapsed_clock_and_stops_at_last_frame_without_movie_changes",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_project_open_validates_bundle_then_replaces_session_and_stops_timer",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_structured_tool_status_survives_reusing_the_same_configuration",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_timeline_project_and_animation_dispatch_use_the_document_and_output",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_timeline_render_defaults_scene_inheritance_and_independent_cursor",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_gui.AdvancedWorkflowTests.test_tools_path_prefill_is_existing_only_and_parsing_is_explicit",
+        "reason": "requires PyMOL and its Qt binding"
+      },
+      {
+        "test": "test_advanced_worker.AdvancedWorkerTests.test_failed_managed_solver_envelope_keeps_retained_evidence",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_all_scientific_operations_use_requested_state_and_reject_fallback",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_contacts_match_brute_force_with_overlap_boundary_and_object_identity",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_coordinate_sequences_preserve_segi_blank_chain_insertion_alt_and_unknown",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_explicit_state_changes_geometry_and_rejects_singleton_fallback",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_geometry_distance_angle_and_signed_dihedral",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_geometry_rejects_invalid_selection_duplicate_points_and_collinearity",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_real_hsg_ligand_contacts_oracle_and_context_sasa",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_real_ubiquitin_pdb_cif_inspection_sasa_and_contacts_parity",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_sasa_default_context_excludes_other_objects_solvent_hydrogen_and_alt_b",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_sasa_single_sphere_merged_occlusion_subset_and_nonmutation",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_spatial_membership_is_evaluated_only_in_requested_state",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_analysis.AnalysisTests.test_spatial_resolution_cleanup_preserves_named_selections_and_view",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_animation.AnimationEncoderTests.test_cancellation_at_encode_boundary_never_publishes",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationEncoderTests.test_missing_libx264_fails_before_render",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationEncoderTests.test_real_h264_frame_count_and_duration",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationEncoderTests.test_zero_byte_and_failing_video_never_publish_and_retain_logs",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationReplayTests.test_cancellation_between_frames_and_before_commit_publishes_nothing",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationReplayTests.test_mp4_preconditions_and_invalid_render_fail_without_output",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationReplayTests.test_png_exact_inventory_dimensions_decoded_changes_progress",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationReplayTests.test_project_closed_inventory_hashes_and_immutable_sources",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_animation.AnimationReplayTests.test_relocated_timeline_replay_without_molscene",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_batch.BatchRenderTests.test_cancel_after_first_completed_retains_pending_for_reopened_ui",
+        "reason": "PyMOL required for real batch rendering"
+      },
+      {
+        "test": "test_batch.BatchRenderTests.test_failed_overwrite_preserves_previous_item_artifacts",
+        "reason": "PyMOL required for real batch rendering"
+      },
+      {
+        "test": "test_batch.BatchRenderTests.test_same_stems_get_distinct_output_directories",
+        "reason": "PyMOL required for real batch rendering"
+      },
+      {
+        "test": "test_batch.BatchRenderTests.test_sorted_success_failure_and_persisted_callback_snapshot",
+        "reason": "PyMOL required for real batch rendering"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_hardlinked_input_rejected",
+        "reason": "Filesystem cannot create hardlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_linked_summary_and_input_file_rejected",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_progress_retry_rejects_a_new_link_without_touching_external_file",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_batch.BatchSafetyTests.test_symlinked_input_and_output_rejected",
+        "reason": "Filesystem cannot create symlinks: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_hardlink_alias_rejected_without_source_damage",
+        "reason": "filesystem does not support creating hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_nested_symlink_rejected_and_cleanup_preserves_target",
+        "reason": "filesystem does not support creating symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_bundles.BundleTests.test_windows_junction_rejected_without_traversal",
+        "reason": "filesystem does not support junction reparse data: WinError 1"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_aligned_copy_verifies_every_atom_and_preserves_originals",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_all_six_axes_raw_values_and_oblique_physical_points",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_associated_existing_display_exports_new_owned_display_and_replays",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_associated_export_retains_unrelated_colliding_object",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_associated_state_export_preserves_current_transform_and_source",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_backend_precision_zero_maps_and_nonrepresentable_values",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_cancellation_after_render_never_publishes",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_display_failure_and_invalid_input_leave_only_originals",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_displays_of_distinct_source_states_do_not_overwrite_each_other",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_explicit_display_name_still_rejects_unowned_objects",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_explicit_state_owned_displays_and_unverified_inventory",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_export_invalid_or_cancelled_leaves_no_completed_bundle",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_failed_registration_cleans_owned_copies_only",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_gaussian_positive_negative_contours_converge",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_load_failure_restores_normalizer_and_only_owned_names",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_matrix_mode_two_alignment_rejected_in_isolated_process",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_native_cell_metadata_change_is_stale_even_with_retained_corners",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_registered_density_relocated_replay",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_registered_origin_map_world_composition",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_registered_state_two_becomes_single_state_one",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_registration_preflight_rejects_stale_ttt_movie_collision",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_replay_matches_saved_contour_geometry_and_aligned_copy",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_same_values_changed_native_origin_invalidate_association_and_fingerprint",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_transformed_model_mode_one_replay_in_isolated_process",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_unknown_schema_is_display_only_and_volume_has_explicit_ramp",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_wide_dx_export_relocated_standalone_replay_preserves_values",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_density_engine.DensityEngineTests.test_wide_dx_writer_values_load_exactly_without_changing_source",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_background_thread_cannot_mutate_live_objects",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_capture_all_omits_absent_state_objects_but_direct_selection_fails",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_capture_spatial_membership_uses_requested_state_and_preserves_view",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_discrete_capture_identity_and_named_members_match_same_state_atoms",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_live_state_and_appearance_validation_preserve_other_objects",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_load_unique_names_scene_and_session_preserve_view",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_object_actions_are_explicit_and_refresh_native_changes",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.ControllerTests.test_selection_capture_rejects_empty_invalid_and_multi_atom",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_desktop.NativeDesktopTests.test_native_clean_preferences_startup_and_shutdown",
+        "reason": "requires PyMOL and the optional GUI binding"
+      },
+      {
+        "test": "test_desktop.NativeDesktopTests.test_native_startup_events_framebuffer_and_shutdown",
+        "reason": "requires PyMOL and the optional GUI binding"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_all_zero_molecule_import_fails_before_objects_or_publication",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_cancelled_export_never_publishes_and_preserves_inputs",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_existing_molecule_import_replay_preserves_exact_state_coordinates_and_vdw",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_import_and_standalone_replay_accept_connections_after_data",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_import_retains_original_and_converts_display_only",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics.ElectrostaticsTests.test_missing_solver_output_and_nonzero_failure_retain_logs",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_born_dielectric_boundary",
+        "reason": "Actual APBS/PDB2PQR tools not configured"
+      },
+      {
+        "test": "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_uniform_sign_dielectric_translation_convergence",
+        "reason": "Actual APBS/PDB2PQR tools not configured"
+      },
+      {
+        "test": "test_electrostatics_real.RealElectrostaticsTests.test_real_pdb2pqr_ubiquitin_surface_and_replay",
+        "reason": "Actual APBS/PDB2PQR tools not configured"
+      },
+      {
+        "test": "test_engine.SceneTests.test_align_same_named_inputs_and_compound_selection",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_cartoon_trace_is_scoped_to_ca_only_protein",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_full_atom_ubiquitin_cartoon_does_not_trace_sidechains",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_hardlinked_owned_target_preserves_other_inode_name",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_measure_and_failed_overwrite_preserves_previous_outputs",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_missing_and_unsupported_inputs",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_nonfinite_radius_and_dimensions_are_rejected_before_runtime",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_nonprotein_render_is_rejected_without_committing_artifacts",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_occupied_output_and_input_collision_are_rejected",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_output_parent_file_is_a_clear_validation_error",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_real_pdb_and_cif_counts",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_real_pocket_neighborhood_and_representations",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.SceneTests.test_render_and_relocated_literal_replay",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_engine.ValidationTests.test_hardlinked_owned_target_preserves_other_inode_name",
+        "reason": "[WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_engine.WindowsAliasTests.test_short_output_alias_cannot_contain_original_input",
+        "reason": "Windows short names are disabled or no distinct 8.3 alias is available"
+      },
+      {
+        "test": "test_external_tools.RealToolProbeTests.test_configured_real_tool_identities",
+        "reason": "Set MOLSCENE_TOOLS_CONFIG to probe real configured tools"
+      },
+      {
+        "test": "test_integration.OfflineIntegrationTests.test_explicit_checks_survive_optimized_python",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_integration.OfflineIntegrationTests.test_missing_runtime_is_recorded_as_failed_json",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_integration.OfflineIntegrationTests.test_nonempty_directory_requires_explicit_overwrite",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_integration.OfflineIntegrationTests.test_offline_checks_record_geometry_scene_session_image_and_portable_replay",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_integration.OfflineIntegrationTests.test_replay_printed_errors_fail_even_when_scene_state_is_correct",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_discrete_state_membership_retains_correct_original_residue",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_equal_spheres_analytic_area_and_half_sum",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_exact_union_excludes_same_object_and_other_object_outsiders",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_filtering_and_counts_ignore_shared_excluded_atoms",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_partner_swap_and_complete_residue_sums_preserve_original_identity",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_primary_alternate_filter_is_case_sensitive_like_existing_sasa",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_rejects_overlap_empty_filtered_partners_and_invalid_parameters",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_requested_state_spatial_membership_and_no_singleton_fallback",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_sasa_preserves_selection_visibility_and_auto_hide_setting",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_separated_spheres_keep_zero_loss_residue_rows",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_signed_backend_difference_is_not_clamped",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_source_view_settings_and_selection_preserved_on_success_and_failure",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface.InterfaceTests.test_split_same_residue_keeps_two_partner_rows",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_all_alternates_requested_state_and_figures_agree",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_complete_artifacts_csv_raw_areas_and_exact_nonprotein_replay",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_controller_preflight_rejects_boolean_request_state_before_snapshot",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_isolated_and_disconnected_cartoon_guides_remain_visible",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_owned_interface_table_replacement_and_unrelated_file_retained",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_protein_partners_without_cartoon_guides_are_visible",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_real_1hsg_dimer_cli_complete_table_and_colored_protein_replay",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_requested_state_spatial_membership_and_no_singleton_fallback",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_signed_analysis_fields_are_not_clamped_in_report_or_csv",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_snapshot_worker_provenance_staleness_and_preflight",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_staged_commit_rechecks_interface_table_destination_before_replacement",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_validation_collisions_and_failed_overwrite_leave_sources_intact",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_interface_engine.InterfaceEngineTests.test_worker_rejects_bad_parameters_and_result_source_collisions",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_native_maps.NativeMapTests.test_public_load_and_standalone_replay_verify_full_field_geometry_and_source_hash",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_native_render.FigureRenderRoutingTests.test_figure_native_bounds_are_actionable_and_cpu_dimensions_remain_legacy",
+        "reason": "requires headless PyMOL"
+      },
+      {
+        "test": "test_native_render.FigureRenderRoutingTests.test_figure_native_failure_and_cancellation_retain_only_reachable_bounded_diagnostics",
+        "reason": "requires headless PyMOL"
+      },
+      {
+        "test": "test_native_render.FigureRenderRoutingTests.test_figure_routes_native_and_preserves_final_session_replay_and_analysis",
+        "reason": "requires headless PyMOL"
+      },
+      {
+        "test": "test_native_render.NativeRenderTests.test_native_volume_frames_and_cancel_cleanup",
+        "reason": "requires allocated native desktop focus"
+      },
+      {
+        "test": "test_navigation_gui.NativeNavigationTests.test_native_navigation_presets_and_interface_workflow",
+        "reason": "requires PyMOL and Qt"
+      },
+      {
+        "test": "test_navigation_gui.NavigationQtTests.test_exact_navigation_handoff_presets_and_full_result_filter",
+        "reason": "requires PyMOL and Qt"
+      },
+      {
+        "test": "test_navigation_gui.NavigationQtTests.test_open_session_replaces_same_count_residue_cache",
+        "reason": "requires PyMOL and Qt"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_all_zero_selected_radii_rejected_before_creating_owned_objects",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_existing_molecule_uses_explicit_state_and_preserves_vdw_settings",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_finite_float64_that_overflows_native_map_is_rejected",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_insufficient_surface_coverage_fails_without_owned_leaks",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_long_precision_dx_values_are_not_silently_misparsed_by_native_loader",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_mixed_zero_and_positive_selected_radii_are_preserved",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_native_asymmetric_values_preserve_axes_and_field",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_pqr_radii_remain_attached_to_identity_when_atoms_are_unsorted",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_potential_display.PotentialDisplayTests.test_pqr_radius_fixed_ramp_legend_and_owned_update",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_batch_cannot_redirect_item_report_into_unowned_descendant",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_reported_hardlink_is_rejected_before_reading",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_reported_symlink_is_rejected_before_reading",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_reported_unowned_or_escaping_paths_are_rejected",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_unrelated_hardlink_is_not_read_or_written",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_unrelated_nested_file_is_unchanged_and_not_in_manifest",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v02.GalleryInventoryTests.test_unrelated_symlink_is_not_read_or_written",
+        "reason": "requires the Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_complete_manifest_lf_hashes_and_unrelated_same_name_sentinels",
+        "reason": "requires Pillow test extra"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_directory_link_rejected_before_resolve",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_hardlink_rejected_before_resolve",
+        "reason": "Filesystem cannot create hardlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v03.GalleryV03Tests.test_owned_symlink_rejected_before_resolve",
+        "reason": "Filesystem cannot create symlink: [WinError 1] 函数不正确。: '[local path removed]' -> '[local path removed]'"
+      },
+      {
+        "test": "test_reproduce_v04.ReproduceV04Tests.test_real_cli_gallery_inventory_provenance_and_original_preservation",
+        "reason": "requires explicit advanced science acceptance environment"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_adversarial_identifiers_order_altloc_state_and_stale_rows",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_clean_all_alternates_and_deuterium_tritium_filter",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_clean_copy_exact_subset_preserves_source_all_states_properties_bonds",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_clean_validation_empty_and_backend_failure_cleanup",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_coordinate_order_partial_residues_discrete_states_and_atomic_rejection",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_focus_and_hide_context_preserve_source_and_unselected_display",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_named_selections_names_collisions_delete_and_session",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_navigation_workflows_reject_background_thread_before_backend_calls",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_observed_ubiquitin_and_exact_capture_summary",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_overview_renders_sparse_guides_and_unbonded_atoms_at_requested_state",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_overview_surface_are_scoped_and_validate_before_mutation",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_pocket_matches_independent_requested_state_distance_oracle",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_preset_marker_scale_is_atom_scoped_and_preserves_unselected_styles",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_read_display_and_copy_preserve_existing_selection_visibility",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_scene_update_rename_preserves_other_scenes_and_reopen",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_structure_tools.StructureToolsTests.test_selection_backend_failure_removes_partial_without_touching_existing",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_timeline.TimelineNativeTests.test_random_seek_display_states_movie_and_fingerprints",
+        "reason": "PyMOL unavailable"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_alignment_super_explicit_states_survive_replay_and_invalid_state_preserves_output",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_all_representations_bind_spatial_membership_and_replay_colors",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_contacts_export_all_pairs_but_draw_at_most_200_and_accept_zero",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_contacts_sasa_inspect_complete_portable_tables",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_explicit_render_nonprotein_and_unrenderable_selection",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_export_preserves_view_names_and_labels_old_snapshot_records",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_generic_render_styling_portable_replay_and_transparent_alpha",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_geometry_report_annotation_session_and_replay_use_requested_state",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_junction_output_is_rejected_lexically",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_linked_owned_table_and_output_parent_are_rejected",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_nonprotein_analysis_figures_show_molecules_in_png_session_and_replay",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_owned_csv_wrong_type_rejected_without_replacing_old_report",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_polymer_without_guide_atoms_is_rejected_by_explicit_cartoon",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_real_cli_alignment_super_states_and_batch",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_real_new_cli_workflows",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_v02_engine.V02EngineTests.test_semantic_fingerprint_ignores_camera_and_changes_with_source_coordinates",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_workbench.QtWorkbenchTests.test_native_fixtures_exports_and_cooperative_window_close",
+        "reason": "requires PyMOL and a Qt binding"
+      },
+      {
+        "test": "test_workbench.QtWorkbenchTests.test_qt_controls_and_process_failure_cancel_recovery",
+        "reason": "requires PyMOL and a Qt binding"
+      },
+      {
+        "test": "test_workbench.QtWorkbenchTests.test_repeated_export_history_is_bounded_and_preserves_science",
+        "reason": "requires PyMOL and a Qt binding"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_alignment_tracks_both_states_in_live_and_exported_records",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_alignment_transforms_live_mobile_and_has_explicit_states",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_batch_input_rejects_links_before_resolving_directory",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_batch_input_requires_existing_directory_before_creating_job",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_contact_annotations_are_capped_but_csv_retains_every_pair",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_inspection_has_full_rows_and_safe_csv_fasta_exports",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_job_snapshot_is_immutable_and_explicit_result_path",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_labels_resolve_spatial_selection_in_requested_state",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_legacy_mixed_state_alignment_cannot_verify_missing_target_provenance",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_live_geometry_records_requested_state_and_actual_annotation",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_relative_batch_input_survives_worker_directory_change",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_result_fingerprint_excludes_camera_and_rejects_changed_coordinates_or_state",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_workbench.WorkbenchControllerTests.test_sasa_retains_request_selections_alongside_scientific_parameters",
+        "reason": "requires the user-provided PyMOL interpreter"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_batch_cancel_file_preserves_pending_and_atomic_progress",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_batch_cancel_marker_cannot_alias_job_session_result_or_output",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_batch_rejects_direct_and_nested_source_markers_before_output_mutation",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_contacts_sasa_inspect_worker_dispatch_and_default_export_envelope",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_distinct_science_output_and_envelope_and_snapshot_identity",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_error_written_atomically_and_nonzero",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_existing_result_job_and_snapshot_collisions_never_clobber_sources",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_export_uses_separate_envelope_and_preserves_snapshot",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_geometry_live_names_success_without_importing_gui",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_invalid_parameters_write_actionable_error_envelope",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_nonray_export_produces_visible_structure_with_requested_dimensions",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_unsafe_error_parent_and_bad_schema_return_stderr",
+        "reason": "requires PyMOL"
+      },
+      {
+        "test": "test_worker.WorkerTests.test_worker_import_and_science_does_not_require_gui",
+        "reason": "requires PyMOL"
+      }
+    ],
+    "required_executed": {
+      "test_native_advanced_timeline_density_potential_and_close": false,
+      "test_native_clean_preferences_startup_and_shutdown": false,
+      "test_native_fixtures_exports_and_cooperative_window_close": false,
+      "test_native_navigation_presets_and_interface_workflow": false,
+      "test_native_startup_events_framebuffer_and_shutdown": false,
+      "test_native_volume_frames_and_cancel_cleanup": false,
+      "test_real_apbs_born_dielectric_boundary": false,
+      "test_real_apbs_uniform_sign_dielectric_translation_convergence": false,
+      "test_real_h264_frame_count_and_duration": false,
+      "test_real_pdb2pqr_ubiquitin_surface_and_replay": false,
+      "test_registered_density_relocated_replay": false,
+      "test_relocated_timeline_replay_without_molscene": false
+    },
+    "driver_sha256": "cd87a27d3ab2329b824b8402fe124a8d2fb14713f896d4f097bb4887e26d1f92"
+  },
+  "installed_required_12": {
+    "discovered": 12,
+    "passed": 12,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 709.065,
+    "source_unchanged": true,
+    "passed_ids": [
+      "test_desktop.NativeDesktopTests.test_native_startup_events_framebuffer_and_shutdown",
+      "test_desktop.NativeDesktopTests.test_native_clean_preferences_startup_and_shutdown",
+      "test_workbench.QtWorkbenchTests.test_native_fixtures_exports_and_cooperative_window_close",
+      "test_navigation_gui.NativeNavigationTests.test_native_navigation_presets_and_interface_workflow",
+      "test_advanced_gui.AdvancedNativeTests.test_native_advanced_timeline_density_potential_and_close",
+      "test_native_render.NativeRenderTests.test_native_volume_frames_and_cancel_cleanup",
+      "test_density_engine.DensityEngineTests.test_registered_density_relocated_replay",
+      "test_animation.AnimationEncoderTests.test_real_h264_frame_count_and_duration",
+      "test_animation.AnimationReplayTests.test_relocated_timeline_replay_without_molscene",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_uniform_sign_dielectric_translation_convergence",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_apbs_born_dielectric_boundary",
+      "test_electrostatics_real.RealElectrostaticsTests.test_real_pdb2pqr_ubiquitin_surface_and_replay"
+    ],
+    "skips": [],
+    "required_executed": {
+      "test_native_advanced_timeline_density_potential_and_close": true,
+      "test_native_clean_preferences_startup_and_shutdown": true,
+      "test_native_fixtures_exports_and_cooperative_window_close": true,
+      "test_native_navigation_presets_and_interface_workflow": true,
+      "test_native_startup_events_framebuffer_and_shutdown": true,
+      "test_native_volume_frames_and_cancel_cleanup": true,
+      "test_real_apbs_born_dielectric_boundary": true,
+      "test_real_apbs_uniform_sign_dielectric_translation_convergence": true,
+      "test_real_h264_frame_count_and_duration": true,
+      "test_real_pdb2pqr_ubiquitin_surface_and_replay": true,
+      "test_registered_density_relocated_replay": true,
+      "test_relocated_timeline_replay_without_molscene": true
+    },
+    "driver_sha256": "cd87a27d3ab2329b824b8402fe124a8d2fb14713f896d4f097bb4887e26d1f92"
+  },
+  "package": {
+    "archives": [
+      {
+        "file": "molscene-0.4.0-py3-none-any.whl",
+        "bytes": 253513,
+        "sha256": "58130866e61cfebf8abcaab22fda32f9f50a9b6c6412a3bfe5956547c1851c31",
+        "members": 51,
+        "module_bytes_match_source": true,
+        "source_files_byte_matched": 0,
+        "private_paths_or_binaries": false
+      },
+      {
+        "file": "molscene-0.4.0.tar.gz",
+        "bytes": 6238338,
+        "sha256": "2df8774a1106a19a78d882ee9f00bf407f42959760cea235e723933ee71a182e",
+        "members": 201,
+        "module_bytes_match_source": true,
+        "source_files_byte_matched": 199,
+        "private_paths_or_binaries": false
+      }
+    ],
+    "module_count": 41,
+    "installed_modules_match_wheel_and_source": true,
+    "plain_source_free_isolated": true,
+    "plain_backend_dependencies_absent": true,
+    "plain_cli_commands_passed": 6,
+    "sdist_extracted_regular_files": 201,
+    "sdist_cli_commands_passed": 3,
+    "sdist_cli_scope": "backend-free import/help; not scientific acceptance"
+  },
+  "gallery": {
+    "actual_advanced_capture": {
+      "returncode": 0,
+      "seconds": 53.78100000000268
+    },
+    "potential_actually_executed": true,
+    "public_derivative_identity": {
+      "timeline-project": {
+        "immutable_payloads": [
+          {
+            "file": "source.pse",
+            "sha256": "ab163141380bb5e35c8c91637723409958353606e2262bf08a7c69c590d9917d"
+          },
+          {
+            "file": "timeline.json",
+            "sha256": "06ab1b2b6b7d5121799d2e6a2adebe71219e01d7fe48640afab568ccb9f5c6b8"
+          },
+          {
+            "file": "replay.pml",
+            "sha256": "7ec883a39b4c7e7ed03006732dd0fc3b35935d32a2938c46eba41e927ff6fc50"
+          }
+        ],
+        "original_manifest_sha256": "3cea1fce921f570e2ff45d833e9a753f695a2627064d77ad3f629e93e6f73e2e",
+        "scientific_numbers_and_identities_preserved": true
+      },
+      "animation": {
+        "immutable_payloads": [
+          {
+            "file": "source.pse",
+            "sha256": "ab163141380bb5e35c8c91637723409958353606e2262bf08a7c69c590d9917d"
+          },
+          {
+            "file": "timeline.json",
+            "sha256": "06ab1b2b6b7d5121799d2e6a2adebe71219e01d7fe48640afab568ccb9f5c6b8"
+          },
+          {
+            "file": "replay.pml",
+            "sha256": "7ec883a39b4c7e7ed03006732dd0fc3b35935d32a2938c46eba41e927ff6fc50"
+          },
+          {
+            "file": "frames/frame_000001.png",
+            "sha256": "086630bf26fd9b79bde520bd4ab151a03af474895727ffaebaa201b2d4b34305"
+          },
+          {
+            "file": "frames/frame_000002.png",
+            "sha256": "45bdb85a021cefeae10d20c6069d63f90cadca8b0e736c72bfe7a74bba030c31"
+          },
+          {
+            "file": "frames/frame_000003.png",
+            "sha256": "45bdb85a021cefeae10d20c6069d63f90cadca8b0e736c72bfe7a74bba030c31"
+          },
+          {
+            "file": "frames/frame_000004.png",
+            "sha256": "abd5940a8b56a03afc04b8244afe83881d7783bb88eba726f81da3aad760f84d"
+          }
+        ],
+        "original_manifest_sha256": "3fc7b63d7dfe77777a4639f2544e0c14e8b8431eb3f8109e3d641834f5379cb3",
+        "scientific_numbers_and_identities_preserved": true
+      },
+      "density": {
+        "immutable_payloads": [
+          {
+            "file": "scene.pse",
+            "sha256": "c8d2726a1dff2baffc2b99846dfc9d6eaf85c992423c810b7c2a9ebd580fb35a"
+          },
+          {
+            "file": "scene.png",
+            "sha256": "147f75b7a9266d6b39f79b5e30bf06489803116a1b7fcbc1985c6ce95bfe1c99"
+          },
+          {
+            "file": "density.json",
+            "sha256": "ec5b5d44278aa8b522c428b634ba535b0040624188d11c208573dacf49280a3c"
+          },
+          {
+            "file": "replay.pml",
+            "sha256": "3041636016f001389943080468dc953867dd41af6dec8244ca4410fa3c65ae5e"
+          },
+          {
+            "file": "inputs/density.dx",
+            "sha256": "df3703ab90f59397c4fdb159b5f257e1dd1db9bfed6dca75d300a0b162eb84fc"
+          }
+        ],
+        "original_manifest_sha256": "aac9c874ba19321b5d737b10204993a8be866bf72f367bccae186c32b8b28ea5",
+        "scientific_numbers_and_identities_preserved": true
+      },
+      "potential": {
+        "immutable_payloads": [
+          {
+            "file": "source.pse",
+            "sha256": "0060b8963d3eaeccc3f710cb2b6c2722dc0d0278fbd0e9ac13ff73e67122fc9a"
+          },
+          {
+            "file": "preparation.json",
+            "sha256": "43bfb48275040438998d0b06f1b0a5a1218aecb04d67f083eb9b48ec4e20df6a"
+          },
+          {
+            "file": "prepared.pqr",
+            "sha256": "5644278581ca765488d0ed93e94ff3cc106a92b62a13d6ea3a17990331583c8e"
+          },
+          {
+            "file": "apbs.in",
+            "sha256": "facf972554ab5fa6a50e3623c1d714ac7a454667334f45676c61bd08d495e5c1"
+          },
+          {
+            "file": "potential.dx",
+            "sha256": "2b1bbae8cf38aae212fcca8fb6905e98dd5f6a16b27a405cb996fe7825525204"
+          },
+          {
+            "file": "scene.pse",
+            "sha256": "b6355e54c8de08fbedfbe8c544fb40fde593511a48e927c59cd05cee4d697d24"
+          },
+          {
+            "file": "scene.png",
+            "sha256": "9b998cf1771c46c837a78582fc3a794af8fabe3c4db05cd9f5ebb4508dd223e7"
+          },
+          {
+            "file": "replay.pml",
+            "sha256": "81ce02a541a770d359fca92aa2bd93442bc343aa88d5bd20a8208578cf0a078c"
+          },
+          {
+            "file": "inputs/selection.pdb",
+            "sha256": "47c0469248ba32b765217b494c5ae015c0a8edba743ea90ab9e73e99958ce4d6"
+          }
+        ],
+        "original_manifest_sha256": "3c545ebd54e1b2492671d24c6200980d1b69c1a49df649a0bb4bd1d54582e98f",
+        "scientific_numbers_and_identities_preserved": true
+      }
+    },
+    "privacy": {
+      "passed": true,
+      "manifests": 5,
+      "sessions": 5,
+      "images": 6,
+      "private_path_hits": 0
+    },
+    "relocated_replay": {
+      "passed": true,
+      "isolated": true,
+      "molscene_import_blocked": true,
+      "solver_import_blocked": true,
+      "native_windows_opened": false,
+      "original_and_relocated_bytes_unchanged": true,
+      "passed_bundle_names": [
+        "animation",
+        "density",
+        "potential",
+        "timeline-project"
+      ]
+    },
+    "sdist_example_capture": {
+      "returncode": 0,
+      "seconds": 17.546000000002095
+    },
+    "sdist_example_scope": "Explicit --skip-potential secondary packaging check; not real potential science acceptance",
+    "legacy_v02": {
+      "capture": {
+        "returncode": 0,
+        "seconds": 26.671000000002095
+      },
+      "files": 64,
+      "images": [
+        {
+          "file": "alignment/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "angle/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "batch/0001-1hsg/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "batch/0002-1ubq/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "batch/0003-1ubq/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "contacts/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "dihedral/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "overview/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "pocket/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "sasa/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "surface/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        }
+      ],
+      "manifest_sha256": "d68cc13e0f3bbf22fa7f310f9beaa5a45cbf499410827a4fe9471ad415df6f7f",
+      "dimensions_checked_from_png_headers_only": true,
+      "workflows": 10,
+      "batch_completed": 3
+    },
+    "legacy_v03": {
+      "capture": {
+        "returncode": 0,
+        "seconds": 11.860000000000582
+      },
+      "files": 14,
+      "images": [
+        {
+          "file": "interface/scene.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "live/clean.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "live/overview.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "live/pocket.png",
+          "size": [
+            400,
+            300
+          ]
+        },
+        {
+          "file": "live/surface.png",
+          "size": [
+            400,
+            300
+          ]
+        }
+      ],
+      "manifest_sha256": "79e83a54cd842bf94604d49f400ab8ebb75be7967f8342170e457447cd422ebd",
+      "dimensions_checked_from_png_headers_only": true
+    },
+    "archived_legacy_privacy": {
+      "passed": true,
+      "manifests": 0,
+      "sessions": 13,
+      "images": 16,
+      "private_path_hits": 0
+    }
+  },
+  "offline_selftest": {
+    "capture": {
+      "returncode": 0,
+      "seconds": 6.375
+    },
+    "passed": true,
+    "tests": [
+      {
+        "name": "runtime",
+        "status": "passed"
+      },
+      {
+        "name": "pdb_mmcif_coordinates",
+        "status": "passed"
+      },
+      {
+        "name": "ca_selection",
+        "status": "passed"
+      },
+      {
+        "name": "representations",
+        "status": "passed"
+      },
+      {
+        "name": "distance_5_angstrom",
+        "status": "passed"
+      },
+      {
+        "name": "rigid_alignment",
+        "status": "passed"
+      },
+      {
+        "name": "session_restore",
+        "status": "passed"
+      },
+      {
+        "name": "ray_image",
+        "status": "passed"
+      },
+      {
+        "name": "portable_replay",
+        "status": "passed"
+      }
+    ]
+  },
+  "scientific_scope": [
+    "Camera interpolation and keyframe state/display cuts; not molecular trajectory interpolation.",
+    "DX/MRC raw scalar values, explicit map geometry and rigid registered copies; no automatic sigma interpretation.",
+    "Computed potential is LPBE in kBT/e with explicit radii, preparation, temperature and display conversion; not affinity/free energy/nonlinear PB or validated ligand parameterization.",
+    "Whole-grid extrema are not surface extrema.",
+    "Native OpenGL no-ray/volume and Figure preserve PSE; GPU opacity/pixels may differ. Other ray paths retain CPU ray.",
+    "External tools are separately installed; PDB2PQR requires independent Python >=3.11."
+  ],
+  "observed_numerical_evidence": {
+    "scope": "Independent installed-wheel actual APBS tests; distance in angstrom, homogeneous potentials in kBT/e, Born energies in kJ/mol.",
+    "homogeneous_charge_sign_dielectric_translation_and_convergence": {
+      "samples": {
+        "fine": [
+          {
+            "distance": 4.0,
+            "actual": 1.785808,
+            "expected": 1.783993258681991,
+            "relative_error": 0.001017235524393005
+          },
+          {
+            "distance": 6.0,
+            "actual": 1.189906,
+            "expected": 1.1893288391213273,
+            "relative_error": 0.000485282841622726
+          },
+          {
+            "distance": 8.0,
+            "actual": 0.8922767,
+            "expected": 0.8919966293409956,
+            "relative_error": 0.00031398174588551824
+          },
+          {
+            "distance": 10.0,
+            "actual": 0.7137793,
+            "expected": 0.7135973034727964,
+            "relative_error": 0.0002550409402024453
+          }
+        ],
+        "coarse": [
+          {
+            "distance": 4.0,
+            "actual": 1.791272,
+            "expected": 1.783993258681991,
+            "relative_error": 0.004080027367024014
+          },
+          {
+            "distance": 6.0,
+            "actual": 1.191535,
+            "expected": 1.1893288391213273,
+            "relative_error": 0.0018549629052152334
+          },
+          {
+            "distance": 8.0,
+            "actual": 0.8930026,
+            "expected": 0.8919966293409956,
+            "relative_error": 0.0011277740586840977
+          },
+          {
+            "distance": 10.0,
+            "actual": 0.714204,
+            "expected": 0.7135973034727964,
+            "relative_error": 0.0008501945344398357
+          }
+        ],
+        "negative": [
+          {
+            "distance": 4.0,
+            "actual": -1.785808,
+            "expected": -1.783993258681991,
+            "relative_error": 0.001017235524393005
+          },
+          {
+            "distance": 6.0,
+            "actual": -1.189906,
+            "expected": -1.1893288391213273,
+            "relative_error": 0.000485282841622726
+          },
+          {
+            "distance": 8.0,
+            "actual": -0.8922767,
+            "expected": -0.8919966293409956,
+            "relative_error": 0.00031398174588551824
+          },
+          {
+            "distance": 10.0,
+            "actual": -0.7137793,
+            "expected": -0.7135973034727964,
+            "relative_error": 0.0002550409402024453
+          }
+        ],
+        "dielectric": [
+          {
+            "distance": 4.0,
+            "actual": 0.8929041,
+            "expected": 0.8919966293409956,
+            "relative_error": 0.0010173476324398946
+          },
+          {
+            "distance": 6.0,
+            "actual": 0.594953,
+            "expected": 0.5946644195606636,
+            "relative_error": 0.000485282841622726
+          },
+          {
+            "distance": 8.0,
+            "actual": 0.4461384,
+            "expected": 0.4459983146704978,
+            "relative_error": 0.00031409385393240763
+          },
+          {
+            "distance": 10.0,
+            "actual": 0.3568897,
+            "expected": 0.3567986517363982,
+            "relative_error": 0.0002551810752610571
+          }
+        ],
+        "translated": [
+          {
+            "distance": 4.0,
+            "actual": 1.785808,
+            "expected": 1.783993258681991,
+            "relative_error": 0.001017235524393005
+          },
+          {
+            "distance": 6.0,
+            "actual": 1.189906,
+            "expected": 1.1893288391213273,
+            "relative_error": 0.000485282841622726
+          },
+          {
+            "distance": 8.0,
+            "actual": 0.8922767,
+            "expected": 0.8919966293409956,
+            "relative_error": 0.00031398174588551824
+          },
+          {
+            "distance": 10.0,
+            "actual": 0.7137793,
+            "expected": 0.7135973034727964,
+            "relative_error": 0.0002550409402024453
+          }
+        ]
+      },
+      "raw_physics_record_sha256": "18d828cb69b6fe14697903c811c65c23b613c43b4a32a40a3ce6b9291607cd62"
+    },
+    "born_dielectric_boundary": {
+      "actual_kj_mol": -229.7735526282,
+      "independent_kj_mol": -228.61080098772135,
+      "relative_error": 0.005086162313656876,
+      "source_hashes": {
+        "ion.pqr": "0df6d4081bae54397203c2ef7f98498cb73d62b2ca8c5db565a1d58e80cd142b",
+        "apbs-mol-auto.in": "b4286963a9c80af8a75ed72c131f86bd0f149f80c86b3a927205221d99ef5ef4"
+      },
+      "published_finite_grid_reference_kj_mol": -229.774,
+      "raw_physics_record_sha256": "f48a6d0154b596ba4717bb8427316e8fad0f52ebeacd87b2b1e9b73f1c27623f"
+    },
+    "public_ubiquitin_gallery_replay": {
+      "atom_count": 1231,
+      "pqr_atoms": 1231,
+      "shape": [
+        65,
+        65,
+        65
+      ],
+      "native_value_sha256": "fa7cb6db1d80496e34a74c0227f90b1016752d0d9d7804176086f1e138266fe8",
+      "ramp_values": [
+        -5.0,
+        0.0,
+        5.0
+      ],
+      "ramp_colors": [
+        "red",
+        "white",
+        "blue"
+      ],
+      "legend": "Potential [kBT/e]: -5 / 0 / +5\nClipped grid fraction: 5.42%",
+      "source_heavy_atoms": 602
+    },
+    "external_tools_observed": {
+      "apbs": {
+        "version": "3.4.1",
+        "architecture": "x86",
+        "returncode": 0,
+        "executable_sha256": "3828e369c76623e06ece1e0415076dd79257cb62db9c5db1f1f405e312ebdb96"
+      },
+      "pdb2pqr": {
+        "version": "3.7.1",
+        "architecture": "x64",
+        "returncode": 0,
+        "executable_sha256": "3dc5ed15d5c7715092b1a0ca3edae596889eb8dadd6ddf5aa51b50899ce71266"
+      }
+    }
+  }
+}

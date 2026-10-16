@@ -13,8 +13,18 @@ registered DX/MRC/CCP4 maps and optional APBS/PDB2PQR electrostatic potential.
 Contours use raw values; volume uses an explicit transfer ramp. Computed
 potentials use LPBE with recorded units, radii and preparation assumptions.
 [Advanced guide](docs/ADVANCED.md) covers tool configuration, project/replay
-semantics, state identity, resource limits and cancellation. The screenshots
-and numerical gallery below remain labelled historical v0.3 evidence.
+semantics, state identity, resource limits and cancellation.
+
+| v0.4 ubiquitin LPBE potential | v0.4 registered synthetic density |
+| --- | --- |
+| ![Actual APBS ubiquitin potential](docs/screenshots/ubiquitin-potential-v04.png) | ![Rigidly registered synthetic mesh](docs/screenshots/registered-density-v04.png) |
+
+Actual PDB2PQR/APBS output: PARSE, pH 7, 65³ grid, ±5 kBT/e ramp.
+The synthetic 17×15×13 field has a nonzero origin and a 90° z rotation plus
+(8, −2, 3) Å translation; it is illustrative, not experimental electron density.
+[Complete replayable bundles](https://github.com/c-chunhao/molscene/releases/tag/v0.4.0)
+and [v0.4 validation](docs/TESTING.md#recorded-v04-local-acceptance).
+The desktop capture and v0.3 gallery below remain labelled historical evidence.
 
 ![Native PyMOL viewport and MolScene interface results](docs/screenshots/workbench-v03.png)
 
