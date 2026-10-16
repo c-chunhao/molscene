@@ -23,6 +23,33 @@ def step_python(name):
 
 @unittest.skipUnless(WORKFLOW.is_file(), 'CI workflow is repository-only, not shipped in sdist')
 class CIStatusTests(unittest.TestCase):
+    def test_molecular_required_identities_cannot_skip(self):
+        import ast
+        gate=step_python('Require native GL, mouse, pick and lifecycle tests to have passed')
+        tree=ast.parse(gate)
+        node=next(n for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='required' for t in n.targets))
+        required=ast.literal_eval(node.value)
+        additions={
+            'test_real_3c70_bundle_reloads_all_world_geometry':'test_assembly_export.NativeAssemblyExportTests',
+            'test_dcd_bundle_replay_all_native_states_then_stride':'test_trajectory_export.ExportTests',
+            'test_isolated_molecular_controls':'test_molecular_gui.MolecularGuiTests',
+            'test_native_assemblies_trajectory_and_close':'test_molecular_gui.NativeMolecularTests'}
+        for name,case in additions.items(): self.assertEqual(required.get(name),case)
+        with tempfile.TemporaryDirectory() as directory:
+            previous=Path.cwd()
+            try:
+                os.chdir(directory); Path('artifacts').mkdir()
+                for skipped in additions:
+                    for outcome in ('ok','skipped','missing','spoof'):
+                        lines=[f'{name} ({case}) ... '+('skipped allocated desktop' if name==skipped and outcome in ('skipped','spoof') else 'ok')
+                               for name,case in required.items() if name!=skipped or outcome!='missing']
+                        Path('artifacts/tests-status.txt').write_text('\n'.join(lines)+'\n')
+                        Path('artifacts/tests.txt').write_text(f'{skipped} ({additions[skipped]}) ... ok\n')
+                        if outcome=='ok': exec(compile(tree,'molecular-ci-gate','exec'),{})
+                        else:
+                            with self.assertRaises(AssertionError): exec(compile(tree,'molecular-ci-gate','exec'),{})
+            finally: os.chdir(previous)
+
     def test_noisy_success_skip_failure_missing_and_spoofed_ok(self):
         import ast
         runner = step_python('Run full test suite with real PyMOL')
@@ -34,7 +61,7 @@ class CIStatusTests(unittest.TestCase):
             required_node = next(n for n in tree.body if isinstance(n, ast.Assign)
                                  and any(isinstance(t, ast.Name) and t.id == 'required' for t in n.targets))
             required = ast.literal_eval(required_node.value)
-            self.assertEqual(len(required), 13 if gate_name == gate_names[0] else 8)
+            self.assertEqual(len(required), 17 if gate_name == gate_names[0] else 8)
             target_name = ('test_native_daily_polar_labels_exports_and_narrow_navigation'
                            if gate_name == gate_names[0] else next(iter(required)))
             if gate_name == gate_names[0]:

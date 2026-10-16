@@ -189,6 +189,10 @@ jobs:
               'test_native_navigation_presets_and_interface_workflow': 'test_navigation_gui.NativeNavigationTests',
               'test_native_advanced_timeline_density_potential_and_close': 'test_advanced_gui.AdvancedNativeTests',
               'test_native_daily_polar_labels_exports_and_narrow_navigation': 'test_daily_gui.NativeDailyTests',
+              'test_real_3c70_bundle_reloads_all_world_geometry': 'test_assembly_export.NativeAssemblyExportTests',
+              'test_dcd_bundle_replay_all_native_states_then_stride': 'test_trajectory_export.ExportTests',
+              'test_isolated_molecular_controls': 'test_molecular_gui.MolecularGuiTests',
+              'test_native_assemblies_trajectory_and_close': 'test_molecular_gui.NativeMolecularTests',
               'test_native_volume_frames_and_cancel_cleanup': 'test_native_render.NativeRenderTests',
               'test_registered_density_relocated_replay': 'test_density_engine.DensityEngineTests',
               'test_real_h264_frame_count_and_duration': 'test_animation.AnimationEncoderTests',
@@ -225,6 +229,8 @@ jobs:
         run: xvfb-run -a python examples/reproduce_v04.py --tools "$MOLSCENE_TOOLS_CONFIG" --output artifacts/gallery-v04 2>&1 | tee artifacts/gallery-v04.txt
       - name: Run offline daily examples with CPU ray
         run: xvfb-run -a python examples/reproduce_v05.py --output artifacts/gallery-v05 2>&1 | tee artifacts/gallery-v05.txt
+      - name: Run offline assembly and trajectory examples
+        run: python examples/reproduce_v06.py --output artifacts/gallery-v06 2>&1 | tee artifacts/gallery-v06.txt
       - name: Upload integration evidence
         if: always()
         uses: actions/upload-artifact@v4

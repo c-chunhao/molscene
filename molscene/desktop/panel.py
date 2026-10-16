@@ -200,6 +200,9 @@ class WorkbenchPanel(QtWidgets.QWidget):
         form.addRow('Coloring', self.coloring)
         form.addRow('Single color', self.color)
         self._button(advanced, 'Apply coloring', 'apply_coloring', self._coloring)
+        from .molecular_panel import AssemblyControls
+        self.assembly = AssemblyControls(self)
+        disclosure(layout, 'Biological assembly', 'assembly_section').addWidget(self.assembly)
         self.tabs.addTab(self._scroll(tab), 'Structure')
         self.tabs.setTabToolTip(0, 'Structure & display')
 
@@ -422,6 +425,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
                 item.setToolTip(f"{obj['name']} · {obj['states']} state(s) · chains {', '.join(obj['chains'])}")
             for combo in (self.align_mobile, self.align_target):
                 self._refresh_combo(combo, names)
+            self.trajectory.refresh(names)
             self._refresh_combo(self.named_selections, self.controller.selections())
             scenes = self.controller.scenes()
             if [self.scene_list.item(i).text() for i in range(self.scene_list.count())] != scenes:
@@ -438,7 +442,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
             record = getattr(self, '_current_record', None)
             if record and self.tabs.currentIndex() == 3 and not self.jobs.active:
                 previous = record.get('snapshot_status')
-                current = self.controller.result_status(record)
+                current = previous if record.get('operation') == 'trajectory' else self.controller.result_status(record)
                 if previous != current:
                     self._source_status(record)
         except Exception as exc:
@@ -584,6 +588,9 @@ class WorkbenchPanel(QtWidgets.QWidget):
         form.addRow('Alignment cutoff (Å)', self.align_cutoff)
         self.align_cycles = self._spin(form, 'Refinement cycles', 'align_cycles', 0, 100, 5)
         self._button(alignment, 'Align live mobile object', 'run_align', self._align)
+        from .molecular_panel import TrajectoryControls
+        self.trajectory = TrajectoryControls(self)
+        disclosure(layout, 'Trajectory analysis', 'trajectory_section').addWidget(self.trajectory)
         layout.addStretch()
         self.tabs.addTab(self._scroll(tab), 'Analysis')
 
@@ -598,6 +605,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.result_source.setObjectName('result_source')
         self.result_source.setWordWrap(True)
         layout.addWidget(self.result_source)
+        self.check_source_button = self._button(layout, 'Check source', 'molecular_check_source', self._check_result_source)
         self.result_details = QtWidgets.QPlainTextEdit()
         self.result_details.setReadOnly(True)
         self.result_details.setObjectName('result_details')
@@ -770,6 +778,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._mutation_locked = True
         self.advanced.set_job_active(True)
         self.annotate_button.setEnabled(False)
+        self.check_source_button.setEnabled(False)
         self._job_operation = job['operation']
         self._job_output = job['output']
         self._job_state = job.get('parameters', {}).get('state', self.analysis_state.value())
@@ -777,6 +786,10 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self._job_state = job['parameters']['request']['state']
         elif job['operation'] == 'density':
             self._job_state = job['parameters']['request']['source_state']
+        elif job['operation'] == 'assembly':
+            self._job_state = job['parameters']['request']['state']
+        elif job['operation'] == 'trajectory':
+            self._job_state = job['parameters']['request']['reference_state']
         elif job['operation'] in ('timeline_project', 'animation'):
             self._job_state = job['parameters']['timeline']['keyframes'][0]['state']
         elif job['operation'] == 'tools':
@@ -821,6 +834,13 @@ class WorkbenchPanel(QtWidgets.QWidget):
             return
         if self._job_operation == 'tools':
             self.advanced.potential.show_tools_result(result)
+        if self._job_operation in ('assembly', 'trajectory'):
+            try:
+                from pathlib import Path
+                result = self.controller.complete_advanced_result(Path(self._job_output) / 'report.json')
+            except Exception as exc:
+                self.status.setText('Error: ' + str(exc))
+                return
         result.setdefault('output_path', self._job_output)
         record = self.controller.record_result(self._job_operation, result, self.jobs.job.get('parameters', {}), state=self._job_state)
         self._show_record(record)
@@ -879,7 +899,10 @@ class WorkbenchPanel(QtWidgets.QWidget):
 
     def _source_status(self, result):
         status = 'cancelled' if result.get('cancelled') else result.get('snapshot_status', 'unverified')
-        self.result_source.setText(f"State {result.get('state', '?')} · {status} · {result.get('calculated_at', '')}")
+        prefix = 'Last checked source' if result.get('operation') == 'trajectory' else 'Source'
+        self.result_source.setText(f"{prefix}: {status} · state {result.get('state', '?')} · {result.get('calculated_at', '')}")
+        self.check_source_button.setEnabled(not getattr(self, '_mutation_locked', False) and not result.get('cancelled'))
+        self.check_source_button.setToolTip('Recheck original selected states, topology and local files. Trajectory source status is checked on selection and on this action; the refresh timer retains the last checked status.')
         self.result_source.setToolTip('Source fingerprint: ' + str(result.get('source_fingerprint', 'unverified')))
 
     def _annotation_available(self, result):
@@ -887,14 +910,26 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.annotate_button.setEnabled(supported and not getattr(self, '_mutation_locked', False) and not result.get('cancelled'))
         self.annotate_button.setToolTip('Saved snapshots cannot annotate the live scene' if result.get('operation') in ('coordinates', 'session_save') else 'Annotate current supported analysis')
 
+    def _check_result_source(self):
+        if getattr(self, '_mutation_locked', False):
+            raise ValueError('Wait for the active worker before checking sources')
+        record = self._record()
+        self.controller.result_status(record)
+        self._source_status(record)
+
     def _populate_result(self, result):
-        import json
         self._source_status(result)
         self._annotation_available(result)
         if result.get('operation') in ('coordinates', 'session_save') and result.get('cancelled'):
             self.result_summary.setText('Cancelled save · no successful snapshot published')
         elif result.get('operation') in ('coordinates', 'session_save'):
             self.result_summary.setText('Saved snapshot · ' + ('coordinates' if result['operation'] == 'coordinates' else 'complete session') + '\nComplete files and output directory are in Details and tables.')
+        elif result.get('operation') == 'assembly':
+            self.result_summary.setText(f"Biological assembly {result.get('assembly_id', '?')} · {len(result.get('copies', []))} copies\nComplete atomic provenance in copies CSV/report. Select this result, then use Structure → Load selected assembly copies.")
+        elif result.get('operation') == 'trajectory':
+            from pathlib import Path
+            destination = Path(result.get('output_path') or '.').name
+            self.result_summary.setText(f"Trajectory · {len(result.get('frames', []))} frames · {len(result.get('atoms', []))} atoms · {len(result.get('residues', []))} residues\nRMSD, RMSF and Rg in Å. Plots: rmsd.svg, rmsf.svg, rg.svg\nOutput directory: {destination} · complete paths in Details")
         elif result.get('operation') == 'interface':
             def area(value):
                 return format(value, '.6g') if isinstance(value, (int, float)) else '?'
@@ -904,9 +939,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
                 f"Buried B: {area(result.get('partner_b', {}).get('buried_area_angstrom2'))} Å²")
         else:
             self.result_summary.setText(str(result.get('kind', result.get('operation', 'Analysis'))))
-        summary = {key: (f'{len(value)} rows' if isinstance(value, list) else value)
-                   for key, value in result.items()}
-        self.result_details.setPlainText(json.dumps(summary, indent=2, ensure_ascii=False, allow_nan=False))
+        from .molecular_panel import preview_json
+        self.result_details.setPlainText(preview_json(result, limit=32000, indent=2, summarize_tables=True))
         self.result_tables.blockSignals(True)
         previous = self.result_tables.currentText()
         self.result_tables.clear()
@@ -979,7 +1013,6 @@ class ResultTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or role not in (QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole):
             return None
-        import json
         value = self.rows[index.row()].get(self.columns[index.column()], '')
         if role == QtCore.Qt.DisplayRole and isinstance(value, dict) and 'object' in value:
             site = '/'.join(str(value.get(key, '')) for key in ('segi', 'chain', 'resi', 'resn'))
@@ -990,7 +1023,8 @@ class ResultTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole and isinstance(value, float):
             return format(value, '.8g')
         if isinstance(value, (dict, list)):
-            return json.dumps(value, ensure_ascii=False, sort_keys=True, allow_nan=False)
+            from .molecular_panel import preview_json
+            return preview_json(value)
         return str(value)
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
