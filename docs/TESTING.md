@@ -1,5 +1,19 @@
 # Testing and reproducibility
 
+## Recorded v0.5 local validation
+
+Local actual-test evidence only. Source freeze maps describe each gate input; they do not assert all frozen files equal the final public commit. Final commit and deltas belong to source-provenance/publication sidecars. Hosted CI and publication are not established here; actual CI job results belong to release publication-evidence.json. No unobserved APBS, PDB2PQR or FFmpeg version is inferred.
+
+| Run | Discovered | Passed | Skipped | Failures/errors | Seconds |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Source backend | 512 | 490 | 22 | 0/0 | 1275.344 |
+| Source plain | 512 | 175 | 337 | 0/0 | 83.312 |
+| Installed required | 13 | 13 | 0 | 0/0 | 717.860 |
+
+All 13 canonical required cases actually passed in source backend and source-free installed runs. Plain dependency/platform skips establish their stated limitations. The 45 current runtime modules match the audited installed wheel and each gate input. Exact passed IDs, sanitized skip reasons, per-input freeze hashes and observed environment versions are retained in validation-v05.json.
+
+[Machine-readable v0.5 local record](validation-v05.json).
+
 ## v0.5 release acceptance
 
 The v0.5 daily workflow has focused tests in `test_polar`, `test_polar_workflow`,
