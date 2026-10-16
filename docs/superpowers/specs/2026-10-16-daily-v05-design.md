@@ -115,15 +115,21 @@ it does not execute that expression. Applying custom retains native expression
 execution semantics rather than promising a safe literal-template evaluation.
 Applying accepts size 8..48 points, color and a maximum of 500 labels; validate
 everything before mutation. Label color must resolve through the native color
-API. Style applies only to selected label targets. Clear affects the explicit
-selected membership. Retain raw expressions and existing `set_labels` compatibility.
+API. Literal label text and per-atom color apply only to selected targets. Native
+label_size is object-state scoped in the tested backend: apply it explicitly to
+each target source object at the requested state, report size_scope and
+size_objects, and disclose that other labels in the same object/state share
+that size. Preserve size settings of unrelated objects and states. Clear affects
+the explicit selected membership. Retain raw expressions and existing `set_labels` compatibility.
 Label mutation intentionally changes labels/style, preserving coordinates, bonds,
-charges, B-factors, camera, current frame and unrelated labels/settings.
+charges, B-factors, camera, current frame and unrelated label text/color and unrelated objects/states settings.
 
 Support GUI preview/apply/clear plus readable controls. Tests cover CA/P/fallback,
 hetero residues, partial selection, insertion/blank-chain/segment/alt identities,
 literal unusual text, absent states, limits, no-change preview/validation failure,
-unrelated label preservation and PSE persistence.
+unrelated label text/color preservation, explicit shared object-state size and
+PSE persistence. The size scope corrects the initial per-target assumption using
+actual installed native rendering evidence and the public setting metadata.
 
 ## 3. Coordinate and full-session persistence without rendering
 
@@ -248,3 +254,11 @@ Current public source marks pi interactions and MTZ loading as Incentive-only;
 these are deferred. No dependency on those APIs is introduced. The public
 `find_pairs` description explicitly warns that orientation mode omits atom-type
 checks; native donor/acceptor filtering is part of the MolScene contract.
+
+Native label-setting comparison checked 2026-10-16:
+- https://github.com/schrodinger/pymol-open-source/blob/master/layer1/SettingInfo.h
+- https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/setting.py
+
+The current public metadata declares label_size as ostate and label_color as atom.
+Actual installed native characterization, rather than this moving upstream source
+alone, establishes the size-scope correction above.
