@@ -9,6 +9,60 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+
+
+class PersistenceReportBoundsTests(unittest.TestCase):
+    def test_supported_200000_atom_frozen_report_is_readable_with_existing_bound(self):
+        from molscene.advanced import read_json, validate_bundle
+        from molscene.artifacts import sha256, write_json
+        from molscene.bundles import Bundle
+        from molscene.desktop.controller import WorkbenchController
+        # Exercise real controller serialization with a synthetic maximum-size
+        # membership. Native membership/snapshot fidelity has a separate test.
+        members=[dict(object='protein_chain_A',index=index) for index in range(1,200001)]
+        context=dict(schema_version=1,session_epoch=0,members={},maps={},files={},timeline=None,
+            display_snapshot=None,selection=dict(state=2,members=members),verified=True)
+        with tempfile.TemporaryDirectory(prefix='persistence-report-bound-') as directory:
+            root=Path(directory).resolve(); output=root/'large'
+            controller=WorkbenchController(None,root)
+            with patch('molscene.advanced_snapshot.capture_identity',return_value=context), \
+                    patch.object(controller,'_save_snapshot',side_effect=lambda path: path.write_bytes(b'captured PSE fixture')):
+                job_path=controller.prepare_job('coordinates',dict(request=dict(selection='chosen',state=2)),output=output)
+            job=json.loads(job_path.read_text(encoding='utf-8'))
+            request=job['parameters']['request']
+            self.assertEqual(job['gui_context']['parameters'],request)
+            names=('objects/0001.cif','source.pse','membership.csv','replay.pml','report.json','manifest.json')
+            with Bundle(output,protected=(),inventory=names,new_directory_only=True) as bundle:
+                (bundle.stage/'objects').mkdir()
+                for name in names[:-2]: (bundle.stage/name).write_text('synthetic payload\n',encoding='utf-8')
+                inputs=dict(session=dict(path='source.pse',sha256=sha256(bundle.stage/'source.pse'),bytes=18))
+                report=dict(schema_version=2,tool='molscene',tool_version='test',pymol_version='test',
+                    created_at='2026-10-16T00:00:00+00:00',operation='coordinates',passed=True,
+                    result_kind='saved_snapshot',snapshot_status='saved',output_path=str(output),
+                    snapshot_id=inputs['session']['sha256'],inputs=inputs,parameters=request,
+                    object_files=[dict(number=1,path='objects/0001.cif',source_object='protein_chain_A',
+                        source_state=2,atom_count=200000,source_indices=list(range(1,200001)),
+                        source_object_matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])],
+                    reload_verification=dict(passed=True,atom_count=200000,core_identity=['element','name','resn','resi','chain','segi','alt'],
+                        max_euclidean_error_angstrom=0.0,method='synthetic report-size fixture',
+                        files=[dict(path='objects/0001.cif',atom_count=200000,passed=True,reload_state=1,
+                            core_identity=['element','name','resn','resi','chain','segi','alt'],max_euclidean_error_angstrom=0.0)]),
+                    artifacts=dict(report='report.json',manifest='manifest.json',replay='replay.pml',session='source.pse',membership='membership.csv'),
+                    limitations=['Synthetic payloads establish report serialization bounds only.'],
+                    replay_contract='Relative files and public PyMOL calls; no MolScene dependency',
+                    artifact_hashes={name:sha256(bundle.stage/name) for name in names[:-2]})
+                write_json(bundle.stage/'report.json',report)
+                bundle.publish()
+            report_bytes=(output/'report.json').stat().st_size
+            print('200,000-atom full-shaped report bytes:',report_bytes)
+            loaded=validate_bundle(output/'report.json')
+            self.assertEqual(loaded['parameters'],request)
+            self.assertEqual(loaded['object_files'][0]['source_indices'],list(range(1,200001)))
+            self.assertLessEqual((output/'report.json').stat().st_size,8*1024*1024)
+            oversized=root/'oversized.json'; oversized.write_bytes(b' '*(8*1024*1024+1))
+            with self.assertRaisesRegex(ValueError,'bounded'):
+                read_json(oversized)
 
 
 class PersistenceValidationTests(unittest.TestCase):
@@ -215,6 +269,45 @@ class PersistenceTests(unittest.TestCase):
             self.assertEqual(reload.cmd.get_setting_float('label_size','source_a',state=2),18)
         self.assertEqual(report['result_kind'],'saved_snapshot')
         self.assertEqual(report['snapshot_status'],'saved')
+
+    def test_relocated_replay_with_unicode_and_apostrophe_path(self):
+        from molscene.persistence import export_persistence
+        from pymol2 import PyMOL
+        source=self.fixture(); output=self.root/'ordinary'
+        export_persistence(source,output,'coordinates',dict(selection='source_a and alt A',state=2))
+        moved=self.root/"已保存's coordinates"; output.rename(moved)
+        with PyMOL() as replay:
+            replay.cmd.do('@'+str(moved/'replay.pml'))
+            atoms=replay.cmd.get_model('all',state=1).atom
+            self.assertEqual(len(atoms),1)
+            atom=atoms[0]
+            self.assertEqual((atom.symbol,atom.name,atom.resn,atom.resi,atom.chain,atom.segi,atom.alt),
+                             ('C','CA','GLY','12A','','SG1','A'))
+            self.assertLessEqual(math.dist(atom.coord,[11.23456,30.34567,33.45678]),0.001)
+
+    def test_grouped_frozen_membership_native_subset_parity(self):
+        from molscene.desktop.controller import WorkbenchController
+        from molscene.worker import run_job
+        self.fixture()
+        expression='(source_a and (alt A or name N)) or (source_b and alt B)'
+        self.cmd.select('chosen_group',expression,state=2)
+        expected=set(self.cmd.index('chosen_group'))
+        self.assertEqual(len(expected),3)
+        controller=WorkbenchController(self.cmd,self.root); output=self.root/'grouped'
+        job_path=controller.prepare_job('coordinates',dict(request=dict(selection='chosen_group',state=2)),output=output)
+        job=json.loads(job_path.read_text(encoding='utf-8'))
+        frozen=job['parameters']['request']['selection']
+        self.cmd.select('frozen_check',frozen,state=2)
+        self.assertEqual(set(self.cmd.index('frozen_check')),expected)
+        self.cmd.select('chosen_group','none'); self.cmd.delete('frozen_check')
+        self.assertEqual(run_job(job_path),0)
+        with (output/'membership.csv').open(newline='',encoding='utf-8') as handle:
+            rows=list(csv.DictReader(handle))
+        self.assertEqual({(row['source_object'],int(row['source_index'])) for row in rows},expected)
+        self.assertEqual({row['source_state'] for row in rows},{'2'})
+        loaded=controller.load_advanced_result(output/'report.json')
+        self.assertEqual(loaded['parameters'],job['gui_context']['parameters'])
+        self.assertEqual(loaded['snapshot_id'],job['gui_context']['snapshot_id'])
 
     def test_protected_collision_pre_cancel_and_cancel_between_object_files(self):
         from molscene.persistence import export_persistence

@@ -821,7 +821,11 @@ class WorkbenchController:
             timeline=parameters.get('timeline'), selection=selection,
             state=request.get('state', 1), session_epoch=self._session_epoch)
         if selection is not None:
-            request['selection'] = ' or '.join(self._atom_expression(atom) for atom in context['selection']['members'])
+            if operation == 'coordinates':
+                from molscene.persistence import _frozen_selection
+                request['selection'] = _frozen_selection(context['selection']['members'])
+            else:
+                request['selection'] = ' or '.join(self._atom_expression(atom) for atom in context['selection']['members'])
         sources = source_paths(parameters)
         for source in sources:
             if operation != 'tools' and source.is_file():

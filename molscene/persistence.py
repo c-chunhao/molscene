@@ -16,6 +16,27 @@ MAX_ATOMS = 200_000
 MAX_OBJECTS = 1_000
 
 
+def _frozen_selection(members, *, object_key='object', index_key='index'):
+    """Encode exact membership once per object, merging only adjacent indices."""
+    groups = defaultdict(set)
+    for row in members:
+        groups[row[object_key]].add(row[index_key])
+    clauses = []
+    for name, indices in sorted(groups.items()):
+        spans = []
+        ordered = sorted(indices)
+        start = end = ordered[0]
+        for index in ordered[1:]:
+            if index == end + 1:
+                end = index
+            else:
+                spans.append(str(start) if start == end else f'{start}-{end}')
+                start = end = index
+        spans.append(str(start) if start == end else f'{start}-{end}')
+        clauses.append('(%'+name+' and index '+'+'.join(spans)+')')
+    return ' or '.join(clauses) if clauses else 'none'
+
+
 def validate_persistence_request(operation, request):
     """Normalize only public, backend-free persistence parameters."""
     if operation not in ('coordinates', 'session_save') or not isinstance(request, dict):
@@ -176,6 +197,7 @@ def export_persistence(input_session, output_dir, operation, request, *, cancell
         version = cmd.get_version()[0]
         if operation == 'coordinates':
             rows = _members(cmd, request['selection'], request['state'])
+            request['selection'] = _frozen_selection(rows, object_key='source_object', index_key='source_index')
             if request['format'] == 'pdb':
                 _pdb_preflight(rows)
             groups = defaultdict(list)
@@ -209,7 +231,7 @@ def export_persistence(input_session, output_dir, operation, request, *, cancell
                     for completed, record in enumerate(object_files, 1):
                         _cancel(cancelled)
                         members = groups[record['source_object']]
-                        expression = ' or '.join('(%'+row['source_object']+' and index '+str(row['source_index'])+')' for row in members)
+                        expression = _frozen_selection(members, object_key='source_object', index_key='source_index')
                         path = bundle.stage/record['path']
                         cmd.save(str(path), expression, state=request['state'], format=request['format'], quiet=1)
                         diagnostic = _verify(reload.cmd, path, members)
