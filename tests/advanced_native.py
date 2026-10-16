@@ -270,7 +270,10 @@ def run_native(directory):
             assert map_fingerprint(cmd, original_map) == map_before
             density.visible.setChecked(False)
             click('density_apply_display')
-            density.maps.setCurrentIndex(density.maps.findData(original_map['name']))
+            original_index = next((i for i in range(density.maps.count())
+                if tuple(density.maps.itemData(i) or ()) == (original_map['name'], original_map['state'])), -1)
+            assert original_index >= 0, 'Original map state is missing from density inventory'
+            density.maps.setCurrentIndex(original_index)
             density.kind.setCurrentText('volume')
             density.volume_ramp.setText('[0,0,0,1,0, 0.15,0,1,1,0.15, 0.4,0,1,0,0.5, 0.8,1,0.5,0,0.8, 1.4,1,0,0,1]')
             density.visible.setChecked(True)
