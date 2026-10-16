@@ -272,14 +272,14 @@ class QtWorkbenchTests(unittest.TestCase):
     def test_repeated_export_history_is_bounded_and_preserves_science(self):
         with tempfile.TemporaryDirectory() as directory:
             result = subprocess.run([sys.executable, '-B', str(Path(__file__).resolve()), '--repeat-exports', directory],
-                                    cwd=ROOT, env=dict(os.environ, PYTHONPATH=str(ROOT), QT_QPA_PLATFORM='offscreen'),
-                                    capture_output=True, text=True, timeout=90)
+                                    cwd=ROOT, env=dict(os.environ, PYTHONPATH=str(ROOT)),
+                                    capture_output=True, text=True, timeout=150)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_qt_controls_and_process_failure_cancel_recovery(self):
         with tempfile.TemporaryDirectory() as directory:
             result = subprocess.run([sys.executable, '-B', str(Path(__file__).resolve()), '--qt', directory],
-                                    cwd=ROOT, env=dict(os.environ, PYTHONPATH=str(ROOT), QT_QPA_PLATFORM='offscreen'),
+                                    cwd=ROOT, env=dict(os.environ, PYTHONPATH=str(ROOT)),
                                     capture_output=True, text=True, timeout=150)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertTrue((Path(directory) / 'qt-passed.json').is_file())
@@ -320,7 +320,10 @@ def qt_test(directory):
     from molscene.desktop.controller import WorkbenchController
     from molscene.desktop.panel import WorkbenchPanel
     from molscene.desktop.jobs import JobManager
-    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    # Only the control fixture is offscreen. Figure workers inherit the real
+    # display platform because no-ray export now requires native OpenGL.
+    with patch.dict(os.environ, QT_QPA_PLATFORM='offscreen'):
+        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     root = Path(directory)
     def wait(predicate, timeout=7000):
         for _ in range(timeout // 10):
@@ -457,7 +460,9 @@ def qt_test(directory):
         camera = cmd.get_view()
         QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_export'), QtCore.Qt.LeftButton)
         assert manager.active, panel.status.text()
-        wait(lambda: not manager.active)
+        # Native Figure export starts a supervised Qt/OpenGL process. Keep its
+        # startup budget separate from ordinary control/worker responsiveness.
+        wait(lambda: not manager.active, timeout=30000)
         assert (destination/'report.json').is_file(), panel.status.text()
         assert cmd.get_view() == camera
         with Image.open(destination/'scene.png') as image:
@@ -506,7 +511,8 @@ def repeated_export_test(directory):
     from molscene import analysis
     from molscene.desktop.controller import WorkbenchController
     from molscene.desktop.panel import WorkbenchPanel
-    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    with patch.dict(os.environ, QT_QPA_PLATFORM='offscreen'):
+        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     root = Path(directory)
     with PyMOL() as runtime:
         cmd = runtime.cmd
@@ -517,8 +523,8 @@ def repeated_export_test(directory):
         controller = WorkbenchController(cmd, root)
         panel = WorkbenchPanel(controller)
         panel.show()
-        def wait():
-            for _ in range(1000):
+        def wait(timeout=10000):
+            for _ in range(timeout // 10):
                 app.processEvents()
                 if not panel.jobs.active:
                     assert not panel.status.text().startswith('Error'), panel.status.text()
@@ -549,7 +555,7 @@ def repeated_export_test(directory):
             destination = root / f'export{index}'
             panel.export_directory.setText(str(destination))
             QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_export'), QtCore.Qt.LeftButton)
-            wait()
+            wait(timeout=30000)
             report_path = destination / 'report.json'
             report = json.loads(report_path.read_text(encoding='utf-8'))
             assert len(report['analysis_records']) == 1, 'Export recursively embedded earlier job history'
