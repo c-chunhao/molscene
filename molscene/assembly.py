@@ -51,7 +51,9 @@ def expand_operations(expression, operators):
     """Expand bounded lists/ranges/products, composing rightmost first."""
     if not isinstance(expression,str) or not expression or len(expression)>4096:
         raise ValueError('Missing or oversized operator expression')
-    expr = re.sub(r'\s+', '', expression)
+    # Normalize grammar boundaries only: whitespace inside an identifier must
+    # remain visible to validation, so '1 2' cannot become operator '12'.
+    expr = re.sub(r'\s*([(),-])\s*', r'\1', expression.strip())
     if '(' in expr or ')' in expr:
         groups = re.findall(r'\(([^()]*)\)',expr)
         if ''.join('('+g+')' for g in groups) != expr:

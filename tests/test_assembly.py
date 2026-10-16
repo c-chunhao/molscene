@@ -60,6 +60,19 @@ class AssemblyTests(unittest.TestCase):
             {str(n): [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1] for n in (1,2)})],
             [['1','1'], ['1','2'], ['2','1'], ['2','2']])
 
+    def test_operator_whitespace_preserves_identifier_boundaries(self):
+        identity=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+        operators={key:identity for key in ('1','2','12','X0','T')}
+        for expression in ('1 2', '(1\t2)', 'X 0', '(X\n0)', '(1, X 0)'):
+            with self.subTest(expression=expression), self.assertRaises(ValueError):
+                assembly.expand_operations(expression,operators)
+        for expression,expected in (
+                ('  X0  ', [['X0']]),
+                (' 1 , 2 ', [['1'], ['2']]),
+                (' ( 1 - 2 , X0 ) \t ( T ) ', [['1','T'], ['2','T'], ['X0','T']])):
+            with self.subTest(expression=expression):
+                self.assertEqual([row['operator_ids'] for row in assembly.expand_operations(expression,operators)],expected)
+
     def test_missing_duplicate_incomplete_metadata(self):
         text = (DATA/'assembly-original.cif').read_text()
         replacements = [('R 0 -1 0 0 1 0 0 0 0 0 1 0', 'R 2 -1 0 0 1 0 0 0 0 0 1 0'),
