@@ -81,6 +81,9 @@ In addition to coordinate-state fingerprints, bind a chemistry fingerprint of
 native donor/acceptor memberships, formal charges and molecular bond topology
 (including bonded neighbors influencing orientation). A same-coordinate bond or
 typing edit must invalidate a previously calculated polar result.
+Fingerprint the explicit calculation state independently of the displayed frame;
+unrelated molecules absent from that state do not make a valid partner selection
+fail. Recalculation/annotation still validates its original members and chemistry.
 
 Validate with actual bonded donor/hydrogen and carbonyl acceptor fragments, a
 nonpolar distance-only negative, wrong orientation, out-of-cutoff geometry,
