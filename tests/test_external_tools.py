@@ -119,6 +119,28 @@ class ExternalToolsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.run_tool([])
 
+    def test_truncated_executable_headers_raise_value_error(self):
+        header = bytearray(64)
+        header[:2] = b'MZ'
+        struct.pack_into('<I', header, 60, 64)
+        fixtures = (header + b'PE\0\0', header + b'PE\0\0\x64',
+                    b'\xce\xfa\xed\xfe', b'\xcf\xfa\xed\xfe\x07\0\0')
+        for index, content in enumerate(fixtures):
+            with self.subTest(header=index):
+                executable = self.root / ('truncated-' + str(index) + '.exe')
+                executable.write_bytes(content)
+                executable.chmod(0o700)
+                self.config['tools']['apbs']['argv'] = [str(executable)]
+                path = self.root / 'tools.json'
+                path.write_text(json.dumps(self.config))
+                try:
+                    tools.load_tools(path)
+                except Exception as exc:
+                    self.assertIsInstance(exc, ValueError)
+                else:
+                    self.fail('Truncated executable header was accepted')
+        self.assertFalse(list(self.root.glob('*.log')))
+
     def test_load_tools_rejects_unknown_keys_duplicates_and_boolean_version(self):
         path = self.root / 'tools.json'
         for document in ('{"schema_version":1,"schema_version":1,"tools":{}}',
@@ -182,6 +204,60 @@ class ExternalToolsTests(unittest.TestCase):
         with self.assertRaises(CancelledError):
             tools.probe_tool('apbs', self.config, work_dir=self.root,
                              cancelled=lambda: flag[0], progress=progress)
+
+    def test_ready_guardian_and_launcher_death_preserves_error_and_cleanup(self):
+        from molscene.bundles import CancelledError
+        for cancel_after_death in (False, True):
+            with self.subTest(cancel_after_death=cancel_after_death):
+                launched, ownership = [], []
+                real_popen = subprocess.Popen
+                def launch(*args, **kwargs):
+                    # Observe the real launcher so the callback can wait until
+                    # all its pipe handles close; no process behavior is faked.
+                    process = real_popen(*args, **kwargs)
+                    launched.append(process)
+                    return process
+                def progress(record):
+                    if record['stage'] != 'tool_ready':
+                        return
+                    ownership.append(record['pid'])
+                    if os.name == 'nt':
+                        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+                        kernel.OpenProcess.restype = ctypes.c_void_p
+                        handle = kernel.OpenProcess(1 | 0x100000, False, record['pid'])
+                        self.assertTrue(handle)
+                        try:
+                            self.assertTrue(kernel.TerminateProcess(ctypes.c_void_p(handle), 9))
+                            self.assertEqual(kernel.WaitForSingleObject(ctypes.c_void_p(handle), 3000), 0)
+                        finally:
+                            kernel.CloseHandle(ctypes.c_void_p(handle))
+                    else:
+                        import signal
+                        os.kill(record['pid'], signal.SIGKILL)
+                    launched[-1].wait(timeout=3)
+                error = None
+                with patch.object(tools.subprocess, 'Popen', side_effect=launch):
+                    try:
+                        tools.probe_tool('apbs', self.config, work_dir=self.root,
+                                         progress=progress,
+                                         cancelled=lambda: cancel_after_death and bool(ownership))
+                    except Exception as exc:
+                        error = exc
+                self.assertTrue(ownership)
+                self.assertFalse(alive(ownership[0]))
+                self.assertTrue(all(process.poll() is not None for process in launched))
+                self.assertTrue(all(process.stdin.closed and process.stdout.closed for process in launched))
+                self.assertFalse(list(self.root.rglob('.molscene-tool-*')))
+                if cancel_after_death:
+                    self.assertIsInstance(error, CancelledError)
+                else:
+                    self.assertIsInstance(error, tools.ExternalToolError)
+                    self.assertEqual(error.result['guardian_pid'], ownership[0])
+                    self.assertEqual(error.result['argv'][-1], '--version')
+                    json.dumps(error.result, allow_nan=False)
+                print('READY_BOUNDARY_CLEANUP ' + json.dumps(dict(guardian_pid=ownership[0],
+                      launcher_pid=launched[-1].pid, cancelled=cancel_after_death,
+                      exception=type(error).__name__)), flush=True)
 
     def assert_pids_gone(self, path):
         records = [json.loads(line) for line in path.read_text().splitlines()]

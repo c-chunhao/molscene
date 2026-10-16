@@ -45,13 +45,13 @@ def _architecture(path):
         if header[:2] == b'MZ' and len(header) == 64:
             handle.seek(struct.unpack_from('<I', header, 60)[0])
             pe = handle.read(6)
-            machine = struct.unpack('<H', pe[4:])[0] if pe[:4] == b'PE\0\0' else 0
+            machine = struct.unpack('<H', pe[4:])[0] if len(pe) == 6 and pe[:4] == b'PE\0\0' else 0
             value = {0x14c: 'x86', 0x8664: 'x64'}.get(machine)
         elif header[:4] == b'\x7fELF' and len(header) >= 20:
             endian = '<' if header[5] == 1 else '>'
             machine = struct.unpack_from(endian + 'H', header, 18)[0]
             value = {3: 'x86', 62: 'x64'}.get(machine)
-        elif header[:4] in (b'\xce\xfa\xed\xfe', b'\xcf\xfa\xed\xfe'):
+        elif len(header) >= 8 and header[:4] in (b'\xce\xfa\xed\xfe', b'\xcf\xfa\xed\xfe'):
             value = {7: 'x86', 0x1000007: 'x64'}.get(struct.unpack_from('<I', header, 4)[0])
         else:
             value = None
@@ -214,8 +214,12 @@ def _managed(name, entry, args, cwd, log_prefix, cancelled=None, progress=None, 
                     if progress:
                         progress(dict(stage='tool_ready', completed=0, total=1, message=name, pid=record['pid']))
                     _check_cancel(cancelled)
-                    process.stdin.write(b'G')
-                    process.stdin.flush()
+                    try:
+                        process.stdin.write(b'G')
+                        process.stdin.flush()
+                    except OSError as exc:
+                        _check_cancel(cancelled)
+                        raise ExternalToolError('Guardian control pipe closed before tool start', result) from exc
                 elif record.get('type') in ('result', 'error'):
                     terminal = record
                     break
@@ -225,18 +229,42 @@ def _managed(name, entry, args, cwd, log_prefix, cancelled=None, progress=None, 
             if terminal['type'] == 'error':
                 raise ExternalToolError(terminal.get('message') or 'External tool failed', result)
         finally:
-            process.stdin.close()  # Cancellation, exception, or normal completion.
+            active_error = sys.exc_info()[1]
+            cleanup_errors = []
             try:
-                process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=2)
-            if os.name != 'nt':
+                process.stdin.close()  # May flush a failed buffered GO byte.
+            except OSError as exc:
+                cleanup_errors.append('control pipe close: ' + str(exc))
+            finally:
                 try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            reader.join(timeout=1)
+                    try:
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        try:
+                            process.kill()
+                        finally:
+                            process.wait(timeout=2)
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    cleanup_errors.append('guardian wait: ' + str(exc))
+                finally:
+                    try:
+                        if os.name != 'nt':
+                            try:
+                                os.killpg(process.pid, signal.SIGKILL)
+                            except ProcessLookupError:
+                                pass
+                    except OSError as exc:
+                        cleanup_errors.append('process group cleanup: ' + str(exc))
+                    finally:
+                        reader.join(timeout=1)
+                        if reader.is_alive():
+                            cleanup_errors.append('guardian protocol reader did not finish')
+            if cleanup_errors:
+                result['cleanup_errors'] = cleanup_errors
+                # Preserve the original error, especially shared cancellation;
+                # diagnostics are added to the same result object in flight.
+                if active_error is None:
+                    raise ExternalToolError('Guardian cleanup failed', result)
         _check_cancel(cancelled)
         if progress:
             progress(dict(stage='tool_finished', completed=1, total=1, message=name))
