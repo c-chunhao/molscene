@@ -16,6 +16,11 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.selection_summary.setWordWrap(True)
         self.selection_summary.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         root.addWidget(self.selection_summary)
+        self.page_selector = QtWidgets.QComboBox()
+        self.page_selector.setObjectName('page_selector')
+        self.page_selector.setAccessibleName('Workbench page')
+        self.page_selector.addItems(['Structure', 'Figure', 'Analysis', 'Results', 'Advanced'])
+        root.addWidget(self.page_selector)
         self.tabs = QtWidgets.QTabWidget()
         self.tabs.setObjectName('workbench_tabs')
         root.addWidget(self.tabs)
@@ -46,6 +51,9 @@ class WorkbenchPanel(QtWidgets.QWidget):
         from .advanced_panel import AdvancedPanel
         self.advanced = AdvancedPanel(self)
         self.tabs.addTab(self.advanced, 'Advanced')
+        self.page_selector.currentIndexChanged.connect(self._select_page)
+        self.tabs.currentChanged.connect(self._tab_changed)
+        self._compact_navigation()
         # Long molecule names and output paths must never resize the native dock.
         for label in self.findChildren(QtWidgets.QLabel):
             label.setWordWrap(True)
@@ -71,6 +79,30 @@ class WorkbenchPanel(QtWidgets.QWidget):
         if isinstance(parent, QtWidgets.QDockWidget) and parent.parentWidget() is not None:
             self.close_guard = NativeCloseGuard(self, parent, parent.parentWidget())
 
+    def _select_page(self, index):
+        if getattr(self, '_mutation_locked', False) and index != 3:
+            index = 3
+        self.tabs.setCurrentIndex(index)
+        self._tab_changed(index)
+
+    def _tab_changed(self, index):
+        if getattr(self, '_mutation_locked', False) and index != 3:
+            self.tabs.setCurrentIndex(3)
+            index = 3
+        self.page_selector.blockSignals(True)
+        self.page_selector.setCurrentIndex(index)
+        self.page_selector.blockSignals(False)
+
+    def _compact_navigation(self):
+        compact = self.width() <= 540
+        self.page_selector.setVisible(compact)
+        self.tabs.tabBar().setVisible(not compact)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, 'advanced'):
+            self._compact_navigation()
+
     def closeEvent(self, event):
         self.advanced.stop_preview()
         super().closeEvent(event)
@@ -79,7 +111,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
         scroll = QtWidgets.QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setWidget(widget)
-        scroll.setMinimumWidth(300)
+        scroll.setMinimumWidth(0)
+        scroll.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
         return scroll
 
     def _button(self, layout, label, name, callback):
@@ -221,10 +254,75 @@ class WorkbenchPanel(QtWidgets.QWidget):
         form.addRow('Label expression', self.label_text)
         self._button(appearance, 'Apply labels', 'apply_labels', lambda: self.controller.set_labels(
             self.selection.text(), self.label_text.text(), state=self.state.value()))
+        self._daily_figure_controls(layout)
         self._export_controls(layout)
         layout.addStretch()
         self.tabs.addTab(self._scroll(tab), 'Figure')
         self.tabs.setTabToolTip(1, 'Figure & session')
+
+    def _daily_figure_controls(self, layout):
+        from .advanced_panel import form, field, combo, integer, text
+        from .ui_helpers import path_browse, details
+        labels = disclosure(layout, 'Guided labels', 'guided_labels_section', True)
+        fields = form(labels)
+        self.label_recipe = field(fields, 'Recipe', 'label_recipe', combo(['atom', 'residue', 'chain_residue', 'custom']))
+        self.label_recipe.setCurrentText('residue')
+        self.label_size = field(fields, 'Native label size (positive)', 'label_size', integer(14, 8, 48))
+        self.label_color = field(fields, 'Label color', 'label_color', QtWidgets.QLineEdit('black'))
+        self.label_scope = text('Size is shared by all labels in the same object/state. Text and color affect targets only; ordinary multistate atoms share label text/color across states.')
+        self.label_scope.setObjectName('label_size_scope')
+        labels.addWidget(self.label_scope)
+        note = text('Uses Structure selection and state. Custom uses the native expression above; preview never executes it.')
+        labels.addWidget(note)
+        row = self._row(labels)
+        self._button(row, 'Preview', 'preview_labels', self._preview_labels)
+        self._button(row, 'Apply recipe', 'apply_label_recipe', self._apply_label_recipe)
+        self._button(row, 'Clear', 'clear_labels', self._clear_labels)
+        self.label_count = text('No label preview')
+        self.label_count.setObjectName('label_count')
+        labels.addWidget(self.label_count)
+        self.label_preview = details(labels, 'Exact label targets', 'label_preview')
+        saves = disclosure(layout, 'Save coordinates / PSE', 'persistence_section', True)
+        fields = form(saves)
+        self.coordinates_format = field(fields, 'Coordinate format', 'coordinates_format', combo(['cif', 'pdb']))
+        self.coordinates_output = field(fields, 'New coordinate output directory', 'coordinates_output', QtWidgets.QLineEdit())
+        path_browse(fields, self.coordinates_output, self, output=True, runner=self.run)
+        self._button(saves, 'Save selected coordinates', 'save_coordinates', self._save_coordinates)
+        self.session_output = field(fields, 'New session output directory', 'session_output', QtWidgets.QLineEdit())
+        path_browse(fields, self.session_output, self, output=True, runner=self.run)
+        self._button(saves, 'Save complete session', 'save_session', self._save_session)
+        saves.addWidget(text('Coordinates: Structure selection and one state, one file per object. Session: complete captured PSE. Both save to a new directory without rendering.'))
+
+    def _label_parameters(self):
+        return dict(template=self.label_recipe.currentText(), state=self.state.value(), expression=self.label_text.text())
+
+    def _label_result(self, result):
+        from .ui_helpers import show_details
+        show_details(self.label_preview, result)
+        scope = ('; size shared by object/state: ' + ', '.join(result['size_objects'])) if result.get('size_objects') else ''
+        self.label_count.setText(str(result['count']) + ' label target(s)' + scope)
+        return result
+
+    def _preview_labels(self):
+        return self._label_result(self.controller.preview_labels(self.selection.text(), **self._label_parameters()))
+
+    def _apply_label_recipe(self):
+        return self._label_result(self.controller.apply_label_recipe(self.selection.text(), **self._label_parameters(),
+            size=self.label_size.value(), color=self.label_color.text(), max_labels=500))
+
+    def _clear_labels(self):
+        return self._label_result(self.controller.clear_labels(self.selection.text(), state=self.state.value()))
+
+    def _save_coordinates(self):
+        if not self.coordinates_output.text().strip():
+            raise ValueError('Choose a new coordinate output directory')
+        self._launch_job('coordinates', {'request': dict(selection=self.selection.text(), state=self.state.value(),
+            format=self.coordinates_format.currentText())}, self.coordinates_output.text(), state=self.state.value())
+
+    def _save_session(self):
+        if not self.session_output.text().strip():
+            raise ValueError('Choose a new session output directory')
+        self._launch_job('session_save', {'request': {}}, self.session_output.text(), state=self.state.value())
 
     def selected_objects(self):
         return [item.data(QtCore.Qt.UserRole) for item in self.object_list.selectedItems()]
@@ -426,6 +524,28 @@ class WorkbenchPanel(QtWidgets.QWidget):
         note.setToolTip('Non-solvent heavy atoms; primary altloc = blank + A; probe 1.4 Å, dot density 3. Surface loss is not affinity or binding energy. Complete methods are retained in result details and exports.')
         note.setWordWrap(True)
         contacts.addWidget(note)
+        polar = disclosure(layout, 'Polar candidates', 'polar_section', True)
+        form = QtWidgets.QFormLayout()
+        form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapAllRows)
+        polar.addLayout(form)
+        self.polar_cutoff = QtWidgets.QDoubleSpinBox()
+        self.polar_cutoff.setObjectName('polar_cutoff')
+        self.polar_cutoff.setRange(0.1, 10)
+        self.polar_cutoff.setValue(3.5)
+        form.addRow('Strict distance cutoff (Å)', self.polar_cutoff)
+        self.polar_angle = QtWidgets.QDoubleSpinBox()
+        self.polar_angle.setObjectName('polar_angle')
+        self.polar_angle.setRange(0, 90)
+        self.polar_angle.setValue(45)
+        form.addRow('Native orientation tolerance (degrees)', self.polar_angle)
+        self.polar_altloc = QtWidgets.QComboBox()
+        self.polar_altloc.setObjectName('polar_altloc')
+        self.polar_altloc.addItems(['primary', 'all'])
+        form.addRow('Polar altloc', self.polar_altloc)
+        self._button(polar, 'Calculate polar candidates', 'run_polar', self._polar)
+        note = QtWidgets.QLabel('Uses Selection A / Partner B above. Typed donor→acceptor candidates; distance < cutoff. Native orientation is coarse, not a measured D–H–A angle. Maximum 100000 pairs; annotate at most 200. Not confirmed hydrogen bonds or affinity.')
+        note.setWordWrap(True)
+        polar.addWidget(note)
         sasa = disclosure(layout, 'SASA', 'sasa_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
@@ -517,7 +637,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._button(layout, 'Export complete table CSV…', 'export_csv', self._csv)
         self._button(layout, 'Export coordinate FASTA…', 'export_fasta', self._fasta)
         self.annotate_button = self._button(layout, 'Annotate selected result', 'annotate_result', self._annotate)
-        self.result_overwrite = QtWidgets.QCheckBox('Overwrite chosen CSV/FASTA')
+        self.result_overwrite = QtWidgets.QCheckBox('Overwrite CSV / FASTA')
         self.result_overwrite.setObjectName('result_overwrite')
         layout.addWidget(self.result_overwrite)
         self.tabs.addTab(tab, 'Results')
@@ -600,6 +720,11 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._launch_job('contacts', dict(selection_a=self.analysis_selection.text(), selection_b=self.contacts_b.text(),
             state=self.analysis_state.value(), cutoff=self.contact_cutoff.value(), heavy_only=self.contact_heavy.isChecked(), max_pairs=100000))
 
+    def _polar(self):
+        self._launch_job('polar', dict(selection_a=self.analysis_selection.text(), selection_b=self.contacts_b.text(),
+            state=self.analysis_state.value(), cutoff=self.polar_cutoff.value(), angle=self.polar_angle.value(),
+            altloc=self.polar_altloc.currentText(), max_pairs=100000))
+
     def _sasa(self):
         self._launch_job('sasa', dict(selection=self.analysis_selection.text(), context=self.sasa_context.text() or None,
             state=self.analysis_state.value(), altloc=self.sasa_altloc.currentText()))
@@ -618,7 +743,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         parameters.update(background=self.background.currentText(), ray=self.image_ray.isChecked(),
                           overwrite=self.export_overwrite.isChecked(), analysis_records=[
                               record for record in self.controller.results
-                              if record.get('operation') in ('geometry', 'contacts', 'sasa', 'interface', 'inspect', 'align')
+                              if record.get('operation') in ('geometry', 'contacts', 'polar', 'sasa', 'interface', 'inspect', 'align')
                               and not record.get('cancelled')])
         self._launch_job('export', parameters, output=self.export_directory.text())
 
@@ -657,8 +782,10 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self._job_state = 1
         if job['operation'] == 'export':
             self._job_state = int(self.controller.cmd.get_state())
-        for index in range(3):
-            self.tabs.widget(index).setEnabled(False)
+        for index in (0, 1, 2, 4):
+            self.tabs.setTabEnabled(index, False)
+            self.page_selector.model().item(index).setEnabled(False)
+        self._select_page(3)
         self.progress_bar.setRange(0, 0)
         self.cancel_job.setEnabled(True)
         self.status.setText('Running ' + job['operation'] + ' in an independent worker…')
@@ -677,8 +804,11 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._mutation_locked = False
         self.advanced.set_job_active(False)
         self.annotate_button.setEnabled(True)
-        for index in range(3):
-            self.tabs.widget(index).setEnabled(True)
+        for index in (0, 1, 2, 4):
+            self.tabs.setTabEnabled(index, True)
+            self.page_selector.model().item(index).setEnabled(True)
+        if getattr(self, '_current_record', None):
+            self._annotation_available(self._current_record)
         self.progress_bar.setRange(0, 1)
         self.progress_bar.setValue(1)
         self.cancel_job.setEnabled(False)
@@ -751,10 +881,20 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.result_source.setText(f"State {result.get('state', '?')} · {status} · {result.get('calculated_at', '')}")
         self.result_source.setToolTip('Source fingerprint: ' + str(result.get('source_fingerprint', 'unverified')))
 
+    def _annotation_available(self, result):
+        supported = result.get('operation') in ('geometry', 'contacts', 'polar')
+        self.annotate_button.setEnabled(supported and not getattr(self, '_mutation_locked', False) and not result.get('cancelled'))
+        self.annotate_button.setToolTip('Saved snapshots cannot annotate the live scene' if result.get('operation') in ('coordinates', 'session_save') else 'Annotate current supported analysis')
+
     def _populate_result(self, result):
         import json
         self._source_status(result)
-        if result.get('operation') == 'interface':
+        self._annotation_available(result)
+        if result.get('operation') in ('coordinates', 'session_save') and result.get('cancelled'):
+            self.result_summary.setText('Cancelled save · no successful snapshot published')
+        elif result.get('operation') in ('coordinates', 'session_save'):
+            self.result_summary.setText('Saved snapshot · ' + ('coordinates' if result['operation'] == 'coordinates' else 'complete session') + '\nComplete files and output directory are in Details and tables.')
+        elif result.get('operation') == 'interface':
             def area(value):
                 return format(value, '.6g') if isinstance(value, (int, float)) else '?'
             self.result_summary.setText(f"Interface area: {area(result.get('interface_area_angstrom2'))} Å²\n"

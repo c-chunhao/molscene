@@ -2,6 +2,7 @@
 from copy import deepcopy
 import time
 from pymol.Qt import QtCore, QtWidgets
+from .ui_helpers import path_browse
 from .advanced_panel import buttons, check, combo, field, form, integer, text
 
 
@@ -49,6 +50,7 @@ class TimelinePanel(QtWidgets.QWidget):
             ('timeline_play', 'Play'), ('timeline_pause', 'Pause')]))
         output = form(layout)
         self.output = field(output, 'New output directory', 'timeline_output', QtWidgets.QLineEdit())
+        path_browse(output, self.output, self, output=True, runner=advanced.run)
         self.width = field(output, 'Width (px)', 'timeline_width', integer(800, 16, 4096))
         self.height = field(output, 'Height (px)', 'timeline_height', integer(600, 16, 4096))
         self.ray = field(output, 'Ray trace PNG frames', 'timeline_ray', check(True))

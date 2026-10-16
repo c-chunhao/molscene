@@ -2,6 +2,7 @@
 import json
 import uuid
 from pymol.Qt import QtWidgets
+from .ui_helpers import path_browse, details, show_details
 from .advanced_panel import buttons, check, combo, decimal, field, form, integer, text
 
 
@@ -13,6 +14,7 @@ class DensityPanel(QtWidgets.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         source = form(layout)
         self.path = field(source, 'Map file', 'density_path', QtWidgets.QLineEdit())
+        path_browse(source, self.path, self, title='Choose density map', filters='Density maps (*.dx *.mrc *.ccp4);;All files (*)', runner=advanced.run)
         self.format = field(source, 'File format', 'density_format', combo(['dx', 'mrc', 'ccp4']))
         self.interpretation = field(source, 'MRC origin / starts', 'density_interpretation', combo(['auto', 'origin', 'starts']))
         self.actions = buttons(layout, [('density_load', 'Load validated map')])
@@ -20,6 +22,7 @@ class DensityPanel(QtWidgets.QWidget):
         self.maps = field(display, 'Managed / session map', 'density_maps', combo([]))
         self.state = field(display, 'Source map state', 'density_state', integer(1))
         self.metadata = field(display, 'Geometry / provenance', 'density_metadata', text('No map selected. Raw map values are not automatically sigma.'))
+        self.metadata_details = details(layout, 'Map details', 'density_metadata_details')
         self.kind = field(display, 'Display kind', 'density_kind', combo(['mesh', 'surface', 'volume']))
         self.level = field(display, 'Contour level (raw units)', 'density_level', decimal(1, -1e12, 1e12, 6))
         self.color = field(display, 'Color name', 'density_color', QtWidgets.QLineEdit('cyan'))
@@ -41,6 +44,7 @@ class DensityPanel(QtWidgets.QWidget):
         self.actions.update(buttons(layout, [('density_register', 'Register a new copy')]))
         output = form(layout)
         self.output = field(output, 'New output directory', 'density_output', QtWidgets.QLineEdit())
+        path_browse(output, self.output, self, output=True, runner=advanced.run)
         self.actions.update(buttons(layout, [('density_export', 'Export density bundle')]))
         self.kind.currentTextChanged.connect(self._display_kind)
         self.registration_mode.currentTextChanged.connect(self._registration_kind)
@@ -107,6 +111,8 @@ class DensityPanel(QtWidgets.QWidget):
     def _show_metadata(self, index=None):
         if self.maps.currentIndex() < 0:
             self.metadata.setText('No map selected. Raw map values are not automatically sigma.')
+            self.metadata_details.clear()
+            self.metadata.setToolTip('')
             return
         record = self._selected_record()
         self.state.setValue(record['state'])
@@ -115,14 +121,12 @@ class DensityPanel(QtWidgets.QWidget):
                      else 'Original loaded placement')
         self.metadata.setText(
             f"{'Verified source' if record.get('verified') else 'Unverified session map'}\n"
-            f"{placement}; Export uses this selected placement once.\n"
-            f"World matrix: {record.get('world_matrix', 'unknown')}\n"
+            f"{placement}; export uses this selected placement once.\n"
             f"Raw units: {grid.get('value_unit', 'unknown')}; normalization: {grid.get('normalization', 'unknown')}\n"
             f"Shape: {grid.get('shape', '?')}; origin (Å): {grid.get('origin_angstrom', '?')}\n"
-            f"Basis (Å): {grid.get('basis_angstrom', '?')}\n"
-            f"Statistics: {grid.get('statistics', {})}\n"
-            f"Format / interpretation: {record.get('format')} / {record.get('interpretation')}\n"
-            f"Source SHA256: {record.get('source_sha256') or 'unassociated'}")
+            'Contour levels use raw values, not automatic sigma.')
+        show_details(self.metadata_details, record)
+        self.metadata.setToolTip(self.metadata_details.toPlainText())
 
     def load(self):
         path = self.path.text().strip()

@@ -4,6 +4,8 @@ import json
 from copy import deepcopy
 from pathlib import Path
 from pymol.Qt import QtWidgets
+from .ui_helpers import path_browse, set_row_visible, show_details
+from .navigation_panel import disclosure
 from .advanced_panel import buttons, check, combo, decimal, field, form, integer, text
 
 
@@ -18,6 +20,8 @@ class PotentialPanel(QtWidgets.QWidget):
         self.mode = field(source, 'Potential source', 'potential_mode', combo(['prepared', 'prepare', 'import']))
         self.pqr = field(source, 'Prepared PQR file', 'potential_pqr', QtWidgets.QLineEdit())
         self.dx = field(source, 'Imported DX file', 'potential_dx', QtWidgets.QLineEdit())
+        path_browse(source, self.pqr, self, title='Choose prepared PQR', filters='PQR (*.pqr);;All files (*)', runner=advanced.run)
+        path_browse(source, self.dx, self, title='Choose potential DX', filters='DX (*.dx);;All files (*)', runner=advanced.run)
         self.selection = field(source, 'Explicit molecular selection', 'potential_selection', QtWidgets.QLineEdit())
         self.state = field(source, 'Molecular state', 'potential_state', integer(1))
         self.units = field(source, 'Raw potential units', 'potential_units', combo(['kBT/e', 'V', 'mV', 'unknown']))
@@ -54,6 +58,7 @@ class PotentialPanel(QtWidgets.QWidget):
         configured = os.environ.get('MOLSCENE_TOOLS_CONFIG', '')
         initial = configured if configured and Path(configured).is_file() else ''
         self.tools_path = field(display, 'Tools schema 1 JSON file', 'potential_tools_path', QtWidgets.QLineEdit(initial))
+        path_browse(display, self.tools_path, self, title='Choose tools JSON', filters='JSON (*.json)', runner=advanced.run)
         self.tools_path.setPlaceholderText('Select a configured tools JSON path, then Check tools')
         self.tools_status = field(display, 'Tools / runtime status', 'potential_tools_status', text(
             'Configuration supplied; not checked.' if initial else 'No tools configuration. Supply schema 1 JSON and select Check tools.'))
@@ -67,11 +72,18 @@ class PotentialPanel(QtWidgets.QWidget):
         self.tools_table.setMaximumHeight(180)
         self.tools_table.setRootIsDecorated(True)
         self.tools_table.header().setStretchLastSection(True)
-        layout.addWidget(self.tools_table)
+        configuration = disclosure(layout, 'Tools details', 'potential_tools_details_section')
+        configuration.addWidget(self.tools_table)
+        self.tools_details = QtWidgets.QPlainTextEdit()
+        self.tools_details.setObjectName('potential_tools_details')
+        self.tools_details.setReadOnly(True)
+        self.tools_details.setMaximumHeight(180)
+        configuration.addWidget(self.tools_details)
         self._tool_rows = {}
         self._shown_tools_config = None
         output = form(layout)
         self.output = field(output, 'New output directory', 'potential_output', QtWidgets.QLineEdit())
+        path_browse(output, self.output, self, output=True, runner=advanced.run)
         self.actions.update(buttons(layout, [
             ('potential_compute', 'Compute potential'), ('potential_load_result', 'Load result copy…'),
             ('potential_ramp_apply', 'Apply ramp')]))
@@ -89,10 +101,7 @@ class PotentialPanel(QtWidgets.QWidget):
         self._mode_changed(self.mode.currentText())
 
     def _source_visible(self, widget, visible):
-        widget.setVisible(visible)
-        label = self._source_form.labelForField(widget)
-        if label is not None:
-            label.setVisible(visible)
+        set_row_visible(self._source_form, widget, visible)
 
     def _mode_changed(self, mode):
         imported = mode == 'import'
@@ -169,18 +178,24 @@ class PotentialPanel(QtWidgets.QWidget):
         lines = []
         for name, entry in result.get('tools', {}).items():
             manifest = entry.get('manifest') or {}
+            version = str(manifest.get('version', '?'))
+            architecture = str(manifest.get('architecture', '?'))
+            # Keep bounded even for unexpected long upstream version/error strings.
+            concise = lambda value: value if len(value) <= 72 else value[:69] + '…'
             lines.append(f"{name}: {'available' if entry.get('available') else 'unavailable'} · "
-                         f"version {manifest.get('version', '?')} · {manifest.get('architecture', '?')}")
+                         f"version {concise(version)} · {concise(architecture)}")
             if entry.get('error'):
-                lines.append(str(entry['error']))
-            if manifest:
-                lines.append('argv: ' + json.dumps(manifest.get('argv', []), ensure_ascii=False))
+                lines.append('Error: ' + concise(str(entry['error']).splitlines()[0]))
             if name in self._tool_rows:
                 root = self._tool_rows[name]
-                root.setText(1, ('Available' if entry.get('available') else 'Unavailable') + ' · ' + str(manifest.get('version', '?')))
-                for key, value in (('actual_version', manifest.get('version', '?')), ('status', entry.get('error') or 'available')):
-                    root.addChild(QtWidgets.QTreeWidgetItem([key, str(value)]))
+                root.setText(1, ('Available' if entry.get('available') else 'Unavailable') + ' · ' + concise(version) + ' · ' + concise(architecture))
+                for key, value in (('actual_version', version), ('status', entry.get('error') or 'available')):
+                    child = QtWidgets.QTreeWidgetItem([key, str(value)])
+                    child.setToolTip(1, str(value))
+                    root.addChild(child)
         self.tools_status.setText('\n'.join(lines) or ('Tools check cancelled.' if result.get('cancelled') else 'No tools configured.'))
+        show_details(self.tools_details, result)
+        self.tools_status.setToolTip(self.tools_details.toPlainText())
 
     def load_result(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Load a verified density or potential result copy',
