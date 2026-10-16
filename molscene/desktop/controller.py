@@ -338,8 +338,11 @@ class WorkbenchController:
     def annotate_result(self, record):
         """Only draw data tied to the current semantic molecular scene and state."""
         self._thread()
-        if self.result_status(record) == 'stale':
+        status = self.result_status(record)
+        if status == 'stale':
             raise ValueError('This result is stale; rerun the analysis before annotating')
+        if record.get('operation') == 'polar' and status != 'current':
+            raise ValueError('This polar result is unverified; rerun before annotating')
         state = record['state']
         kind = record.get('kind')
         if kind in ('distance', 'angle', 'dihedral'):
@@ -354,19 +357,22 @@ class WorkbenchController:
             getattr(self.cmd, kind)(name, *selections, state=state, quiet=1)
             record['annotation'] = name
             record['displayed_count'] = 1
-        elif record.get('operation') == 'contacts':
+        elif record.get('operation') in ('contacts', 'polar'):
             pairs = record['pairs'][:200]
+            keys = ('donor', 'acceptor') if record.get('operation') == 'polar' else ('atom_a', 'atom_b')
             from molscene.analysis import collect_atoms
             for pair in pairs:
-                for key in ('atom_a', 'atom_b'):
+                for key in keys:
                     atom = pair[key]
                     if collect_atoms(self.cmd, self._atom_expression(atom), state=state) != [atom]:
                         raise ValueError('Result atoms have changed; rerun before annotating')
-            name = self.cmd.get_unused_name('molscene_contacts')
+            name = self.cmd.get_unused_name('molscene_' + record['operation'])
             for pair in pairs:
-                self.cmd.distance(name, self._atom_expression(pair['atom_a']),
-                                  self._atom_expression(pair['atom_b']), state=state, quiet=1)
+                self.cmd.distance(name, self._atom_expression(pair[keys[0]]),
+                                  self._atom_expression(pair[keys[1]]), state=state, quiet=1)
             record.update(annotation=name if pairs else None, displayed_count=len(pairs))
+            if record.get('operation') == 'polar':
+                record.update(displayed_pair_count=len(pairs), annotation_pair_cap=200)
         else:
             raise ValueError('Choose a geometry or contacts result to annotate')
         return record
@@ -482,7 +488,7 @@ class WorkbenchController:
         self._state(state)
         if operation in ('timeline_project', 'animation', 'density', 'potential', 'tools'):
             return self._prepare_advanced_job(operation, parameters, output=output)
-        if operation not in ('geometry', 'contacts', 'sasa', 'interface', 'inspect', 'export', 'batch'):
+        if operation not in ('geometry', 'contacts', 'polar', 'sasa', 'interface', 'inspect', 'export', 'batch'):
             raise ValueError('Unsupported worker operation')
         parameters = deepcopy(parameters)
         if operation == 'batch':
@@ -496,13 +502,13 @@ class WorkbenchController:
             if not lexical.is_dir():
                 raise ValueError('Batch input must be an existing directory')
             parameters['input_dir'] = str(lexical.resolve())
-        if operation in ('geometry', 'contacts', 'sasa', 'interface', 'inspect'):
+        if operation in ('geometry', 'contacts', 'polar', 'sasa', 'interface', 'inspect'):
             if operation == 'interface':
                 self._state(parameters.get('state'))
             if parameters.get('state') != state:
                 raise ValueError('Job and selection states must match explicitly')
             selections = parameters.get('selections', []) if operation == 'geometry' else (
-                [parameters.get('selection_a'), parameters.get('selection_b')] if operation in ('contacts', 'interface')
+                [parameters.get('selection_a'), parameters.get('selection_b')] if operation in ('contacts', 'polar', 'interface')
                 else [parameters.get('selection', 'all')])
             if operation == 'sasa' and parameters.get('context'):
                 selections.append(parameters['context'])
@@ -524,7 +530,7 @@ class WorkbenchController:
                    result_path=str(directory / 'result.json'))
         if operation != 'batch':
             session = directory / 'snapshot.pse'
-            self.cmd.save(str(session), format='pse', quiet=1)
+            self._save_snapshot(session)
             job['input_session'] = str(session)
         else:
             parameters['cancel_file'] = str(directory / 'cancel.request')
@@ -538,6 +544,15 @@ class WorkbenchController:
         from molscene.timeline import new_timeline
         self._timeline = new_timeline(self.cmd, fps=fps)
         return deepcopy(self._timeline)
+
+    def _save_snapshot(self, path):
+        """Preserve the user's session association even on native save failure."""
+        self._thread()
+        previous = self.cmd.get('session_file')
+        try:
+            self.cmd.save(str(path), format='pse', quiet=1)
+        finally:
+            self.cmd.set('session_file', previous)
 
     def timeline_edit(self, action, keyframe_id=None, values=None):
         self._thread()
@@ -812,7 +827,7 @@ class WorkbenchController:
             context['snapshot_id'] = None
             if operation != 'potential' or not request.get('pqr_path'):
                 session = directory / 'snapshot.pse'
-                self.cmd.save(str(session), format='pse', quiet=1)
+                self._save_snapshot(session)
                 job['input_session'] = str(session)
                 context['snapshot_id'] = sha256(session)
             context['original_inputs'] = originals

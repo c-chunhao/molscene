@@ -9,7 +9,7 @@ import stat
 import tempfile
 
 FILES = ('scene.png', 'scene.pse', 'scene.pml', 'report.json', 'contacts.csv',
-         'sasa.csv', 'interface.csv', 'chains.csv', 'sequence.fasta')
+         'sasa.csv', 'interface.csv', 'chains.csv', 'sequence.fasta', 'polar.csv')
 INPUT_NAMES = tuple(role + ext for role in ('input', 'mobile', 'target')
                     for ext in ('.pdb', '.cif', '.mmcif', '.pse'))
 

@@ -181,6 +181,19 @@ def _require_atoms(cmd, selection, label, exact=None):
 
 
 def _tables(stage, kind, result):
+    if kind == 'polar':
+        identity = ('object', 'index', 'segi', 'chain', 'resi', 'resn', 'name', 'element', 'alt', 'state')
+        fields = [end + '_' + key for end in ('donor', 'acceptor') for key in identity]
+        fields += ['distance_angstrom', 'donor_membership', 'acceptor_membership']
+        rows = []
+        for pair in result['pairs']:
+            row = {end + '_' + key: pair[end][key] for end in ('donor', 'acceptor') for key in identity}
+            row.update(distance_angstrom=pair['distance_angstrom'],
+                       donor_membership=','.join(pair['donor_membership']),
+                       acceptor_membership=','.join(pair['acceptor_membership']))
+            rows.append(row)
+        artifacts.write_csv(stage / 'polar.csv', rows, fields)
+        return {'polar_csv': 'polar.csv'}
     if kind == 'contacts':
         identity = ('object', 'index', 'segi', 'chain', 'resi', 'resn', 'name', 'element', 'alt', 'state')
         fields = [end + '_' + key for end in ('atom_a', 'atom_b') for key in identity] + ['distance_angstrom']
@@ -411,18 +424,25 @@ def _run(operation, sources, output_dir, parameters, overwrite):
                             _analysis_context(scene, active, state)
                             if operation in ('measure', 'angle', 'dihedral'):
                                 result = _geometry_scene(scene, 'distance' if operation == 'measure' else operation, parameters, state)
-                            elif operation == 'contacts':
-                                result = science.contacts(pm.cmd, _scope('molecule', parameters['selection_a']),
-                                    _scope('molecule', parameters['selection_b']), state=state, cutoff=parameters['cutoff'])
-                                result['kind'] = 'contacts'
+                            elif operation in ('contacts', 'polar'):
+                                options = dict(state=state, cutoff=parameters['cutoff'])
+                                if operation == 'polar':
+                                    options.update(angle=parameters['angle'], altloc=parameters['altloc'], max_pairs=parameters['max_pairs'])
+                                result = (science.contacts if operation == 'contacts' else science.polar_contacts)(
+                                    pm.cmd, _scope('molecule', parameters['selection_a']),
+                                    _scope('molecule', parameters['selection_b']), **options)
+                                result['kind'] = operation
                                 result['displayed_pair_count'] = min(200, result['pair_count'])
+                                if operation == 'polar':
+                                    result['annotation_pair_cap'] = 200
+                                keys = ('donor', 'acceptor') if operation == 'polar' else ('atom_a', 'atom_b')
                                 for i, pair in enumerate(result['pairs'][:200]):
                                     bound = [_bind(scene, '_molscene_contact_' + side,
                                         f"({pair[side]['object']}) and index {pair[side]['index']}", state)
-                                        for side in ('atom_a', 'atom_b')]
-                                    scene.call('distance', 'contacts', *bound, state=state)
+                                        for side in keys]
+                                    scene.call('distance', operation, *bound, state=state)
                                 if result['displayed_pair_count']:
-                                    scene.call('hide', 'labels', 'contacts')
+                                    scene.call('hide', 'labels', operation)
                             elif operation == 'sasa':
                                 context = parameters['context']
                                 result = science.sasa(pm.cmd, active,
@@ -519,6 +539,19 @@ def sasa(input_path, output_dir, *, selection='all', context=None, state=1, altl
         _selection(context, 'context')
     return _run('sasa', {'input': _input(input_path)}, output_dir,
         dict(options, selection=_selection(selection, 'selection'), context=context, altloc=altloc), overwrite)
+
+
+def polar(input_path, output_dir, *, selection_a, selection_b, state=1, cutoff=3.5,
+          angle=45.0, altloc='primary', max_pairs=100000, width=1600, height=1200,
+          dpi=300, overwrite=False):
+    """Render typed polar candidates, preserving complete JSON/CSV and frozen replay."""
+    from .polar import _validate
+    _validate(state, cutoff, angle, altloc, max_pairs)
+    options = _options(width, height, dpi, state)
+    return _run('polar', {'input': _input(input_path)}, output_dir,
+                dict(options, selection_a=_selection(selection_a, 'selection_a'),
+                     selection_b=_selection(selection_b, 'selection_b'), cutoff=cutoff,
+                     angle=angle, altloc=altloc, max_pairs=max_pairs), overwrite)
 
 
 def interface(input_path, output_dir, *, selection_a, selection_b, state=1, altloc='primary',

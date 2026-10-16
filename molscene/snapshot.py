@@ -20,6 +20,16 @@ def record_snapshot_status(cmd, record, state=None, fingerprints=None):
     displayed frame. Older single-state records still require that frame to match.
     An older mixed-state alignment cannot verify its unrecorded target state.
     """
+    if record.get('operation') == 'polar' or record.get('kind') == 'polar':
+        from .polar import chemistry_fingerprint
+        requested = record.get('state')
+        source = record.get('chemistry_fingerprint')
+        if type(requested) is not int or requested < 1 or not isinstance(source, str) or not source:
+            return 'unverified'
+        try:
+            return 'current' if chemistry_fingerprint(cmd, requested) == source else 'stale'
+        except (ValueError, RuntimeError):
+            return 'stale'
     current_state = int(cmd.get_state()) if state is None else state
     cache = {} if fingerprints is None else fingerprints
 

@@ -16,6 +16,12 @@ def _selection(selection):
     return selection
 
 
+def polar_contacts(cmd, selection_a, selection_b, **options):
+    """Lazy public wrapper for typed native polar-contact candidates."""
+    from .polar import polar_contacts as calculate
+    return calculate(cmd, selection_a, selection_b, **options)
+
+
 @contextmanager
 def _resolved_selection(cmd, selection, state, allow_empty=False):
     """Bind membership once in the requested state, independently of the view."""

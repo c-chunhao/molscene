@@ -60,6 +60,15 @@ def _parser():
             command.add_argument('--cutoff', type=float, default=4.0, help='Contact cutoff in angstrom (default: 4)')
         geometry.append(command)
     sasa = commands.add_parser('sasa', help='Solvent-accessible surface area in square angstrom')
+    polar = commands.add_parser('polar', help='PyMOL-typed polar-contact candidates; native coarse orientation')
+    polar.add_argument('input')
+    polar.add_argument('--selection-a', required=True)
+    polar.add_argument('--selection-b', required=True)
+    polar.add_argument('--state', type=int, default=1)
+    polar.add_argument('--cutoff', type=float, default=3.5, help='Strict native distance cutoff in angstrom')
+    polar.add_argument('--angle', type=float, default=45.0, help='Native coarse endpoint tolerance, not a D-H-A angle')
+    polar.add_argument('--altloc', choices=('primary', 'all'), default='primary')
+    polar.add_argument('--max-pairs', type=int, default=100000)
     sasa.add_argument('input')
     sasa.add_argument('--selection', default='all', help='Target subset of the context')
     sasa.add_argument('--context', help='Context selection (default: non-solvent heavy atoms)')
@@ -75,7 +84,7 @@ def _parser():
     batch = commands.add_parser('batch', help='Render sorted local PDB/CIF/mmCIF files, nonrecursive')
     batch.add_argument('input_dir')
     _render_arguments(batch)
-    for command in (render, measure, align, *geometry, sasa, interface, batch):
+    for command in (render, measure, align, *geometry, polar, sasa, interface, batch):
         command.add_argument('--output', required=True, help='Output directory')
         command.add_argument('--width', type=int, default=1600)
         command.add_argument('--height', type=int, default=1200)
@@ -236,6 +245,7 @@ def _present_analysis(command, report):
         'angle': ('value', 'Angle', 'degrees'),
         'dihedral': ('value', 'Dihedral', 'degrees'),
         'contacts': ('pair_count', 'Contacts', 'pairs; geometric proximity only'),
+        'polar': ('pair_count', 'Polar', 'candidates; native coarse orientation, not confirmed hydrogen bonds'),
         'sasa': ('total_area_angstrom2', 'SASA', 'square angstrom'),
         'interface': ('interface_area_angstrom2', 'Interface area',
                       'square angstrom; half the total buried SASA; geometric area only'),
@@ -325,7 +335,10 @@ def main(argv=None):
             print(f"RMSD: {report['analysis']['rmsd_angstrom']:.6g} angstrom; {report['analysis']['aligned_atoms']} aligned atoms.")
         else:
             options['state'] = args.state
-            if args.command == 'interface':
+            if args.command == 'polar':
+                options.update(selection_a=args.selection_a, selection_b=args.selection_b,
+                               cutoff=args.cutoff, angle=args.angle, altloc=args.altloc, max_pairs=args.max_pairs)
+            elif args.command == 'interface':
                 options.update(selection_a=args.selection_a, selection_b=args.selection_b, altloc=args.altloc)
             elif args.command == 'sasa':
                 options.update(selection=args.selection, context=args.context, altloc=args.altloc)

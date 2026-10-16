@@ -11,6 +11,7 @@ from .advanced import PARAMETERS as _ADVANCED_PARAMETERS
 _PARAMETERS = {
     'geometry': {'kind', 'selections', 'state'},
     'contacts': {'selection_a', 'selection_b', 'state', 'cutoff', 'heavy_only', 'max_pairs'},
+    'polar': {'selection_a', 'selection_b', 'state', 'cutoff', 'angle', 'altloc', 'max_pairs'},
     'sasa': {'selection', 'context', 'state', 'altloc'},
     'interface': {'selection_a', 'selection_b', 'state', 'altloc'},
     'inspect': {'selection', 'state'},
@@ -207,11 +208,13 @@ def run_job(job_path):
                 pm.cmd.load(str(session))
                 # No style reset, camera orientation or ray rendering here.
                 function = {'geometry': analysis.geometry, 'contacts': analysis.contacts,
+                            'polar': analysis.polar_contacts,
                             'sasa': analysis.sasa, 'interface': analysis.interface,
                             'inspect': analysis.inspect_structure}[operation]
                 result = function(pm.cmd, **parameters)
                 result.update(snapshot_id=artifacts.sha256(session),
-                              source_fingerprint=scene_fingerprint(pm.cmd, parameters.get('state', 1)),
+                              source_fingerprint=(result['chemistry_fingerprint'] if operation == 'polar'
+                                  else scene_fingerprint(pm.cmd, parameters.get('state', 1))),
                               state=parameters.get('state', 1),
                               calculated_at=datetime.now(timezone.utc).isoformat())
             if output != result_path:
