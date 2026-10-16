@@ -117,10 +117,85 @@ In **Results**, select the result and table, review the source/status and row to
 
 Choose dimensions, DPI, background, ray tracing and destination before export. Surface transparency and stick radius affect display, not the scientific calculation. Export saves the current camera rather than silently reorienting it. PNG, PSE, PML and JSON stay together. The GUI PML loads the bundled PSE to preserve arbitrary native edits; it is not a coordinate-only reconstruction. CLI PML from coordinate workflows instead replays recorded API operations using copied input files.
 
+Figure export also uses the supervised official Qt/OpenGL child when ray is
+disabled or the current scene contains a volume. It saves the final scene PSE
+before rendering and records `analysis.rendering`, including requested/effective
+ray and the actual GPU renderer. This path requires dimensions 16–4096 and DPI
+1–1200; unsupported sizes fail with an actionable error. OpenGL may be opaque.
+Other ray-enabled scenes retain CPU ray rendering.
+
 长任务通过独立 worker 运行，面板显示运行、完成、失败或取消。取消后保留已完成批处理项；待运行项不记为成功。错误后可修正参数继续。已有输出需显式选择覆盖；输入输出目录不能互为祖先。导出前检查报告中的 state、snapshot status、选择和相对产物路径。
 
 ## Practical checks / 使用前检查
 
 Inspect PNG dimensions and the actual molecular shape; nonblank pixels alone are insufficient. Reopen the PSE and replay the PML in a fresh PyMOL session. Keep the complete folder when moving results. Session compatibility and pixel identity can vary across backend versions and graphics systems. The CLI `selftest` checks offline coordinate/session/replay behavior; native mouse/GL checks are recorded separately in [TESTING.md](TESTING.md).
 
-The validated MolScene workflows do not cover trajectory statistics, density-map analysis, electrostatic calculations, automatic biological assembly, hydrogen-bond chemistry or commercial-only components. Native PyMOL commands remain available under upstream behavior and licensing.
+## Advanced / 高级工作流
+
+The fifth tab, **Advanced**, follows Structure, Figure, Analysis and Results.
+It has Timeline, Density and Potential sections. The
+[advanced guide](ADVANCED.md) gives exact CLI equivalents, scientific definitions,
+tool schema, limits and bundle inventories. Historical screenshots above show
+v0.3; current native acceptance is recorded separately in [TESTING](TESTING.md).
+
+For a timeline, create a new document to capture a baseline display. Set frame,
+explicit molecular state, label, scene and interpolation. **Capture** adds a new
+keyframe through the controller, capturing the current camera. **Update details**
+changes an existing row's details while preserving its captured view; moving the
+live camera before updating details does not recapture it. Select a row to
+remove/reorder it; FPS changes timing. Scene
+**Keep previous display** inherits the previous explicit scene or baseline.
+Seek/previous/next and play/pause move a separate preview cursor. Preview stops
+on pause, end, job start, session replacement or close. A JSON file stores the
+document; **Open project** restores its **Source snapshot** and replaces the
+session. Project saving preserves PSE/JSON/replay/provenance together. Animation
+export selects width, height, ray rendering, output and optional MP4. MP4 needs
+configured FFmpeg/ffprobe with libx264.
+
+Advanced no-ray and volume-bearing exports run in a supervised official
+Qt/OpenGL child; the live workbench remains the source. One child renders an
+entire timeline sequence, reports progress and closes normally. Reports show
+requested/effective ray and actual GPU renderer. OpenGL may produce opaque
+output and differs from CPU ray rendering; inspect decoded images and the
+recorded renderer when comparing results across machines.
+
+Density loading takes a path, format and explicit origin/starts interpretation
+when needed. Select the map and state; inspect geometry, raw units and verified
+source association before applying mesh/surface/volume, contour level, color,
+opacity and visibility. Volume requires a transfer ramp. Registration offers a
+rigid matrix or mobile/target alignment with explicit states and selection;
+it creates copies. Unassociated session maps can display but cannot authorize
+verified registration. Export uses a new directory and records the result.
+It creates an owned display for the requested settings against the verified
+map. Existing scene objects remain; a name collision produces a fresh result
+name and a report warning. Old and new layers can coexist, and volume opacity
+can compound. Use Figure export to preserve the exact visible scene.
+
+Potential mode chooses prepared PQR, protein preparation or imported DX. Review
+the source PQR/DX/selection, state, input/display units, temperature, force field,
+pH/protonation/water choice, grid counts, dielectric/salt/radius/padding controls
+and numeric ramp range. The tools path can be prefilled from
+`MOLSCENE_TOOLS_CONFIG`; loading/checking remains explicit. Copy and edit the
+schema-1 JSON externally, supply its path, then select **Check tools**. The
+compact structured configuration/probe table is read-only. Checks run in a
+cancellable worker and show per-tool version/architecture/runtime diagnostics.
+Compute writes a bundle. Loading a current result creates owned copies without
+replacing the session; applying its ramp updates only its ramp/legend. Stale or
+unverified sources block applying a result/ramp to the current scene.
+
+Mutation tabs are locked while a worker is active; Results and Cancel remain
+available. Closing the dock/window stops previews and uses the existing job
+cancellation lifecycle. Failure preserves prior outputs and retains bounded
+private tool logs. Advanced exports require a new directory, with no overwrite
+option. Camera-only changes do not stale a potential result; editing source
+coordinates/radii, map field/geometry or relevant timeline/display data can.
+
+第五页 **Advanced** 包括时间线、密度/标量图及电势。JSON 仅保存时间线文档，
+项目还包含源 PSE 与回放；打开项目会替换会话，普通结果加载只创建结果副本。
+等值线数值不是自动 sigma；体渲染需明确 ramp。计算电势是记录假设的 LPBE，
+不是亲和力。外部 PDB2PQR 可使用独立 Python 3.11，桌面可保持 Python 3.10。
+任务期间可取消，关闭时停止预览；新高级输出目录不提供覆盖。
+
+Trajectory statistics, automatic biological assembly, chemical hydrogen-bond
+assignment and commercial-only components remain outside the validated scope.
+Native PyMOL commands remain available under upstream behavior and licensing.

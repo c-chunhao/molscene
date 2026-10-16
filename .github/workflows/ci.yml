@@ -25,7 +25,29 @@ jobs:
       - name: Install original tool only
         run: python -m pip install -e .
       - name: Test without a PyMOL backend
-        run: python -m unittest discover -s tests -v
+        shell: bash
+        run: |
+          set -e -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee unit-tests.txt
+      - name: Require actual Windows NTFS junction and hardlink safeguards
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          log = Path('unit-tests.txt').read_text(encoding='utf-8')
+          for name in ('test_windows_junction_rejected_without_traversal',
+                       'test_hardlink_alias_rejected_without_source_damage'):
+              case = r'test_bundles\.BundleTests(?:\.' + re.escape(name) + r')?'
+              assert re.search(r'^' + re.escape(name) + r' \(' + case + r'\) \.\.\. ok$', log, re.M), name + ' must execute on NTFS'
+          PY
+      - name: Upload plain test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plain-${{ matrix.os }}-${{ matrix.python }}
+          path: unit-tests.txt
 
   integration:
     name: Required PyMOL + native Qt OpenGL / Linux
@@ -37,6 +59,9 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       QT_QPA_PLATFORM: xcb
       MOLSCENE_TEST_ARTIFACTS: artifacts/native-workbench
+      MOLSCENE_REQUIRE_ADVANCED: '1'
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v4
       # See https://github.com/mamba-org/setup-micromamba for official inputs.
@@ -45,10 +70,12 @@ jobs:
           environment-name: molscene-ci
           create-args: >-
             -c conda-forge
-            python=3.10
-            pymol-open-source
+            python=3.11
+            pymol-open-source>=3.1,<3.3
             pillow
-            pyqt
+            pyqt=5
+            apbs=3.4.1=py311ha92c01f_1
+            ffmpeg
             pip
           init-shell: bash
           cache-environment: true
@@ -57,12 +84,95 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb xauth libgl1 libegl1 libxcb-cursor0 libxkbcommon-x11-0
       - name: Install MolScene
         run: python -m pip install -e .
-      - name: Record resolved backend and assert import
+      - name: Install independent PDB2PQR Python 3.11 environment
+        run: |
+          mkdir -p artifacts/pdb2pqr-wheels
+          python -m venv --copies .ci-pdb2pqr
+          .ci-pdb2pqr/bin/python -m pip --log artifacts/pdb2pqr-download.log download --only-binary=:all: --dest artifacts/pdb2pqr-wheels pdb2pqr==3.7.1
+          .ci-pdb2pqr/bin/python -m pip install --no-index --find-links artifacts/pdb2pqr-wheels pdb2pqr==3.7.1
+          .ci-pdb2pqr/bin/python -m pip freeze --all > artifacts/pdb2pqr-freeze.txt
+          .ci-pdb2pqr/bin/python -m pip inspect > artifacts/pdb2pqr-inspect.json
+          sha256sum artifacts/pdb2pqr-wheels/* > artifacts/pdb2pqr-wheel-sha256.txt
+      - name: Record resolved backend and assert Python PyMOL and Qt5
         run: |
           mkdir -p artifacts
           micromamba list > artifacts/environment.txt
-          python -c "import sys, pymol2; from PIL import Image; from pymol.Qt import QtCore, QtWidgets, PYQT_NAME; print(sys.version); print(pymol2.__file__); print(PYQT_NAME, QtCore.qVersion())" | tee artifacts/backend.txt
+          micromamba list --explicit > artifacts/conda-explicit.txt
+          python - <<'PY' | tee artifacts/backend.txt
+          import json, re, sys
+          from pathlib import Path
+          import pymol2
+          from PIL import Image
+          from pymol.Qt import QtCore, QtWidgets, PYQT_NAME
+          assert sys.version_info[:2] == (3, 11), sys.version
+          assert QtCore.qVersion().startswith('5.'), (PYQT_NAME, QtCore.qVersion())
+          assert 'pyqt5' in PYQT_NAME.lower(), PYQT_NAME
+          with pymol2.PyMOL() as instance:
+              version = instance.cmd.get_version()[0]
+          assert re.match(r'^3\.[12](?:\.|$)', version), version
+          records = []
+          for path in sorted(Path(sys.prefix, 'conda-meta').glob('*.json')):
+              record = json.loads(path.read_text())
+              records.append({key: record.get(key) for key in
+                  ('name', 'version', 'build', 'subdir', 'url', 'md5', 'sha256')})
+          apbs = [record for record in records if record['name'] == 'apbs']
+          assert len(apbs) == 1 and apbs[0]['version'] == '3.4.1' and apbs[0]['build'] == 'py311ha92c01f_1', apbs
+          assert all(record['url'] and (record['sha256'] or record['md5']) for record in records), 'Missing resolved package URL/hash'
+          Path('artifacts/conda-packages.json').write_text(json.dumps(records, indent=2) + '\n')
+          print(sys.version)
+          print('PyMOL', version, 'binding', PYQT_NAME, 'Qt', QtCore.qVersion())
+          PY
           xvfb-run -a python -m molscene doctor | tee artifacts/doctor.txt
+      - name: Configure actual regular tool paths and verify external interpreter
+        run: |
+          .ci-pdb2pqr/bin/python - <<'PY' > artifacts/pdb2pqr-runtime.json
+          import importlib.metadata, json, struct, sys
+          from pathlib import Path
+          assert sys.version_info >= (3, 11)
+          assert importlib.metadata.version('pdb2pqr') == '3.7.1'
+          distribution = importlib.metadata.distribution('pdb2pqr')
+          metadata = next(distribution.locate_file(file).resolve(strict=True)
+              for file in distribution.files if str(file).endswith('.dist-info/METADATA'))
+          print(json.dumps({'executable': str(Path(sys.executable).resolve(strict=True)),
+              'metadata': str(metadata), 'python': sys.version, 'bits': struct.calcsize('P') * 8}))
+          PY
+          python - <<'PY'
+          import json, os, shutil, sys
+          from pathlib import Path
+          from molscene.external_tools import load_tools
+          runtime = json.loads(Path('artifacts/pdb2pqr-runtime.json').read_text())
+          assert runtime['bits'] == 64
+          def entry(executable, *, prefix=(), runtime_files=(), timeout=1200):
+              executable = Path(executable).resolve(strict=True)
+              assert executable.is_file() and not executable.is_symlink()
+              return dict(argv=[str(executable), *prefix], architecture='x64',
+                  path_dirs=[str(executable.parent)], runtime_files=list(runtime_files),
+                  timeout_seconds=timeout, memory_limit_mib=4096)
+          apbs_metadata = next(Path(sys.prefix, 'conda-meta').glob('apbs-3.4.1-py311ha92c01f_1.json')).resolve(strict=True)
+          tools = {'apbs': entry(shutil.which('apbs'), runtime_files=[{'path': str(apbs_metadata), 'role': 'package_metadata'}]),
+              'pdb2pqr': entry(runtime['executable'], prefix=['-B', '-m', 'pdb2pqr'], timeout=600,
+                  runtime_files=[{'path': runtime['executable'], 'role': 'interpreter'},
+                                 {'path': runtime['metadata'], 'role': 'package_metadata'}]),
+              'ffmpeg': entry(shutil.which('ffmpeg')), 'ffprobe': entry(shutil.which('ffprobe'))}
+          path = Path('artifacts/tools.json').resolve()
+          path.write_text(json.dumps({'schema_version': 1, 'tools': tools}, indent=2) + '\n')
+          load_tools(path)
+          with open(os.environ['GITHUB_ENV'], 'a') as handle:
+              handle.write('MOLSCENE_TOOLS_CONFIG=' + str(path) + '\n')
+          PY
+      - name: Assert actual tools architecture version and H264 encoder
+        run: |
+          python -m molscene tools --config "$MOLSCENE_TOOLS_CONFIG" | tee artifacts/tools-probe.json
+          ffmpeg -hide_banner -encoders > artifacts/ffmpeg-encoders.txt 2>&1
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          result = json.loads(Path('artifacts/tools-probe.json').read_text())
+          assert result['passed'] is True
+          assert set(result['tools']) == {'apbs', 'pdb2pqr', 'ffmpeg', 'ffprobe'}
+          assert all(item['available'] for item in result['tools'].values())
+          assert re.search(r'^\s*V\S*\s+libx264\s', Path('artifacts/ffmpeg-encoders.txt').read_text(), re.M), 'Real libx264 is required'
+          PY
       - name: Require desktop test dependencies
         run: python -c "import runpy; tests = runpy.run_path('tests/test_desktop.py'); assert tests['HAS_PYMOL'] and tests['HAS_QT'], 'Required native tests cannot skip for missing dependencies'"
       - name: Run full test suite with real PyMOL
@@ -80,16 +190,47 @@ jobs:
               'test_native_clean_preferences_startup_and_shutdown': 'test_desktop.NativeDesktopTests',
               'test_native_fixtures_exports_and_cooperative_window_close': 'test_workbench.QtWorkbenchTests',
               'test_native_navigation_presets_and_interface_workflow': 'test_navigation_gui.NativeNavigationTests',
+              'test_native_advanced_timeline_density_potential_and_close': 'test_advanced_gui.AdvancedNativeTests',
+              'test_native_volume_frames_and_cancel_cleanup': 'test_native_render.NativeRenderTests',
+              'test_registered_density_relocated_replay': 'test_density_engine.DensityEngineTests',
+              'test_real_h264_frame_count_and_duration': 'test_animation.AnimationEncoderTests',
+              'test_relocated_timeline_replay_without_molscene': 'test_animation.AnimationReplayTests',
+              'test_real_apbs_uniform_sign_dielectric_translation_convergence': 'test_electrostatics_real.RealElectrostaticsTests',
+              'test_real_apbs_born_dielectric_boundary': 'test_electrostatics_real.RealElectrostaticsTests',
+              'test_real_pdb2pqr_ubiquitin_surface_and_replay': 'test_electrostatics_real.RealElectrostaticsTests',
           }
           for name, case in required.items():
               assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute successfully, not skip'
           PY
+      - name: Require actual Linux no-replace links and process lifetime proofs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          log = Path('artifacts/tests.txt').read_text()
+          required = {
+              'test_publish_exact_inventory_hashes_and_empty_log': 'test_bundles.BundleTests',
+              'test_nested_symlink_rejected_and_cleanup_preserves_target': 'test_bundles.BundleTests',
+              'test_hardlink_alias_rejected_without_source_damage': 'test_bundles.BundleTests',
+              'test_destination_created_between_check_and_rename_is_not_replaced': 'test_bundles.BundleTests',
+              'test_timeout_reaps_child_and_grandchild': 'test_external_tools.ExternalToolsTests',
+              'test_cancellation_during_run_reaps_descendants': 'test_external_tools.ExternalToolsTests',
+              'test_forced_worker_death_reaps_descendants': 'test_external_tools.ExternalToolsTests',
+              'test_forced_guardian_death_reaps_descendants': 'test_external_tools.ExternalToolsTests',
+          }
+          for name, case in required.items():
+              assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute on Linux'
+          PY
       - name: Run offline selftest
         run: xvfb-run -a python -m molscene selftest --output artifacts/selftest 2>&1 | tee artifacts/selftest.txt
+      - name: Run complete advanced examples with actual solvers
+        run: xvfb-run -a python examples/reproduce_v04.py --tools "$MOLSCENE_TOOLS_CONFIG" --output artifacts/gallery-v04 2>&1 | tee artifacts/gallery-v04.txt
       - name: Upload integration evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: opensource-qt-integration
-          path: artifacts/
+          path: |
+            artifacts/
+            !artifacts/pdb2pqr-wheels/**
           if-no-files-found: ignore

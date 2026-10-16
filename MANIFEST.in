@@ -5,6 +5,13 @@ include examples/README.md
 include examples/download_examples.py
 include examples/reproduce_v02.py
 include examples/reproduce_v03.py
+include examples/reproduce_v04.py
+include examples/advanced-tools.example.json
+include tests/fixtures/advanced/born/apbs-mol-auto.in
+include tests/fixtures/advanced/born/ion.pqr
+include tests/fixtures/advanced/born/LICENSE.md
+include tests/fixtures/advanced/born/SOURCES.md
+include tests/fixtures/advanced/born/UPSTREAM_README.md
 recursive-include tests *.py
 include README.zh-CN.md CONTRIBUTING.md
 include docs/*.md docs/*.json

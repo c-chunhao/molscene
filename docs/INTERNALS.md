@@ -112,6 +112,72 @@ Batch sorts nonrecursive local PDB/CIF/mmCIF inputs into numbered safe directori
 
 On Windows, publishing a batch summary retries transient access/sharing/lock errors for at most two seconds while rechecking output, input and temporary paths each attempt. An open progress reader can otherwise block atomic replacement on exFAT. Other errors and persistent denial still fail; previous summary bytes remain intact until replacement succeeds.
 
-The release validates these selected public API workflows. It does not reproduce commercial PyMOL in full or validate every native command, plugin, trajectory, density-map, electrostatics, biological assembly or chemical-interaction workflow. Historical v0.1 observations from a separately installed Incentive build were API evidence only; evaluation-marked exports were never repaired or published as the open-source gallery. v0.2 native desktop evidence is tied to the exact open-source runtime in [TESTING.md](TESTING.md).
+## Advanced contracts
+
+`advanced.run_advanced` is the shared entry for `timeline_project`, `animation`,
+`density` and `potential`; CLI and workers use the same validated requests.
+The separate read-only `tools` operation needs no PSE. Its per-tool diagnostics
+remain available even if one probe fails. Widgets delegate through the existing
+controller/JobManager, with progress JSON and cooperative cancellation markers.
+They contain no scientific algorithms and do not probe tools on the Qt thread.
+
+Advanced explicit no-ray and volume-bearing image exports use a fixed-bootstrap
+official PyMOL Qt/OpenGL child, supervised through the existing guardian. The
+Qt main thread draws/exports; a whole timeline sequence stays in one child with
+per-frame progress and normal owned-window close. Structured bounded request/
+result/progress data, result identity, successful exit, complete image decoding,
+dimensions and hashes are checked before publication. CPU ray remains for other
+ray-enabled advanced exports. Reports retain requested/effective ray, actual
+renderer/GPU and opacity limitations; OpenGL is not labelled CPU ray tracing.
+These renderer modules are ordinary wheel package modules, imported lazily;
+the four external-tool configuration names do not change. No geometry,
+interpolation, units or assigned radii change with the rendering path.
+
+Figure/current-view export uses the same native renderer when ray is disabled
+or the final scene contains a volume. It saves the final scene PSE once before
+rendering, retains legacy publication/explicit-overwrite behavior and reports
+the actual backend in `analysis.rendering`. Native size limits fail explicitly;
+other ray-enabled Figure exports retain the existing CPU branch. Renderer
+failure diagnostics remain reachable through the worker's error message.
+
+Grid values use canonical `(i*ny+j)*nz+k` order and physical basis/origin in Å.
+Parsed float64 hashes are distinct from native float32 value hashes. Map identity
+binds source SHA, field values, full supported native intrinsic geometry,
+load/current matrices and state. Physical registration uses the delta relative
+to the fresh-load matrix. A session save cannot manufacture a source association.
+Aligned-copy replay preserves the full world transform, distinct from the fitted
+scientific delta; mode 2 align/super is rejected before copies/native fitting.
+
+Timeline identity binds canonical JSON and the frozen PSE display snapshot.
+Potential identity binds original explicit atom membership/state, coordinates
+and actual radii; subsequent owned result objects are excluded. Session epoch
+also prevents results from a replaced session being applied. Atom-only
+fingerprints cannot establish map or display equivalence. Missing evidence is
+`unverified`, changed relevant evidence is `stale`.
+
+Advanced bundles use an exact inventory and no-replace directory publication,
+with repeated lexical link/reparse/hardlink/ancestry checks. This is separate
+from the legacy explicit-overwrite multi-file export described above. Payload
+SHA-256 excludes report/manifest to avoid recursive hashes; the manifest hashes
+the report and every other payload, excluding itself. Failure evidence retains
+bounded logs and failure metadata without copied scientific inputs. Standalone
+PML uses public `cmd` plus stdlib and relative files, without importing MolScene
+or invoking solvers. Timeline replay embeds its interpolation/seek semantics.
+
+External commands are argument arrays under an owned guardian process. POSIX
+uses a new session/process group; Windows assigns the guardian to a kill-on-close
+Job Object before spawning tools. Cancellation, timeout and worker death stop
+owned descendants; no executable-name killing is used. Actual tool version,
+architecture, executable/runtime metadata hashes, argv and logs are retained.
+This provenance can include local paths: public example derivatives explicitly
+record original manifest hash/redactions and recompute report/manifest hashes,
+while preserving the private original. Binary PSE review remains required.
+
+The [advanced guide](ADVANCED.md) specifies LPBE preparation/solver defaults,
+units, radius conventions, map interpretations, numerical bounds and all CLI
+controls. Actual native/numerical/replay/encoder evidence belongs in
+[TESTING](TESTING.md), independent of a feature's implementation.
+
+The release validates selected public API workflows. It does not reproduce commercial PyMOL in full or validate every native command, plugin, trajectory, biological assembly or chemical-interaction workflow. Historical v0.1 observations from a separately installed Incentive build were API evidence only; evaluation-marked exports were never repaired or published as the open-source gallery. Historical native desktop evidence is tied to the exact open-source runtime in [TESTING.md](TESTING.md).
 
 Public implementation references consulted 2026-10-15: [pymol2](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol2/__init__.py), [Qt binding wrapper](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/Qt/__init__.py), [native Qt GUI](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pmg_qt/pymol_qt_gui.py), [Qt Essentials package details](https://doc.qt.io/qtforpython-6.8/package_details.html). Upstream branch links can change; they do not identify a commercial binary's complete source.

@@ -13,6 +13,7 @@ python -m unittest discover -s tests -v
 python -m molscene selftest --output results/selftest
 python examples/reproduce_v02.py --output results/gallery
 python -m examples.reproduce_v03 --output results/gallery-v03
+python examples/reproduce_v04.py --tools /absolute/path/tools.json --output results/gallery-v04
 ```
 
 The real backend tests use local/synthetic fixtures and do not fetch network data. No-PyMOL runs report expected dependency skips and verify lazy import, parser, validation and failure behavior only. No-Qt runs do not establish GUI compatibility. A platform incapable of hardlinks/reparse points/distinct Windows 8.3 aliases may report capability skips; the reason must be retained. These tests remain enabled for capable CI filesystems.
@@ -50,13 +51,94 @@ Install the wheel into an independent environment on the task drive. Run outside
 
 Extract sdist into a new directory, compare all pinned fixture hashes with `examples/data/sources.json`, compare package/test/example source bytes, and run fixture-backed science tests plus offline selftest there. The complete source suite is recorded separately; this archive check verifies a different packaging contract. This detects hidden reliance on ignored audit files or local worktrees. Record archive SHA-256, exact installed versions, commands, pass/fail/skip counts and capability reasons. Check tracked files and generated reports for private paths, credentials, runtime files and commercial material before publishing.
 
+Direct `reproduce_v04.py` source/extracted-sdist execution selects its adjacent
+MolScene package and launches the CLI from that source root. For isolated wheel
+checks, copy the script outside every checkout so it uses the installed package;
+do not add a checkout to `sys.path` or `PYTHONPATH`. Its public coordinate lookup
+falls back to `share/molscene/examples/data` under the installation prefix and
+still checks the pinned byte hash before use.
+
 ## CI environments
 
 The [workflow](../.github/workflows/ci.yml) retains four unit combinations: Ubuntu/Windows × Python 3.10/3.13, installing only MolScene and intentionally omitting PyMOL/Qt. Expected integration skips in those jobs are not desktop results.
 
-The separate required Linux job installs conda-forge PyMOL, its resolved PyQt binding, Pillow and Xvfb/Mesa support, prints environment/backend/Qt versions, asserts the desktop test dependency flags, and runs the full suite plus offline selftest. The suite runs the native harness normally and with clean preferences, the real workbench fixture/export/active-close workflow, and the navigation/preset/clean-copy/interface workflow. A separate log gate requires all four native tests to report `ok`, rejecting skipped execution. Missing dependencies, invalid GL or failed native lifecycle therefore fail this job. Native artifacts are retained; evidence is uploaded on success or failure. The environment is resolved rather than locked, so logs establish versions for a particular run. This does not imply future combinations are verified. Configuration follows the [official setup-micromamba v3 inputs](https://github.com/mamba-org/setup-micromamba).
+The separate required Linux job uses Python 3.11, conda-forge PyMOL 3.1/3.2,
+Qt5, Pillow, FFmpeg/ffprobe and pinned APBS `3.4.1=py311ha92c01f_1`. PDB2PQR
+3.7.1 uses a separate copied-interpreter Python 3.11 environment. Conda records
+retain resolved builds, URLs and hashes; pip resolution/download hashes and
+actual executable versions/architecture are retained too. Import, Qt binding,
+tools and encoder assertions run before the suite. `MOLSCENE_REQUIRE_ADVANCED=1`
+and an absolute `MOLSCENE_TOOLS_CONFIG` make missing science dependencies fail.
+Xvfb/Mesa uses xcb and a 24-bit GLX display.
+
+The exact twelve native/science/replay/encoder cases below must each produce
+their full `test_name (module.Case) ... ok` line. A skip cannot satisfy a gate.
+Windows NTFS unit jobs also require actual junction/hardlink safeguards; Linux
+requires actual symlink/hardlink/no-replace and process-tree lifetime tests.
+Evidence uploads even on failure. A resolved environment or workflow file alone
+does not prove execution. Configuration follows the
+[official setup-micromamba v3 inputs](https://github.com/mamba-org/setup-micromamba).
 
 Actual conclusions belong to the [Actions run for the release commit](https://github.com/c-chunhao/molscene/actions). Workflow code alone is not evidence of a green run. Historical v0.1 Linux backend [run](https://github.com/c-chunhao/molscene/actions/runs/38674100313/job/116223640261) passed backend tests before the desktop existed and does not validate v0.2 native GUI.
+
+## v0.4 required acceptance
+
+| Exact unittest case | Required test |
+|---|---|
+| `test_desktop.NativeDesktopTests` | `test_native_startup_events_framebuffer_and_shutdown` |
+| `test_desktop.NativeDesktopTests` | `test_native_clean_preferences_startup_and_shutdown` |
+| `test_workbench.QtWorkbenchTests` | `test_native_fixtures_exports_and_cooperative_window_close` |
+| `test_navigation_gui.NativeNavigationTests` | `test_native_navigation_presets_and_interface_workflow` |
+| `test_advanced_gui.AdvancedNativeTests` | `test_native_advanced_timeline_density_potential_and_close` |
+| `test_native_render.NativeRenderTests` | `test_native_volume_frames_and_cancel_cleanup` |
+| `test_density_engine.DensityEngineTests` | `test_registered_density_relocated_replay` |
+| `test_animation.AnimationEncoderTests` | `test_real_h264_frame_count_and_duration` |
+| `test_animation.AnimationReplayTests` | `test_relocated_timeline_replay_without_molscene` |
+| `test_electrostatics_real.RealElectrostaticsTests` | `test_real_apbs_uniform_sign_dielectric_translation_convergence` |
+| `test_electrostatics_real.RealElectrostaticsTests` | `test_real_apbs_born_dielectric_boundary` |
+| `test_electrostatics_real.RealElectrostaticsTests` | `test_real_pdb2pqr_ubiquitin_surface_and_replay` |
+
+Map checks use asymmetric/nonzero-origin geometry, explicit file-axis mapping,
+independent coordinates and full relocated replay. The electrostatics gates use
+an analytical homogeneous-dielectric charge limit (sign, dielectric, translation
+and convergence), a published Born dielectric-boundary numerical fixture plus
+independent continuum comparison, and actual public ubiquitin preparation/
+potential/display/replay. Published finite-grid Born regression and continuum
+analytic values are distinct oracles. Retain warnings and actual solver counts.
+Preparation checks original heavy-atom identity, additions, charge/radius
+assignment, zero-radius hydrogens and source preservation. Color/legend/radius
+sampling checks complement field values; grid extrema are not surface extrema.
+
+The advanced native harness exercises widgets, timeline display changes,
+registered density mesh/surface/volume, actual potential/ramp, responsive worker
+cancellation/descendant cleanup and cooperative close. Framebuffer comparisons
+must establish visible geometry, including visible versus hidden volume; object
+names alone are insufficient. Existing four native assertions remain required.
+
+The supervised-renderer gate additionally proves a visible Gaussian volume
+differs from its hidden control, at least two timeline images differ within one
+native child, source/camera preservation, normal window close and cancellation
+with all owned renderer PIDs absent. Advanced explicit no-ray and volume-bearing
+exports use an official Qt/OpenGL child through the process guardian. Reports
+must identify requested/effective ray, the actual GPU renderer and decoded
+image diagnostics. OpenGL output may be opaque and is not CPU ray tracing.
+Header checks alone cannot establish render success; deliberately hidden or
+transparent flat scenes remain valid when their images decode correctly.
+
+Before publication freeze source and run the full source suite, the plain
+environment, isolated installed-wheel GUI/science/replay, extracted-sdist
+examples, original/v0.4 examples and relocated standalone replay. The sdist must
+contain `reproduce_v04.py`, the tools JSON and Born input/PQR/license/source
+files; execute from the extraction rather than importing the checkout. Record
+archive inventories/hashes and scan text, logs, PNG metadata and PSE data for
+local paths/credentials. Public projections must identify the original manifest
+SHA-256/redactions, recompute their own artifact/report/manifest hashes and
+preserve original evidence/pinned coordinate bytes. Never package runtime binaries.
+
+The exact public source commit must pass Linux64/Qt5 CI before v0.4 publication.
+No v0.4 full-suite, package, native or remote CI success is inferred from the
+historical v0.3 tables below. Record new counts/versions/commit/CI URL after the
+corresponding frozen-source runs; until then these are acceptance requirements.
 
 ## Environment and scope notes
 

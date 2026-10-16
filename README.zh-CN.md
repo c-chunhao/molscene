@@ -1,10 +1,16 @@
-# MolScene 0.3
+# MolScene 0.4
 
 **在 PyMOL 原生桌面中完成结构分析与可复现制图。**
 
-[English](README.md) · [桌面操作指南](docs/GUI.md) · [实例与数据来源](examples/README.md) · [测试记录](docs/TESTING.md) · [科学定义与内部接口](docs/INTERNALS.md)
+[English](README.md) · [桌面操作指南](docs/GUI.md) · [高级工作流](docs/ADVANCED.md) · [实例与数据来源](examples/README.md) · [测试记录](docs/TESTING.md) · [科学定义与内部接口](docs/INTERNALS.md)
 
 MolScene 在上游 PyMOL Qt 主窗口中加入工作台 dock，保留原生的旋转、缩放、原子拾取、对象菜单和命令界面。工作台提供观测残基导航、精确选择传递、现场预设、清理副本、场景书签编辑及结果搜索；面板与离线 CLI 共用几何、几何接触、溶剂可及表面积（SASA）、伙伴界面面积和结构概况算法，输出图像、完整表格、可编辑会话、回放脚本与来源报告。分子引擎及原生界面由 PyMOL 提供。
+
+0.4 的第五个 **Advanced** 页与对应 CLI 增加相机时间线、DX/MRC/CCP4
+标量图显示与配准，以及可选 APBS/PDB2PQR 电势工作流。等值线使用原始数值，
+体渲染使用明确的传递函数；计算电势使用 LPBE，并记录单位、半径及制备假设。
+[高级指南](docs/ADVANCED.md) 说明工具配置、项目与 JSON 的区别、回放、状态语义、
+资源上限和取消。下方截图及数值仍是明确标注的历史 v0.3 证据。
 
 ![真实原生 PyMOL 视口与 MolScene 界面分析](docs/screenshots/workbench-v03.png)
 
@@ -32,6 +38,10 @@ python -m molscene gui examples/data/1ubq.pdb --workspace workspace
 ```
 
 `gui` 额外依赖固定为 `PySide6-Essentials==6.8.1`；工作台通过 `pymol.Qt` 使用兼容 binding，同一进程不能混用 Qt binding。`test` 安装用于验证图像的 Pillow。普通导入、版本和帮助不需要 PyMOL 或 Qt；实际计算需要 PyMOL，桌面还需要原生 Qt 资源和有效 OpenGL 显示环境。
+
+高级 no-ray 或包含体渲染的导出也需要原生 Qt/OpenGL，CLI 会使用受监督的独立
+渲染子进程。报告区分请求与实际 ray 设置并记录 GPU；OpenGL 可能输出不透明图像，
+不能称为 CPU 光线追踪。其他启用 ray 的高级导出保留 CPU ray 路径。
 
 也可以独立创建 conda-forge 环境：
 
@@ -90,6 +100,6 @@ CLI 坐标工作流的 PML 使用输入副本和记录的 API 操作，可脱离
 
 MolScene 自有代码采用 [MIT](LICENSE)。PyMOL、Qt 及其原生资源遵守各自发行版的许可；上游 viewport、菜单、命令控制台和分子引擎不是从商业安装复制或重新实现的。项目独立开发，与 Schrödinger / PyMOL 无隶属或背书关系。详见 [上游开源许可](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) 和 [接口分析](docs/INTERNALS.md)。
 
-本轮验证常用表示与着色、对象/场景管理、指定态几何、几何接触、SASA、坐标序列、叠合和批量制图。经过验证的氢键化学判定、轨迹统计、独立电影时间轴、密度图专用工作流、静电势、自动生物学组装及商业专属组件仍是后续范围，不宣称全面商业等价。原生 PyMOL 可能提供其它命令，其行为和许可由上游决定。
+本轮范围包括常用表示与着色、对象/场景管理、指定态几何、几何接触、SASA、坐标序列、叠合、批量制图，以及明确限定的高级工作流。相机插值不是轨迹分析；氢键化学判定、自动生物学组装、配体力场参数化及商业专属组件仍在范围之外，不宣称全面商业等价。原生 PyMOL 的其它命令由上游定义行为和许可。
 
 公开示例由独立开源运行时正常生成，未移除或修改评估水印。结构数据保留 [原始归属](examples/README.md)。核心工具离线运行，仅单独调用的固定来源、校验和验证下载器联网。参阅 [验证记录](docs/TESTING.md) 与 [贡献指南](CONTRIBUTING.md)。

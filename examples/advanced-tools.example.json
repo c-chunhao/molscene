@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "apbs": {
+      "argv": ["/ABSOLUTE/PLACEHOLDER/apbs/bin/apbs"],
+      "architecture": "x64",
+      "path_dirs": ["/ABSOLUTE/PLACEHOLDER/apbs/bin"],
+      "runtime_files": [],
+      "timeout_seconds": 1200,
+      "memory_limit_mib": 4096
+    },
+    "pdb2pqr": {
+      "argv": ["/ABSOLUTE/PLACEHOLDER/pdb2pqr/bin/python", "-B", "-m", "pdb2pqr"],
+      "architecture": "x64",
+      "path_dirs": ["/ABSOLUTE/PLACEHOLDER/pdb2pqr/bin"],
+      "runtime_files": [
+        {"path": "/ABSOLUTE/PLACEHOLDER/pdb2pqr/bin/python", "role": "interpreter"},
+        {"path": "/ABSOLUTE/PLACEHOLDER/pdb2pqr/lib/python3.11/site-packages/pdb2pqr-3.7.1.dist-info/METADATA", "role": "package_metadata"}
+      ],
+      "timeout_seconds": 600,
+      "memory_limit_mib": 4096
+    },
+    "ffmpeg": {
+      "argv": ["/ABSOLUTE/PLACEHOLDER/ffmpeg/bin/ffmpeg"],
+      "architecture": "x64",
+      "path_dirs": ["/ABSOLUTE/PLACEHOLDER/ffmpeg/bin"],
+      "runtime_files": [],
+      "timeout_seconds": 1200,
+      "memory_limit_mib": 4096
+    },
+    "ffprobe": {
+      "argv": ["/ABSOLUTE/PLACEHOLDER/ffmpeg/bin/ffprobe"],
+      "architecture": "x64",
+      "path_dirs": ["/ABSOLUTE/PLACEHOLDER/ffmpeg/bin"],
+      "runtime_files": [],
+      "timeout_seconds": 1200,
+      "memory_limit_mib": 4096
+    }
+  }
+}

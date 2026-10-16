@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "molscene"
-version = "0.3.0"
+version = "0.4.0"
 description = "Native PyMOL workbench, reproducible molecular scenes and structural analysis"
 readme = "README.md"
 requires-python = ">=3.10"

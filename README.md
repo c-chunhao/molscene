@@ -1,12 +1,20 @@
-# MolScene 0.3
+# MolScene 0.4
 
 [![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
 
 **A native PyMOL workbench with reproducible figures and structural analysis.**
 
-[简体中文](README.zh-CN.md) · [Desktop guide](docs/GUI.md) · [Examples](examples/README.md) · [Validation](docs/TESTING.md) · [Scientific definitions](docs/INTERNALS.md)
+[简体中文](README.zh-CN.md) · [Desktop guide](docs/GUI.md) · [Advanced workflows](docs/ADVANCED.md) · [Examples](examples/README.md) · [Validation](docs/TESTING.md) · [Scientific definitions](docs/INTERNALS.md)
 
 MolScene adds a dock to the upstream PyMOL Qt window and provides an offline CLI for local PDB/mmCIF structures. Navigate observed residues, pass exact selections to analysis, apply live presets, create cleaned copies and edit scene bookmarks. Calculate geometry, geometric contacts, solvent-accessible surface area (SASA) and partner interface area, then export figures, full tables and editable sessions with provenance. PyMOL supplies the molecular graphics engine and native interface; MolScene supplies the workbench, shared analysis definitions and reproducible output workflows.
+
+The **Advanced** tab and matching CLI add reproducible camera timelines,
+registered DX/MRC/CCP4 maps and optional APBS/PDB2PQR electrostatic potential.
+Contours use raw values; volume uses an explicit transfer ramp. Computed
+potentials use LPBE with recorded units, radii and preparation assumptions.
+[Advanced guide](docs/ADVANCED.md) covers tool configuration, project/replay
+semantics, state identity, resource limits and cancellation. The screenshots
+and numerical gallery below remain labelled historical v0.3 evidence.
 
 ![Native PyMOL viewport and MolScene interface results](docs/screenshots/workbench-v03.png)
 
@@ -40,6 +48,11 @@ python -m molscene gui examples/data/1ubq.pdb --workspace workspace
 ```
 
 The `gui` extra pins `PySide6-Essentials==6.8.1`. Existing compatible Qt bindings are accessed through `pymol.Qt`; do not mix bindings in one process. `test` adds Pillow for image validation. Import, `--help` and `--version` work without PyMOL or Qt; actual scientific commands require PyMOL, and `gui` additionally requires its native Qt resources and a working OpenGL display.
+
+Advanced no-ray and volume-bearing exports also require native Qt/OpenGL: they
+use a supervised child renderer, including from the CLI. Reports distinguish
+requested/effective ray and GPU rendering; OpenGL may be opaque and is not CPU
+ray tracing. Other ray-enabled advanced exports retain CPU ray rendering.
 
 One independently managed backend option is [conda-forge PyMOL](https://github.com/schrodinger/pymol-open-source):
 
@@ -110,6 +123,6 @@ The residue browser shows coordinate sites actually present, preserving object, 
 
 MolScene's original code is [MIT licensed](LICENSE). PyMOL and Qt are separate dependencies under their respective distribution licenses. The native viewport, menus, command console, molecular engine and upstream Qt resources come from PyMOL; they were not recreated or copied from a commercial installation. This independent project is not affiliated with or endorsed by Schrödinger or the PyMOL project. See the [upstream open-source license](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) and [interface analysis](docs/INTERNALS.md).
 
-This release covers common representation/coloring controls, object/scene management, state-specific geometry, geometric contacts, SASA, coordinate sequence, alignment and batch figures. Validated hydrogen-bond chemistry, trajectory statistics, a separate movie timeline, density-map workflows, electrostatics, automatic biological assembly and commercial-only components remain outside the validated MolScene workflows. Native PyMOL may expose additional commands under its own behavior and licensing; MolScene does not claim commercial parity.
+This release covers common representation/coloring controls, object/scene management, state-specific geometry, geometric contacts, SASA, coordinate sequence, alignment, batch figures and the scoped advanced workflows. Camera interpolation is not trajectory analysis. Chemical hydrogen-bond assignment, automatic biological assembly, ligand force-field parameterization and commercial-only components remain outside this scope. Native PyMOL exposes further commands under its own behavior and licensing; MolScene does not claim commercial parity.
 
 The public examples use an independent open-source runtime and retain [coordinate attribution](examples/README.md). No evaluation overlay was removed or modified. The core tool is offline; only the optional fixed-source, checksum-verified example downloader accesses the network. See [testing evidence](docs/TESTING.md) and [contribution guidance](CONTRIBUTING.md).

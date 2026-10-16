@@ -2,6 +2,79 @@
 
 These examples use public RCSB PDB coordinate files. The source structures are experimental models; the MolScene figures illustrate reproducible visualization and geometric analysis.
 
+## v0.4 advanced workflows
+
+The separate generator uses synthetic maps/spheres and the pinned public 1UBQ
+coordinates below. It does not download structures or tools. Select an
+environment containing MolScene, PyMOL and Pillow, and an explicit schema-1
+[tools configuration](advanced-tools.example.json) pointing to real APBS 3.4.1
+and PDB2PQR 3.7.1. Every placeholder path must be replaced; PDB2PQR uses its own
+Python 3.11+ interpreter. The desktop may retain Python 3.10.
+
+```sh
+python examples/reproduce_v04.py --tools /absolute/path/tools.json --output results/gallery-v04
+```
+
+This generates a four-frame, 12 FPS camera/display timeline project and PNG
+sequence, an asymmetric synthetic DX map with nonzero origin and a 90° z
+rotation plus (8,-2,3) Å registration, and real prepared ubiquitin LPBE potential.
+The public input hash is checked before use. Preparation uses explicit protein
+state 1, PARSE, pH 7/PROPKA and water dropping; the solve requests 65³, default
+2/78.5 dielectrics, 0.15 M salt and a ±5 kBT/e display range. See
+[ADVANCED](../docs/ADVANCED.md) for the full assumptions and limitations.
+The synthetic field is illustrative, not experimental electron density.
+
+Images are 800 × 600 at 96 DPI so the potential unit/range and clipping legend
+remain readable. This generator requests no-ray images, so it needs official Qt resources and a
+working OpenGL display even for the CLI synthetic-only run. Advanced no-ray/
+volume rendering uses a supervised native child; Linux CI supplies Xvfb/GLX.
+Inspect requested/effective ray, actual GPU renderer and decoded image evidence.
+OpenGL output may be opaque and does not establish CPU ray rendering.
+
+`--skip-potential` is an explicit user choice for a tool-free synthetic example:
+
+```sh
+python examples/reproduce_v04.py --skip-potential --output results/synthetic-v04
+```
+
+The example-level `validation.json` records that skip; this run cannot satisfy
+the required real-science release gate. Required release acceptance executes
+APBS, PDB2PQR and H.264, with no dependency skips. Existing output directories
+are refused; there is no `--overwrite`. Original v0.2/v0.3 examples remain
+separate and keep their historical behavior.
+
+Each feature directory has a closed inventory and `manifest.json`. Project:
+`source.pse,timeline.json,replay.pml,report.json,manifest.json`. Animation adds
+exactly four `frames/frame_000001.png`…`frame_000004.png`. Density contains
+`inputs/density.dx,density.json,scene.pse,scene.png,replay.pml,report.json,manifest.json`.
+Potential preparation contains `source.pse,inputs/selection.pdb,prepared.pqr,
+preparation.json,potential.dx,apbs.in,tools.json`, the four APBS/PDB2PQR stdout/
+stderr logs, `scene.pse,scene.png,replay.pml,report.json,manifest.json`.
+The example-level manifest includes those complete feature inventories plus
+`validation.json`; no runtime executable/DLL is copied.
+
+Tool runs retain private original bundles/logs in a sibling
+`.molscene-v04-private-*` directory. The selected public output contains
+**derivatives**: each report's `public_projection` records its original manifest
+SHA-256 and redactions; affected artifact hashes and the manifest are recomputed.
+Science values and original private bytes are preserved. PSE bytes are copied
+unchanged and require independent binary/session privacy review before public
+distribution. The generator's text redaction is not a claim that this review
+has passed. Never publish the private sibling or a tools config with local paths.
+
+Scientific DX/PQR/PDB inputs retain exact bytes and line endings, preserving
+input hashes and replay references. Public projections have no private GUI job
+context: they remain unverified for current-scene result application. Replay
+their complete folders, use Open project for a timeline, or explicitly import
+maps/PQR/DX through the appropriate controls.
+
+Replay each complete relocated feature directory with `@replay.pml` in fresh
+compatible PyMOL. Timeline exposes `molscene_seek(frame)`/`molscene_play()`.
+Replay needs neither MolScene nor solvers/encoder. Review camera/display changes,
+registered map geometry and numeric potential legend/radius conventions in
+addition to hashes and nonblank images. Actual v0.4 source/package/native/Linux
+results belong in [TESTING](../docs/TESTING.md); no historical gallery proves them.
+
 ## Download and verify
 
 From the repository root, using any Python 3.10+ interpreter:

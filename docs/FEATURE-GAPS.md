@@ -1,6 +1,6 @@
 # PyMOL comparison and MolScene priorities / 功能差距与优先级
 
-Assessment date: 2026-10-15; v0.3 workflow documentation updated 2026-10-16.
+Assessment date: 2026-10-15; v0.4 workflow documentation updated 2026-10-16.
 Baseline: MolScene v0.2.0. The installed
 Incentive PyMOL reports 3.1.6.1 through its public version API. This is a
 workflow comparison based on official documentation, the installed public API
@@ -52,11 +52,28 @@ Exact source hashes and the local evidence are in
 [validation-v03.json](validation-v03.json). Linux Qt5 execution remains a remote
 CI release gate, separate from the observed Windows Qt6 checks.
 
-Animation, density registration, chemistry-aware hydrogen bonds, protonation,
-electrostatics and specialized commercial components remain open. No feature
-count, popularity ranking or commercial-parity percentage is claimed. The
+The table above preserves the historical v0.3 priority assessment. The scoped
+v0.4 additions are described below. No feature count, popularity ranking or
+commercial-parity percentage is claimed. The
 navigation browser is an observed-coordinate view; the native application
 continues to supply its own separate sequence display and command capabilities.
+
+## v0.4 scope and remaining boundaries
+
+| Workflow | v0.4 contract | Boundary |
+|---|---|---|
+| Camera timeline | Explicit scenes/states, keyframes, preview, project, PNG/H.264 and standalone replay | No trajectory interpolation/statistics or multitrack commercial parity |
+| Density/scalar maps | DX/MRC/CCP4 physical geometry, raw contours, volume ramps and verified copy registration | No implicit sigma normalization, guessed source association or experimental validity for synthetic maps |
+| Electrostatics | Explicit prepared PQR/protein preparation/import, real APBS/PDB2PQR, unit-labelled potential display and replay | LPBE assumptions; no binding-affinity/free-energy claim or ligand force-field assignment |
+| Reproducibility | Closed inventories, no-replace bundles, source identity, cancellation and public derivatives | Native/PSE privacy/scientific review and exact-commit Linux execution remain independent release gates |
+| Advanced rendering | Supervised official Qt/OpenGL child for explicit no-ray/volume, with requested/effective renderer and decoded image evidence | Requires a valid graphics context; GPU/opacity differences remain, and OpenGL is not CPU ray tracing |
+
+The required Linux path uses actual Qt5/PyMOL 3.1/3.2, APBS 3.4.1 x64,
+PDB2PQR 3.7.1 and H.264. Windows Qt6 evidence cannot substitute for it.
+The [advanced guide](ADVANCED.md) states controls, limits and scientific
+assumptions. [TESTING](TESTING.md) separates implemented acceptance tests from
+recorded executions. Chemical hydrogen-bond assignment, automatic biological
+assembly, trajectory analysis and specialized commercial components remain open.
 
 ## Scientific boundaries
 
