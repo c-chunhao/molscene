@@ -6,6 +6,7 @@ import sys
 
 from . import analysis, artifacts, engine
 from .snapshot import scene_fingerprint
+from .advanced import PARAMETERS as _ADVANCED_PARAMETERS
 
 _PARAMETERS = {
     'geometry': {'kind', 'selections', 'state'},
@@ -16,6 +17,114 @@ _PARAMETERS = {
     'export': {'width', 'height', 'dpi', 'background', 'ray', 'overwrite', 'analysis_records'},
     'batch': {'input_dir', 'render_options', 'overwrite', 'cancel_file'},
 }
+_PARAMETERS.update(_ADVANCED_PARAMETERS)
+
+
+def _advanced_job(path, job, parameters):
+    from .advanced import validate_request, source_paths, validate_cancel, run_advanced, probe_tools
+    from .bundles import CancelledError
+    operation = job['operation']
+    result_path = None
+    protected = [path]
+    try:
+        # Protect declared raw inputs before request validation, including on
+        # error paths. Invalid science must still produce a safe envelope.
+        def protect_raw(value, key=None):
+            if isinstance(value, dict):
+                for name, item in value.items():
+                    protect_raw(item, name)
+            elif isinstance(value, list):
+                if key == 'argv' and value and isinstance(value[0], str):
+                    protected.append(artifacts.checked_path(value[0]))
+                elif key == 'path_dirs':
+                    for item in value:
+                        if isinstance(item, str):
+                            protected.append(artifacts.checked_path(item))
+                else:
+                    for item in value:
+                        protect_raw(item)
+            elif key in ('map_path', 'pqr_path', 'dx_path', 'path') and isinstance(value, str):
+                protected.append(artifacts.checked_path(value))
+        protect_raw(parameters)
+        for row in job.get('original_inputs', []):
+            if isinstance(row, dict):
+                for key in ('path', 'copy'):
+                    if isinstance(row.get(key), str):
+                        protected.append(artifacts.checked_path(row[key]))
+        originals = job.get('protected_paths', [])
+        if not isinstance(originals, list) or any(not isinstance(p, str) or not Path(p).is_absolute() for p in originals):
+            raise ValueError('protected_paths must be absolute paths')
+        protected.extend(artifacts.checked_path(p) for p in originals)
+        session = job.get('input_session')
+        if session is not None:
+            if not isinstance(session, str) or not Path(session).is_absolute():
+                raise ValueError('input_session must be an absolute PSE path')
+            protected.append(artifacts.checked_path(session))
+        output = artifacts.checked_path(job['output'])
+        if not isinstance(job.get('result_path'), str) or not Path(job['result_path']).is_absolute():
+            raise ValueError('Advanced jobs require explicit absolute result_path')
+        envelope = artifacts.result_path(job['result_path'], protected)
+        if operation == 'tools':
+            if session is not None or output != envelope or envelope.parent != path.parent:
+                raise ValueError('Tools requires no session and output=result_path in its private job directory')
+        elif (output == envelope or output in envelope.parents
+              or any(output == p or output in p.parents for p in protected)):
+            raise ValueError('Advanced output must not contain source, job or envelope')
+        cancelled = validate_cancel(parameters.get('cancel_file') if isinstance(parameters, dict) else None,
+                                    output, [*protected, envelope])
+        result_path = envelope
+        parameters = validate_request(operation, parameters)
+        protected.extend(source_paths(parameters))
+        context = job.get('gui_context')
+        if context is not None:
+            if not isinstance(context, dict):
+                raise ValueError('Private snapshot context must be a dictionary')
+            actual = artifacts.sha256(session) if session is not None else None
+            if actual != context.get('snapshot_id'):
+                raise ValueError('Private source snapshot changed after job preparation')
+        originals = job.get('original_inputs', [])
+        if not isinstance(originals, list):
+            raise ValueError('original_inputs must describe private input copies')
+        for row in originals:
+            if (not isinstance(row, dict) or set(row) != {'role', 'path', 'copy', 'sha256'}
+                    or row['role'] not in ('map_path', 'pqr_path', 'dx_path')
+                    or parameters.get('request', {}).get(row['role']) != row['copy']
+                    or artifacts.sha256(artifacts.checked_path(row['copy'])) != row['sha256']):
+                raise ValueError('Private input copy identity does not match prepared job')
+        def progress(value):
+            print(json.dumps({'progress': value}, allow_nan=False), flush=True)
+        if operation == 'tools':
+            result = probe_tools(parameters['tools'], path.parent, cancelled=cancelled, progress=progress)
+        else:
+            result = run_advanced(operation, session, output, parameters, cancelled=cancelled, progress=progress,
+                                  protected=(*protected, envelope))
+        record = dict(passed=result.get('passed', True), result=result)
+        if 'gui_context' in job:
+            record['gui_context'] = job['gui_context']
+        artifacts.atomic_result(result_path, record, protected)
+        return 0 if record['passed'] else 1
+    except Exception as exc:
+        message = f'{type(exc).__name__}: {exc}'
+        print('molscene worker: ' + message, file=sys.stderr)
+        if result_path is not None:
+            record = dict(passed=False, error=message)
+            if isinstance(exc, CancelledError):
+                record['result'] = dict(operation=operation, passed=False, cancelled=True)
+            for name in ('failure_path', 'result', 'bundle_diagnostics'):
+                value = getattr(exc, name, None)
+                if value is not None:
+                    try:
+                        encoded = json.dumps(str(value) if isinstance(value, Path) else value, allow_nan=False)
+                        if len(encoded.encode('utf-8')) <= 65536:
+                            key = 'diagnostics' if name == 'result' and isinstance(exc, CancelledError) else name
+                            record[key] = json.loads(encoded)
+                    except (ValueError, TypeError):
+                        pass
+            try:
+                artifacts.atomic_result(result_path, record, protected)
+            except (OSError, ValueError) as error:
+                print('Cannot safely persist advanced error: ' + str(error), file=sys.stderr)
+        return 1
 
 
 def _read_job(path):
@@ -39,6 +148,8 @@ def run_job(job_path):
     try:
         path, job, parameters = _read_job(job_path)
         operation = job['operation']
+        if operation in _ADVANCED_PARAMETERS:
+            return _advanced_job(path, job, parameters)
         protected = [path]
         if operation != 'batch':
             if not isinstance(job.get('input_session'), str):
