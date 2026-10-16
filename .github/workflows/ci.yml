@@ -28,7 +28,15 @@ jobs:
         shell: bash
         run: |
           set -e -o pipefail
-          python -m unittest discover -s tests -v 2>&1 | tee unit-tests.txt
+          python - <<'PY' 2>&1 | tee unit-diagnostics.txt
+          import unittest
+          from pathlib import Path
+          # Only the runner writes status; test diagnostics use the separate log.
+          with Path('unit-tests.txt').open('x', encoding='utf-8') as status:
+              suite = unittest.defaultTestLoader.discover('tests')
+              result = unittest.TextTestRunner(stream=status, verbosity=2).run(suite)
+          raise SystemExit(0 if result.wasSuccessful() else 1)
+          PY
       - name: Require actual Windows NTFS junction and hardlink safeguards
         if: runner.os == 'Windows'
         shell: bash
@@ -47,7 +55,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plain-${{ matrix.os }}-${{ matrix.python }}
-          path: unit-tests.txt
+          path: |
+            unit-tests.txt
+            unit-diagnostics.txt
 
   integration:
     name: Required PyMOL + native Qt OpenGL / Linux
