@@ -9,7 +9,7 @@
 
 ## Global Constraints
 
-- All new files, worktrees, environments, caches, examples and evidence stay under F:/001_data/CaoCh/008_Reverse/01pymol. Existing tools on C:/D: may be read/run. No global configuration changes.
+- All new files, worktrees, environments, caches, examples and evidence stay on F: under the existing MolScene project directory. Existing tools on other drives may be read/run. No global configuration changes.
 - Python >=3.10, lazy PyMOL/Qt/NumPy imports; backend-free CLI help and request validation remain usable. NumPy is supplied by the compatible PyMOL scientific runtime; no new mandatory package.
 - Preserve existing rendering, timelines, density, electrostatics, labels, persistence and public examples. Do not redistribute proprietary software or make commercial parity claims.
 - New bundles use Bundle(new_directory_only=True), checked_path, complete manifests and artifact hashes; cancellation publishes no successful partial bundle. Protect original inputs, private copies, job and envelope on validation/error paths.
