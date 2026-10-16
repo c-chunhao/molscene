@@ -45,6 +45,10 @@ not check chemical types. Reject absent states instead of singleton fallback.
 The native method and its actual cutoff/angle conventions must be recorded.
 The tested backend uses a strict distance cutoff (`distance < cutoff`), not an
 inclusive boundary. State that convention explicitly and test the boundary.
+Native orientation is a permissive coarse tolerance: either endpoint can supply
+favorable local orientation. It is not a measured D-H-A angle, and 45 degrees
+must not be relabelled as D-H-A >=135. Test a controlled acceptor rotation of
+44/46 degrees at native tolerances 45/60, and both endpoints unfavorably oriented.
 
 Return unique directed donor->acceptor pairs, preserving reciprocal directions
 when both atoms have both native roles. Deduplicate overlaps, exclude self and
@@ -52,6 +56,10 @@ directly covalently bonded endpoints, and sort deterministically by distance and
 identity. Empty typed endpoints are a valid zero-row result; empty original A/B
 selections fail. Bound the geometric candidate set before a potentially large
 native pair query; exceeding the declared cap fails rather than truncates.
+For `all`, retain all endpoint conformers but exclude pairs with different
+nonblank alt labels within the same original object. This is a declared
+conservative same-label convention, not proof of correlated conformers. Do not
+infer cross-object alt-label correlation; report that limitation explicitly.
 The preflight cap counts unique undirected non-self pairs between typed heavy
 endpoints of A/B with distance <= cutoff, before orientation and direct-bond
 exclusion; directly bonded pairs count toward this conservative resource cap.
