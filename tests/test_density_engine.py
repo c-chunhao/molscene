@@ -393,6 +393,106 @@ with pymol2.PyMOL() as p:
         self.assertEqual(hashlib.sha256(session.read_bytes()).hexdigest(),source_hash)
         self.assertEqual(report['analysis']['density']['source']['state'],2)
 
+    def test_associated_existing_display_exports_new_owned_display_and_replays(self):
+        for kind in ('mesh','surface'):
+            with self.subTest(kind=kind):
+                self.c.reinitialize()
+                record=self.load_origin()
+                old=density.display_density(self.c,record,dict(kind=kind,level=50,color='red',opacity=.4))['name']
+                self.c.ray(32,32)
+                original_geometry=self.points(old)
+                self.assertTrue(original_geometry)
+                self.c.disable(old)
+                matrix=list(self.c.get_object_matrix('source',state=1))
+                raw=self.c.get_volume_field('source',state=1,copy=1).ravel().tolist()
+                session=self.root/(kind+'.pse'); self.c.save(str(session))
+                session_bytes=session.read_bytes(); source_bytes=self.path.read_bytes()
+                out=self.root/('bundle_'+kind)
+                report=density_export.export_density(session,out,dict(map_path=str(self.path),format='mrc',
+                    interpretation='origin',map_name='source',display=dict(kind=kind,level=100),
+                    render=dict(width=32,height=32,ray=True)))
+                metadata=report['analysis']['density']; new=metadata['display']['name']
+                self.assertNotEqual(new,old)
+                self.assertEqual(metadata['display']['source'],'source')
+                self.assertTrue(any(old in warning and new in warning and 'coexist' in warning for warning in report['warnings']))
+                self.c.reinitialize(); self.c.load(str(out/'scene.pse')); self.c.ray(32,32)
+                self.assertEqual(self.c.get_volume_field('source',state=1,copy=1).ravel().tolist(),raw)
+                self.assertVector(self.c.get_object_matrix('source',state=1),matrix)
+                self.assertEqual(self.c.isolevel(old,state=1,query=1),50)
+                self.assertEqual(self.c.isolevel(new,state=1,query=1),100)
+                self.assertAlmostEqual(self.c.get_setting_float('transparency',old),.6,places=6)
+                self.assertNotIn(old,self.c.get_names('objects',enabled_only=1))
+                self.assertIn(new,self.c.get_names('objects',enabled_only=1))
+                # Reloaded hidden contours have no realized vertices until shown.
+                self.c.enable(old); self.c.ray(32,32)
+                self.assertEqual(self.points(old),original_geometry)
+                self.c.disable(old)
+                exported_geometry=self.points(new); self.assertTrue(exported_geometry)
+                moved=self.root/('moved_'+kind); shutil.move(str(out),str(moved))
+                code='''import builtins,json,os,pathlib,pymol2,sys
+original=builtins.__import__
+def isolated(name,*args,**kwargs):
+ if name=='molscene' or name.startswith('molscene.'): raise ImportError('MolScene deliberately unavailable')
+ return original(name,*args,**kwargs)
+builtins.__import__=isolated
+root=pathlib.Path(sys.argv[1]); old,new=sys.argv[2:4]; os.chdir(root)
+with pymol2.PyMOL() as pm:
+ c=pm.cmd; c.do('@replay.pml'); c.ray(32,32)
+ result={'matrix':list(c.get_object_matrix('source',state=1)),
+         'raw':c.get_volume_field('source',state=1,copy=1).ravel().tolist(),
+         'old_level':c.isolevel(old,state=1,query=1),'new_level':c.isolevel(new,state=1,query=1),
+         'old_transparency':c.get_setting_float('transparency',old),
+         'enabled':c.get_names('objects',enabled_only=1)}
+ c.enable(old); c.ray(32,32)
+ c.dump('old.txt',old,state=1); c.dump('new.txt',new,state=1); c.disable(old)
+ (root/'observed.json').write_text(json.dumps(result))
+'''
+                result=subprocess.run([sys.executable,'-B','-c',code,str(moved),old,new],cwd=self.root,
+                                      capture_output=True,text=True,timeout=90)
+                self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+                observed=json.loads((moved/'observed.json').read_text())
+                self.assertEqual(observed['raw'],raw); self.assertVector(observed['matrix'],matrix)
+                self.assertEqual(observed['old_level'],50); self.assertEqual(observed['new_level'],100)
+                self.assertAlmostEqual(observed['old_transparency'],.6,places=6)
+                self.assertNotIn(old,observed['enabled']); self.assertIn(new,observed['enabled'])
+                for filename,expected in (('old.txt',original_geometry),('new.txt',exported_geometry)):
+                    actual=[[float(v) for v in line.split()] for line in (moved/filename).read_text().splitlines() if line.strip()]
+                    self.assertEqual(len(actual),len(expected))
+                    for got,want in zip(actual,expected): self.assertVector(got,want)
+                self.assertEqual(session.read_bytes(),session_bytes)
+                self.assertEqual((moved/'source.pse').read_bytes(),session_bytes)
+                self.assertEqual(self.path.read_bytes(),source_bytes)
+
+    def test_explicit_display_name_still_rejects_unowned_objects(self):
+        record=self.load_origin()
+        self.c.pseudoatom('unrelated',pos=[4,5,6])
+        with self.assertRaises(ValueError):
+            density.display_density(self.c,record,dict(kind='mesh',level=100),name='unrelated')
+        self.assertVector(self.c.get_model('unrelated').atom[0].coord,[4,5,6])
+        self.assertEqual(record['derived'],[])
+        self.c.isomesh('unowned_mesh','source',level=50)
+        with self.assertRaises(ValueError):
+            density.display_density(self.c,record,dict(kind='mesh',level=100),name='unowned_mesh')
+        self.assertEqual(self.c.isolevel('unowned_mesh',state=1,query=1),50)
+        self.c.isomesh('source_mesh','source',level=25)
+        with self.assertRaises(ValueError):
+            density.display_density(self.c,record,dict(kind='mesh',level=100))
+        self.assertEqual(self.c.isolevel('source_mesh',state=1,query=1),25)
+
+    def test_associated_export_retains_unrelated_colliding_object(self):
+        self.load_origin()
+        self.c.pseudoatom('source_mesh',pos=[4,5,6])
+        session=self.root/'unrelated.pse'; self.c.save(str(session)); original=session.read_bytes()
+        report=density_export.export_density(session,self.root/'unrelated_bundle',dict(
+            map_path=str(self.path),format='mrc',interpretation='origin',map_name='source',
+            display=dict(kind='mesh',level=100),render=dict(width=32,height=32,ray=True)))
+        self.c.reinitialize(); self.c.load(str(self.root/'unrelated_bundle/scene.pse'))
+        self.assertEqual(self.c.get_type('source_mesh'),'object:molecule')
+        self.assertVector(self.c.get_model('source_mesh').atom[0].coord,[4,5,6])
+        new=report['analysis']['density']['display']['name']
+        self.assertNotEqual(new,'source_mesh'); self.assertEqual(self.c.get_type(new),'object:mesh')
+        self.assertEqual(session.read_bytes(),original)
+
     def test_cancellation_after_render_never_publishes(self):
         self.path.write_bytes(mrc_bytes())
         cancel=[False]

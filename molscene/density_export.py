@@ -154,7 +154,15 @@ def export_density(session_path,output_dir,request,*,cancelled=None,progress=Non
             registration=None
             if request['registration'] is not None: registration=density.register_density(cmd,record,request['registration'])
             result_record=registration['record'] if registration is not None else record
-            display=density.display_density(cmd,result_record,request['display'])
+            display_name=density._display_name(result_record,request['display']['kind'])
+            display_warnings=[]
+            if display_name in cmd.get_names('all'):
+                retained=display_name
+                display_name=density._unique(cmd,'density_display')
+                display_warnings.append(f"Existing source object/display '{retained}' was retained; "
+                    f"fresh result display '{display_name}' was created. Original and new layers may coexist, "
+                    "including their volume opacity; this does not replace the current view.")
+            display=density.display_density(cmd,result_record,request['display'],name=display_name)
             cmd.zoom(result_record['name'],buffer=3,state=result_record['state'])
             view=list(cmd.get_view())
             stage('render',3,'Rendering density scene')
@@ -197,7 +205,7 @@ def export_density(session_path,output_dir,request,*,cancelled=None,progress=Non
                 maps=advanced_maps,timeline=None,display_snapshot=snapshot,selection=None,session_epoch=None),
             limitations=['Rigid registration maps coordinate frames; it does not optimize density correlation, refine atoms, or assess experimental quality.',
                           'Raw map values have unknown units unless separately established. Bounds are geometric diagnostics only.',
-                          'Aligned-copy registration requires global, mobile and target matrix_mode -1, 0 or 1; mode2 is unsupported.'],warnings=render_warnings,
+                          'Aligned-copy registration requires global, mobile and target matrix_mode -1, 0 or 1; mode2 is unsupported.'],warnings=display_warnings+render_warnings,
             artifact_hashes={name:sha256(bundle.stage/name) for name in inventory if name not in ('report.json','manifest.json')})
         write_json(bundle.stage/'report.json',report)
         stage('publish',5,'Publishing validated density bundle')

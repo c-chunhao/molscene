@@ -307,15 +307,19 @@ def map_inventory(cmd,records):
     return result
 
 
-def display_density(cmd,record,display):
+def _display_name(record,kind):
+    state_suffix='' if record['state']==1 else '_s'+str(record['state'])
+    return record['name']+state_suffix+'_'+kind
+
+
+def display_density(cmd,record,display,*,name=None):
     spec=validate_display(display)
     _field(cmd,record['name'],record['state'])
     if record.get('verified') is True:
         _verify_record(cmd,record)
     if cmd.get_color_index(spec['color'])<0: raise ValueError('Unknown PyMOL color')
     kind=spec['kind']
-    state_suffix='' if record['state']==1 else '_s'+str(record['state'])
-    name=record['name']+state_suffix+'_'+kind
+    name=_display_name(record,kind) if name is None else name
     _name(name)
     existing=name in cmd.get_names('all')
     if existing and (name not in record['derived'] or cmd.get_type(name)!='object:'+('surface' if kind=='surface' else kind)):
