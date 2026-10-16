@@ -6,7 +6,7 @@ from pathlib import Path
 from .artifacts import checked_path, sha256
 from .bundles import CancelledError
 
-EXPORTS = frozenset(('timeline_project', 'animation', 'density', 'potential', 'coordinates', 'session_save'))
+EXPORTS = frozenset(('timeline_project', 'animation', 'density', 'potential', 'coordinates', 'session_save', 'assembly', 'trajectory'))
 PARAMETERS = {
     'timeline_project': {'timeline', 'cancel_file'},
     'animation': {'timeline', 'render', 'mp4', 'tools', 'cancel_file'},
@@ -15,6 +15,8 @@ PARAMETERS = {
     'tools': {'tools', 'cancel_file'},
     'coordinates': {'request', 'cancel_file'},
     'session_save': {'request', 'cancel_file'},
+    'assembly': {'request', 'cancel_file'},
+    'trajectory': {'request', 'cancel_file'},
 }
 
 
@@ -41,7 +43,13 @@ def validate_request(operation, parameters):
         marker = result['cancel_file']
         if not isinstance(marker, str) or not Path(marker).is_absolute():
             raise ValueError('cancel_file must be an absolute path')
-    if operation in ('coordinates', 'session_save'):
+    if operation == 'assembly':
+        from .assembly import validate_assembly_request
+        result['request'] = validate_assembly_request(result.get('request'))
+    elif operation == 'trajectory':
+        from .trajectory import validate_trajectory_request
+        result['request'] = validate_trajectory_request(result.get('request'))
+    elif operation in ('coordinates', 'session_save'):
         from .persistence import validate_persistence_request
         result['request'] = validate_persistence_request(operation, result.get('request'))
     elif operation in ('timeline_project', 'animation'):
@@ -75,7 +83,7 @@ def validate_request(operation, parameters):
 def source_paths(parameters):
     """Enumerate original scientific inputs and configured tool runtime files."""
     request = parameters.get('request', {})
-    result = [checked_path(request[key]) for key in ('map_path', 'pqr_path', 'dx_path') if request.get(key)]
+    result = [checked_path(request[key]) for key in ('map_path', 'pqr_path', 'dx_path', 'source_path', 'trajectory_path') if request.get(key)]
     config = parameters.get('tools') or request.get('tools') or {}
     for entry in config.get('tools', {}).values():
         result.append(checked_path(entry['argv'][0]))
@@ -136,6 +144,14 @@ def run_advanced(operation, input_session, output_dir, parameters, *, cancelled=
     protected = tuple(protected) + tuple(source_paths(parameters))
     if cancelled and cancelled():
         raise CancelledError('Operation cancelled')
+    if operation == 'assembly':
+        from .assembly_export import export_assembly
+        return export_assembly(input_session, output_dir, parameters['request'], cancelled=cancelled,
+                               progress=progress, protected=protected)
+    if operation == 'trajectory':
+        from .trajectory_export import export_trajectory
+        return export_trajectory(input_session, output_dir, parameters['request'], cancelled=cancelled,
+                                 progress=progress, protected=protected, source_input=source_input)
     if operation in ('coordinates', 'session_save'):
         from .persistence import export_persistence
         return export_persistence(input_session, output_dir, operation, parameters['request'],
@@ -186,7 +202,13 @@ def validate_bundle(report_path):
                 or not candidate.is_file() or candidate.stat().st_size != row.get('bytes')
                 or sha256(candidate) != row.get('sha256')):
             raise ValueError('Bundle payload integrity failure: ' + relative)
-    report = read_json(report_path)
+    # Complete molecular provenance can exceed the generic 8 MiB JSON cap.
+    # Only a closed, hash-validated report receives this bounded allowance.
+    report = read_json(report_path, maximum=128 * 1024 * 1024)
+    if not isinstance(report, dict):
+        raise ValueError('Advanced report must be a JSON object')
+    if report.get('operation') not in ('assembly', 'trajectory') and report_path.stat().st_size > 8 * 1024 * 1024:
+        raise ValueError('JSON must be a bounded regular file')
     if report.get('schema_version') != 2 or report.get('passed') is not True or report.get('operation') not in EXPORTS:
         raise ValueError('Not a successful advanced report')
     hashes = report.get('artifact_hashes', {})

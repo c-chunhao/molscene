@@ -336,6 +336,13 @@ class WorkbenchController:
 
     def result_status(self, record, *, state=None):
         self._thread()
+        if record.get('operation') in ('assembly', 'trajectory'):
+            from molscene.molecular_snapshot import result_status, report_matches
+            context = self._advanced_contexts.get(record.get('_report_path', ''))
+            status = (result_status(self.cmd, context, session_epoch=self._session_epoch)
+                      if context and report_matches(context, record) else 'unverified')
+            record['snapshot_status'] = status
+            return status
         if record.get('operation') in ('coordinates', 'session_save'):
             record['snapshot_status'] = 'saved'
             return 'saved'
@@ -508,7 +515,7 @@ class WorkbenchController:
         from molscene.engine import _no_link
         self._thread()
         self._state(state)
-        if operation in ('timeline_project', 'animation', 'density', 'potential', 'tools', 'coordinates', 'session_save'):
+        if operation in ('timeline_project', 'animation', 'density', 'potential', 'tools', 'coordinates', 'session_save', 'assembly', 'trajectory'):
             return self._prepare_advanced_job(operation, parameters, output=output)
         if operation not in ('geometry', 'contacts', 'polar', 'sasa', 'interface', 'inspect', 'export', 'batch'):
             raise ValueError('Unsupported worker operation')
@@ -571,10 +578,12 @@ class WorkbenchController:
         """Preserve the user's session association even on native save failure."""
         self._thread()
         previous = self.cmd.get('session_file')
+        view = self.cmd.get_view()
         try:
             self.cmd.save(str(path), format='pse', quiet=1)
         finally:
             self.cmd.set('session_file', previous)
+            self.cmd.set_view(view)
 
     def timeline_edit(self, action, keyframe_id=None, values=None):
         self._thread()
@@ -661,6 +670,148 @@ class WorkbenchController:
         return dict(maps=map_inventory(self.cmd, self._advanced_maps), timeline=deepcopy(self._timeline),
                     session_epoch=self._session_epoch)
 
+    def assembly_catalog(self, path):
+        """Read deposited metadata without touching the live molecular scene."""
+        self._thread()
+        from molscene.assembly import assembly_catalog
+        return assembly_catalog(path)
+
+    def complete_advanced_result(self, report_path):
+        """Validate and bind a finished report before record_result; never load it.
+
+        The returned report contains the private _report_path association. The
+        caller records it exactly once with record_result after this returns.
+        """
+        from molscene.advanced import validate_bundle
+        from molscene.artifacts import checked_path
+        self._thread()
+        path = checked_path(report_path)
+        report = validate_bundle(path)
+        context = self._advanced_contexts.get(str(path))
+        molecular = report['operation'] in ('assembly', 'trajectory')
+        if molecular and context is None:
+            raise ValueError('Molecular completion requires its prepared source context')
+        if context is not None:
+            if report['operation'] != context.get('operation'):
+                raise ValueError('Report operation does not match the prepared job')
+            if report.get('snapshot_id') != context.get('snapshot_id'):
+                raise ValueError('Report does not belong to the prepared source snapshot')
+            roles = {'map_path': 'density', 'pqr_path': 'pqr', 'dx_path': 'potential',
+                     'source_path': 'source', 'trajectory_path': 'trajectory'}
+            expected = {roles[row['role']]: row['sha256'] for row in context['original_inputs']}
+            if context['snapshot_id'] is not None:
+                expected['session'] = context['snapshot_id']
+            inputs = report.get('inputs')
+            if (not isinstance(inputs, dict) or set(inputs) != set(expected)
+                    or any(not isinstance(inputs[role], dict) or inputs[role].get('sha256') != digest
+                           for role, digest in expected.items())):
+                raise ValueError('Report input roles and hashes do not match the prepared job')
+            if molecular:
+                from molscene.molecular_snapshot import report_matches
+                if not report_matches(context, report):
+                    raise ValueError('Report request and inputs do not match the prepared source')
+                for row in inputs.values():
+                    relative = row.get('path')
+                    candidate = checked_path(path.parent / relative) if isinstance(relative, str) else None
+                    if (candidate is None or path.parent not in candidate.parents
+                            or Path(relative).is_absolute() or relative not in report['artifact_hashes']
+                            or report['artifact_hashes'][relative] != row['sha256']
+                            or candidate.stat().st_size != row.get('bytes')):
+                        raise ValueError('Report source payload is not bound to the closed bundle')
+            elif report['operation'] in ('coordinates', 'session_save'):
+                if report.get('parameters') != context.get('parameters'):
+                    raise ValueError('Report request does not match the prepared snapshot')
+            elif report['operation'] == 'potential' and report.get('parameters', {}).get('mode') != context.get('mode'):
+                raise ValueError('Report mode does not match the prepared job')
+        # validate_bundle returned a freshly owned document; do not duplicate
+        # up to 200,000 atomic provenance rows merely to attach private state.
+        record = report
+        record['_report_path'] = str(path)
+        self.result_status(record)
+        return record
+
+    def load_assembly_result(self, report_path):
+        """Explicitly load verified bundle CIFs as collision-free molecular copies.
+
+        All payloads are independently checked before any live object is made.
+        Only this call's names are removed if subsequent live verification fails.
+        No PSE is loaded and no history entry is appended.
+        """
+        from molscene.artifacts import checked_path
+        from molscene.analysis import collect_atoms
+        from molscene.assembly import _verify_atoms, MAX_ATOMS, MAX_COPIES
+        from molscene.engine import _runtime
+        self._thread()
+        path = checked_path(report_path)
+        report = self.complete_advanced_result(path)
+        if report['operation'] != 'assembly' or report['snapshot_status'] != 'current':
+            raise ValueError('Assembly source is stale or unverified; rebuild before loading copies')
+        copies, files = report.get('copies'), report.get('copy_files')
+        if (not isinstance(copies, list) or not isinstance(files, list) or not 1 <= len(copies) <= MAX_COPIES
+                or len(files) != len(copies) or type(report.get('copy_count')) is not int
+                or report['copy_count'] != len(copies)):
+            raise ValueError('Invalid assembly copy inventory')
+        total = 0
+        payloads, seen_names, seen_paths = [], set(), set()
+        for ordinal, (row, file) in enumerate(zip(copies, files), 1):
+            if not isinstance(row, dict) or not isinstance(file, dict):
+                raise ValueError('Invalid assembly copy metadata')
+            name, relative, atoms = row.get('object_name'), row.get('path'), row.get('source_atoms')
+            count = row.get('atom_count')
+            if (not isinstance(name, str) or not name or name in seen_names or not isinstance(relative, str)
+                    or relative in seen_paths or type(count) is not int or not 1 <= count <= MAX_ATOMS
+                    or relative != f'copies/copy_{ordinal:03d}.cif'
+                    or not isinstance(atoms, list) or len(atoms) != count
+                    or file.get('object_name') != name or file.get('path') != relative or file.get('atom_count') != count
+                    or relative not in report['artifact_hashes'] or file.get('sha256') != report['artifact_hashes'][relative]):
+                raise ValueError('Invalid assembly copy identity or payload binding')
+            candidate = checked_path(path.parent / relative)
+            if path.parent not in candidate.parents or Path(relative).is_absolute() or candidate.suffix.lower() != '.cif' or file.get('bytes') != candidate.stat().st_size:
+                raise ValueError('Assembly copy payload escapes the validated bundle')
+            total += count
+            if total > MAX_ATOMS:
+                raise ValueError('Assembly generated atom count exceeds limit')
+            # Validate provenance coordinates and identity fields before loading.
+            for atom in atoms:
+                if (not isinstance(atom, dict) or any(not isinstance(atom.get(key), str) for key in ('segi','chain','resi','resn','name','element','alt'))
+                        or not isinstance(atom.get('coord'), list) or len(atom['coord']) != 3
+                        or any(type(v) not in (int, float) or not math.isfinite(v) for v in atom['coord'])):
+                    raise ValueError('Invalid assembly atomic provenance')
+            seen_names.add(name); seen_paths.add(relative)
+            payloads.append((candidate, row))
+        if type(report.get('atom_count')) is not int or report['atom_count'] != total:
+            raise ValueError('Assembly total atom count disagrees with copy provenance')
+        models = []
+        with _runtime().PyMOL() as pm:
+            pm.cmd.set('assembly', '')
+            pm.cmd.set('cif_use_auth', 1)
+            for candidate, row in payloads:
+                pm.cmd.load(str(candidate), 'verify', format='cif', zoom=0)
+                if pm.cmd.count_states('verify') != 1:
+                    raise ValueError('Assembly copy must have exactly one coordinate state')
+                _verify_atoms(collect_atoms(pm.cmd, '%verify'), row['source_atoms'])
+                models.append(pm.cmd.get_model('verify', state=1))
+                pm.cmd.delete('verify')
+        view, session_file = self.cmd.get_view(), self.cmd.get('session_file')
+        owned = []
+        try:
+            for model, (_, row) in zip(models, payloads):
+                name = self.cmd.get_unused_name('molscene_assembly')
+                owned.append(name)
+                self.cmd.load_model(model, name, state=1, zoom=0, quiet=1)
+                if self.cmd.count_states('%' + name) != 1:
+                    raise ValueError('Loaded assembly copy has unexpected coordinate states')
+                _verify_atoms(collect_atoms(self.cmd, '%' + name), row['source_atoms'])
+            return owned
+        except BaseException:
+            for name in reversed(owned):
+                if name in self.cmd.get_names('objects'):
+                    self.cmd.delete(name)
+            raise
+        finally:
+            self.cmd.set('session_file', session_file)
+            self.cmd.set_view(view)
+
     def load_advanced_result(self, report_path):
         self._thread()
         from copy import deepcopy
@@ -668,6 +819,11 @@ class WorkbenchController:
         from molscene.artifacts import checked_path
         path = checked_path(report_path)
         report = validate_bundle(path)
+        if report['operation'] in ('assembly', 'trajectory'):
+            record = self.complete_advanced_result(path)
+            if report['operation'] == 'assembly':
+                record['loaded'] = self.load_assembly_result(path)
+            return record
         record = deepcopy(report)
         record['_report_path'] = str(path)
         context = self._advanced_contexts.get(str(path))
@@ -817,9 +973,14 @@ class WorkbenchController:
             if registration.get('kind') == 'align':
                 states.update((registration['mobile_state'], registration['target_state']))
         selection = request.get('selection') if operation == 'coordinates' or operation == 'potential' and not request.get('pqr_path') else None
-        context = capture_identity(self.cmd, states=states, maps=maps,
-            timeline=parameters.get('timeline'), selection=selection,
-            state=request.get('state', 1), session_epoch=self._session_epoch)
+        if operation in ('assembly', 'trajectory'):
+            from molscene.molecular_snapshot import capture
+            context, request = capture(self.cmd, operation, request, session_epoch=self._session_epoch)
+            parameters['request'] = request
+        else:
+            context = capture_identity(self.cmd, states=states, maps=maps,
+                timeline=parameters.get('timeline'), selection=selection,
+                state=request.get('state', 1), session_epoch=self._session_epoch)
         if selection is not None:
             if operation == 'coordinates':
                 from molscene.persistence import _frozen_selection
@@ -830,6 +991,9 @@ class WorkbenchController:
         for source in sources:
             if operation != 'tools' and source.is_file():
                 context['files'][str(source)] = sha256(source)
+        if operation in ('assembly', 'trajectory'):
+            from molscene.bundles import Bundle
+            Bundle(output, protected=sources, inventory=('report.json', 'manifest.json'), new_directory_only=True)
         parent = checked_path(self.workspace / '.molscene-jobs')
         parent.mkdir(parents=True, exist_ok=True)
         directory = Path(tempfile.mkdtemp(prefix='job-', dir=parent))
@@ -841,7 +1005,7 @@ class WorkbenchController:
             raise ValueError('Output must not contain sources, job or result envelope')
         result_path(envelope, protected)
         originals = []
-        for key in ('map_path', 'pqr_path', 'dx_path'):
+        for key in ('map_path', 'pqr_path', 'dx_path', 'source_path', 'trajectory_path'):
             if request.get(key):
                 source = checked_path(request[key])
                 before = sha256(source)
@@ -857,11 +1021,11 @@ class WorkbenchController:
                    parameters=parameters, protected_paths=[str(p) for p in sources], original_inputs=originals)
         if operation != 'tools':
             context['operation'] = operation
-            if operation in ('coordinates', 'session_save'):
+            if operation in ('coordinates', 'session_save', 'assembly', 'trajectory'):
                 context['parameters'] = deepcopy(request)
             context['mode'] = request.get('mode') if operation == 'potential' else None
             context['snapshot_id'] = None
-            if operation != 'potential' or not request.get('pqr_path'):
+            if operation != 'assembly' and (operation != 'potential' or not request.get('pqr_path')):
                 session = directory / 'snapshot.pse'
                 self._save_snapshot(session)
                 job['input_session'] = str(session)

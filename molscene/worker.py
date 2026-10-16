@@ -44,7 +44,7 @@ def _advanced_job(path, job, parameters):
                 else:
                     for item in value:
                         protect_raw(item)
-            elif key in ('map_path', 'pqr_path', 'dx_path', 'path') and isinstance(value, str):
+            elif key in ('map_path', 'pqr_path', 'dx_path', 'source_path', 'trajectory_path', 'path') and isinstance(value, str):
                 protected.append(artifacts.checked_path(value))
         protect_raw(parameters)
         for row in job.get('original_inputs', []):
@@ -83,17 +83,27 @@ def _advanced_job(path, job, parameters):
             actual = artifacts.sha256(session) if session is not None else None
             if actual != context.get('snapshot_id'):
                 raise ValueError('Private source snapshot changed after job preparation')
-            if (operation in ('coordinates', 'session_save') or context.get('operation') in ('coordinates', 'session_save')) and (
+            if (operation in ('coordinates', 'session_save', 'assembly', 'trajectory') or context.get('operation') in ('coordinates', 'session_save', 'assembly', 'trajectory')) and (
                     context.get('operation') != operation or context.get('parameters') != parameters.get('request')):
-                raise ValueError('Persistence operation/request does not match the prepared source snapshot')
+                raise ValueError('Prepared operation/request does not match the source snapshot')
         originals = job.get('original_inputs', [])
         if not isinstance(originals, list):
             raise ValueError('original_inputs must describe private input copies')
+        if operation in ('assembly', 'trajectory'):
+            roles = {key for key in ('source_path', 'trajectory_path') if parameters['request'].get(key)}
+            if ((context is not None or originals) and (len(originals) != len(roles) or {row.get('role') for row in originals if isinstance(row, dict)} != roles
+                    or context is not None and context.get('original_inputs') != originals)):
+                raise ValueError('Original input roles do not match the prepared job')
+            if context is not None:
+                from .molecular_snapshot import valid
+                if not valid(context):
+                    raise ValueError('Invalid molecular source identity context')
         for row in originals:
             if (not isinstance(row, dict) or set(row) != {'role', 'path', 'copy', 'sha256'}
-                    or row['role'] not in ('map_path', 'pqr_path', 'dx_path')
+                    or row['role'] not in ('map_path', 'pqr_path', 'dx_path', 'source_path', 'trajectory_path')
                     or parameters.get('request', {}).get(row['role']) != row['copy']
-                    or artifacts.sha256(artifacts.checked_path(row['copy'])) != row['sha256']):
+                    or artifacts.sha256(artifacts.checked_path(row['copy'])) != row['sha256']
+                    or operation in ('assembly', 'trajectory') and artifacts.sha256(artifacts.checked_path(row['path'])) != row['sha256']):
                 raise ValueError('Private input copy identity does not match prepared job')
         def progress(value):
             print(json.dumps({'progress': value}, allow_nan=False), flush=True)

@@ -107,6 +107,28 @@ def _parser():
 
 
 def _advanced_parsers(commands):
+    catalog = commands.add_parser('assemblies', help='List deposited biological assembly metadata without a backend')
+    catalog.add_argument('input')
+    assembly = commands.add_parser('assembly', help='Build deposited biological assembly copies in a new bundle')
+    assembly.add_argument('input')
+    assembly.add_argument('--assembly-id', default='1')
+    assembly.add_argument('--state', type=int, default=1)
+    assembly.add_argument('--output', required=True)
+    trajectory = commands.add_parser('trajectory', help='Analyze fixed-topology coordinate states; no PBC correction')
+    trajectory.add_argument('input', help='Local PSE or multi-model PDB/mmCIF')
+    trajectory.add_argument('--object', dest='object_name', default='trajectory_source',
+                            help='Actual PSE object name; coordinate files load as trajectory_source')
+    trajectory.add_argument('--selection', default='name CA')
+    trajectory.add_argument('--fit-selection', default='name CA')
+    trajectory.add_argument('--reference-state', type=int, default=1)
+    trajectory.add_argument('--start', type=int, default=1)
+    trajectory.add_argument('--stop', type=int)
+    trajectory.add_argument('--stride', type=int, default=1)
+    trajectory.add_argument('--no-align', action='store_true')
+    trajectory.add_argument('--time-step-ps', type=float)
+    trajectory.add_argument('--time-start-ps', type=float, default=0.)
+    trajectory.add_argument('--trajectory', dest='trajectory_path', help='Optional supported local CHARMM DCD; requires single-state topology')
+    trajectory.add_argument('--output', required=True)
     coordinates = commands.add_parser('coordinates', help='Save selected single-state coordinates as a guarded snapshot bundle')
     coordinates.add_argument('input')
     coordinates.add_argument('--selection', default='all')
@@ -165,7 +187,49 @@ def _advanced_main(args):
     from .artifacts import checked_path
     from .external_tools import load_tools
     from .timeline import validate_timeline
-    if args.command in ('coordinates', 'session-save'):
+    if args.command == 'assemblies':
+        from .assembly import assembly_catalog
+        report = assembly_catalog(checked_path(args.input))
+    elif args.command == 'assembly':
+        from .advanced import validate_request
+        source = checked_path(args.input)
+        parameters = validate_request('assembly', dict(request=dict(source_path=str(source), assembly_id=args.assembly_id, state=args.state)))
+        report = run_advanced('assembly', None, checked_path(args.output), parameters, protected=(source,))
+    elif args.command == 'trajectory':
+        from .advanced import validate_request
+        from .artifacts import sha256
+        from .bundles import Bundle
+        source, output = checked_path(args.input), checked_path(args.output)
+        request = {key: getattr(args, key) for key in ('object_name', 'selection', 'fit_selection', 'reference_state',
+                   'start', 'stop', 'stride', 'time_step_ps', 'time_start_ps')}
+        request['align'] = not args.no_align
+        request['trajectory_path'] = str(checked_path(args.trajectory_path)) if args.trajectory_path else None
+        parameters = validate_request('trajectory', dict(request=request))
+        if source.suffix.lower() not in ('.pdb', '.cif', '.mmcif', '.pse') or not source.is_file():
+            raise ValueError('Trajectory requires an explicit local PDB/mmCIF/PSE input')
+        protected = [source]
+        if request['trajectory_path'] is not None:
+            external = checked_path(request['trajectory_path'])
+            from .dcd import scan_dcd
+            scan_dcd(external)
+            protected.append(external)
+        Bundle(output, protected=protected, inventory=('report.json', 'manifest.json'), new_directory_only=True)
+        if source.suffix.lower() == '.pse':
+            report = run_advanced('trajectory', engine._session(source), output, parameters, protected=protected)
+        else:
+            before = sha256(source)
+            with tempfile.TemporaryDirectory(prefix='molscene-trajectory-snapshot-') as directory:
+                snapshot = Path(directory) / 'snapshot.pse'
+                with engine._runtime().PyMOL() as pm:
+                    pm.cmd.set('assembly', '')
+                    pm.cmd.set('cif_use_auth', 1)
+                    pm.cmd.load(str(source), 'trajectory_source', quiet=1)
+                    pm.cmd.save(str(snapshot), quiet=1)
+                if sha256(source) != before:
+                    raise ValueError('Trajectory coordinate input changed during snapshot capture')
+                report = run_advanced('trajectory', snapshot, output, parameters, protected=protected,
+                                      source_input=dict(path=str(source), sha256=before))
+    elif args.command in ('coordinates', 'session-save'):
         from .advanced import validate_request
         from .artifacts import sha256
         from .bundles import Bundle
@@ -308,7 +372,7 @@ def main(argv=None):
     except SystemExit as exc:
         return exc.code
     try:
-        if args.command in ('timeline-validate', 'timeline-project', 'animate', 'density', 'potential', 'tools', 'coordinates', 'session-save'):
+        if args.command in ('timeline-validate', 'timeline-project', 'animate', 'density', 'potential', 'tools', 'coordinates', 'session-save', 'assemblies', 'assembly', 'trajectory'):
             return _advanced_main(args)
         if args.command == 'gui':
             try:
