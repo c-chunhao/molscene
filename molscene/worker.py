@@ -83,6 +83,9 @@ def _advanced_job(path, job, parameters):
             actual = artifacts.sha256(session) if session is not None else None
             if actual != context.get('snapshot_id'):
                 raise ValueError('Private source snapshot changed after job preparation')
+            if (operation in ('coordinates', 'session_save') or context.get('operation') in ('coordinates', 'session_save')) and (
+                    context.get('operation') != operation or context.get('parameters') != parameters.get('request')):
+                raise ValueError('Persistence operation/request does not match the prepared source snapshot')
         originals = job.get('original_inputs', [])
         if not isinstance(originals, list):
             raise ValueError('original_inputs must describe private input copies')

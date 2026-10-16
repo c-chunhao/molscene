@@ -336,6 +336,9 @@ class WorkbenchController:
 
     def result_status(self, record, *, state=None):
         self._thread()
+        if record.get('operation') in ('coordinates', 'session_save'):
+            record['snapshot_status'] = 'saved'
+            return 'saved'
         if record.get('operation') in ('timeline_project', 'animation', 'density', 'potential'):
             from molscene.advanced_snapshot import result_status
             context = self._advanced_contexts.get(record.get('_report_path', ''))
@@ -355,6 +358,8 @@ class WorkbenchController:
     def annotate_result(self, record):
         """Only draw data tied to the current semantic molecular scene and state."""
         self._thread()
+        if record.get('operation') in ('coordinates', 'session_save'):
+            raise ValueError('Saved snapshot results cannot be annotated as live analysis')
         status = self.result_status(record)
         if status == 'stale':
             raise ValueError('This result is stale; rerun the analysis before annotating')
@@ -503,7 +508,7 @@ class WorkbenchController:
         from molscene.engine import _no_link
         self._thread()
         self._state(state)
-        if operation in ('timeline_project', 'animation', 'density', 'potential', 'tools'):
+        if operation in ('timeline_project', 'animation', 'density', 'potential', 'tools', 'coordinates', 'session_save'):
             return self._prepare_advanced_job(operation, parameters, output=output)
         if operation not in ('geometry', 'contacts', 'polar', 'sasa', 'interface', 'inspect', 'export', 'batch'):
             raise ValueError('Unsupported worker operation')
@@ -673,6 +678,8 @@ class WorkbenchController:
                 raise ValueError('Report operation or mode does not match the prepared job')
             if report.get('snapshot_id') != context.get('snapshot_id'):
                 raise ValueError('Report does not belong to the prepared source snapshot')
+            if report.get('operation') in ('coordinates', 'session_save') and report.get('parameters') != context.get('parameters'):
+                raise ValueError('Report request does not match the prepared snapshot')
             roles = {'map_path': 'density', 'pqr_path': 'pqr', 'dx_path': 'potential'}
             expected = {roles[row['role']]: row['sha256'] for row in context['original_inputs']}
             if context['snapshot_id'] is not None:
@@ -682,6 +689,11 @@ class WorkbenchController:
                     or any(not isinstance(inputs[role], dict) or inputs[role].get('sha256') != digest
                            for role, digest in expected.items())):
                 raise ValueError('Report input roles and hashes do not match the prepared job')
+        if report['operation'] in ('coordinates', 'session_save'):
+            if report.get('result_kind') != 'saved_snapshot' or report.get('snapshot_status') != 'saved':
+                raise ValueError('Persistence report must identify a saved snapshot')
+            self.results.append(record)
+            return record
         if self.result_status(record) != 'current':
             raise ValueError('Result source is stale or unverified. Rerun from the current session, or import the original PQR/DX/map using its controls.')
         if report['operation'] == 'density':
@@ -781,6 +793,7 @@ class WorkbenchController:
         import json
         import shutil
         import tempfile
+        from copy import deepcopy
         from molscene.advanced import validate_request, source_paths, validate_cancel
         from molscene.advanced_snapshot import capture_identity
         from molscene.artifacts import checked_path, sha256, result_path
@@ -803,7 +816,7 @@ class WorkbenchController:
             registration = request.get('registration') or {}
             if registration.get('kind') == 'align':
                 states.update((registration['mobile_state'], registration['target_state']))
-        selection = request.get('selection') if operation == 'potential' and not request.get('pqr_path') else None
+        selection = request.get('selection') if operation == 'coordinates' or operation == 'potential' and not request.get('pqr_path') else None
         context = capture_identity(self.cmd, states=states, maps=maps,
             timeline=parameters.get('timeline'), selection=selection,
             state=request.get('state', 1), session_epoch=self._session_epoch)
@@ -840,6 +853,8 @@ class WorkbenchController:
                    parameters=parameters, protected_paths=[str(p) for p in sources], original_inputs=originals)
         if operation != 'tools':
             context['operation'] = operation
+            if operation in ('coordinates', 'session_save'):
+                context['parameters'] = deepcopy(request)
             context['mode'] = request.get('mode') if operation == 'potential' else None
             context['snapshot_id'] = None
             if operation != 'potential' or not request.get('pqr_path'):

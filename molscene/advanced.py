@@ -6,13 +6,15 @@ from pathlib import Path
 from .artifacts import checked_path, sha256
 from .bundles import CancelledError
 
-EXPORTS = frozenset(('timeline_project', 'animation', 'density', 'potential'))
+EXPORTS = frozenset(('timeline_project', 'animation', 'density', 'potential', 'coordinates', 'session_save'))
 PARAMETERS = {
     'timeline_project': {'timeline', 'cancel_file'},
     'animation': {'timeline', 'render', 'mp4', 'tools', 'cancel_file'},
     'density': {'request', 'cancel_file'},
     'potential': {'request', 'cancel_file'},
     'tools': {'tools', 'cancel_file'},
+    'coordinates': {'request', 'cancel_file'},
+    'session_save': {'request', 'cancel_file'},
 }
 
 
@@ -39,7 +41,10 @@ def validate_request(operation, parameters):
         marker = result['cancel_file']
         if not isinstance(marker, str) or not Path(marker).is_absolute():
             raise ValueError('cancel_file must be an absolute path')
-    if operation in ('timeline_project', 'animation'):
+    if operation in ('coordinates', 'session_save'):
+        from .persistence import validate_persistence_request
+        result['request'] = validate_persistence_request(operation, result.get('request'))
+    elif operation in ('timeline_project', 'animation'):
         from .timeline import validate_timeline
         result['timeline'] = validate_timeline(result.get('timeline'))
         if operation == 'animation':
@@ -123,7 +128,7 @@ def probe_tools(config, work_dir, *, cancelled=None, progress=None):
     return result
 
 
-def run_advanced(operation, input_session, output_dir, parameters, *, cancelled=None, progress=None, protected=()):
+def run_advanced(operation, input_session, output_dir, parameters, *, cancelled=None, progress=None, protected=(), source_input=None):
     parameters = validate_request(operation, parameters)
     if operation not in EXPORTS:
         raise ValueError('Use probe_tools for read-only tool probes')
@@ -131,6 +136,10 @@ def run_advanced(operation, input_session, output_dir, parameters, *, cancelled=
     protected = tuple(protected) + tuple(source_paths(parameters))
     if cancelled and cancelled():
         raise CancelledError('Operation cancelled')
+    if operation in ('coordinates', 'session_save'):
+        from .persistence import export_persistence
+        return export_persistence(input_session, output_dir, operation, parameters['request'],
+                                  cancelled=cancelled, progress=progress, protected=protected, source_input=source_input)
     if operation in ('timeline_project', 'animation'):
         if input_session is None:
             raise ValueError('Timeline export requires a session')

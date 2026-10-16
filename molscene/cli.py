@@ -107,6 +107,15 @@ def _parser():
 
 
 def _advanced_parsers(commands):
+    coordinates = commands.add_parser('coordinates', help='Save selected single-state coordinates as a guarded snapshot bundle')
+    coordinates.add_argument('input')
+    coordinates.add_argument('--selection', default='all')
+    coordinates.add_argument('--state', type=int, default=1)
+    coordinates.add_argument('--format', choices=('cif', 'pdb'), default='cif')
+    coordinates.add_argument('--output', required=True)
+    session_save = commands.add_parser('session-save', help='Save a complete captured PSE without rendering')
+    session_save.add_argument('session')
+    session_save.add_argument('--output', required=True)
     validate = commands.add_parser('timeline-validate', help='Validate timeline JSON without a backend')
     validate.add_argument('timeline')
     validate.add_argument('--session')
@@ -156,7 +165,33 @@ def _advanced_main(args):
     from .artifacts import checked_path
     from .external_tools import load_tools
     from .timeline import validate_timeline
-    if args.command == 'tools':
+    if args.command in ('coordinates', 'session-save'):
+        from .advanced import validate_request
+        from .artifacts import sha256
+        from .bundles import Bundle
+        source = checked_path(args.input if args.command == 'coordinates' else args.session)
+        output = checked_path(args.output)
+        operation = 'coordinates' if args.command == 'coordinates' else 'session_save'
+        request = dict(selection=args.selection, state=args.state, format=args.format) if operation=='coordinates' else {}
+        parameters = validate_request(operation, dict(request=request))
+        # Guard the original local input before creating the private snapshot.
+        Bundle(output, protected=(source,), inventory=('report.json','manifest.json'), new_directory_only=True)
+        if operation=='session_save':
+            report = run_advanced(operation, engine._session(source), output, parameters, protected=(source,))
+        else:
+            if source.suffix.lower() not in ('.pdb','.cif','.mmcif','.pse') or not source.is_file():
+                raise ValueError('Coordinates requires an explicit local PDB/mmCIF/PSE input')
+            before = sha256(source)
+            with tempfile.TemporaryDirectory(prefix='molscene-coordinate-snapshot-') as directory:
+                snapshot = Path(directory)/'snapshot.pse'
+                with engine._runtime().PyMOL() as pm:
+                    pm.cmd.load(str(source), quiet=1)
+                    pm.cmd.save(str(snapshot), quiet=1)
+                if sha256(source) != before:
+                    raise ValueError('Coordinate input changed while capturing the snapshot')
+                report = run_advanced(operation, snapshot, output, parameters, protected=(source,),
+                                      source_input=dict(path=str(source), sha256=before))
+    elif args.command == 'tools':
         config = load_tools(checked_path(args.config))
         folder = Path(tempfile.mkdtemp(prefix='molscene-probes-'))
         report = probe_tools(config, folder)
@@ -273,7 +308,7 @@ def main(argv=None):
     except SystemExit as exc:
         return exc.code
     try:
-        if args.command in ('timeline-validate', 'timeline-project', 'animate', 'density', 'potential', 'tools'):
+        if args.command in ('timeline-validate', 'timeline-project', 'animate', 'density', 'potential', 'tools', 'coordinates', 'session-save'):
             return _advanced_main(args)
         if args.command == 'gui':
             try:

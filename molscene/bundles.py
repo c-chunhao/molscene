@@ -190,11 +190,12 @@ class Bundle:
     are simply abandoned; exceptional exits retain only registered tool logs.
     """
 
-    def __init__(self, destination, *, protected, inventory, cancelled=None):
+    def __init__(self, destination, *, protected, inventory, cancelled=None, new_directory_only=False):
         self.destination = checked_path(destination)
         self.protected = tuple(checked_path(p) for p in protected)
         self.inventory = _inventory(inventory)
         self.cancelled = cancelled
+        self.new_directory_only = new_directory_only
         self.failure_path = self.destination.parent/('.molscene-failure-'+uuid.uuid4().hex)
         self._logs, self._sources = {}, {}
         self._cached_logs = {}
@@ -216,6 +217,8 @@ class Bundle:
             if source.exists() and source.is_file():
                 _regular(source)
         if self.destination.exists():
+            if self.new_directory_only:
+                raise ValueError('Destination must be a new directory')
             if not self.destination.is_dir() or any(self.destination.iterdir()):
                 raise ValueError('Destination must be a new or empty directory')
 

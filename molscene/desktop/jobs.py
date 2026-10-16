@@ -7,7 +7,7 @@ import sys
 
 from pymol.Qt import QtCore
 
-_COOPERATIVE = frozenset(('timeline_project', 'animation', 'density', 'potential', 'tools'))
+_COOPERATIVE = frozenset(('timeline_project', 'animation', 'density', 'potential', 'tools', 'coordinates', 'session_save'))
 
 
 def worker_command(job_path):
