@@ -666,19 +666,20 @@ class AdvancedNativeTests(unittest.TestCase):
         print('Advanced native evidence: ' + str(root), flush=True)
         env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))
         env.pop('QT_QPA_PLATFORM', None)
-        process = subprocess.run([sys.executable, '-B', '-m', 'tests.advanced_native', str(root)],
-            cwd=Path(__file__).resolve().parents[1], env=env, capture_output=True, text=True, timeout=300)
-        (root / 'process.log').write_text(process.stdout + process.stderr, encoding='utf-8')
-        self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
-        self.assertTrue((root / 'advanced-native.json').is_file(), process.stdout + process.stderr)
+        from tests.owned_processes import run_native_child
+        process, stdout, stderr, native_pid = run_native_child(
+            [sys.executable, '-B', '-m', 'tests.advanced_native', str(root)], root, timeout=300,
+            cwd=Path(__file__).resolve().parents[1], env=env)
+        (root / 'process.log').write_text(stdout + stderr, encoding='utf-8')
+        self.assertEqual(process.returncode, 0, stdout + stderr)
+        self.assertTrue((root / 'advanced-native.json').is_file(), stdout + stderr)
         report = json.loads((root / 'advanced-native.json').read_text())
         self.assertTrue(report['closed'])
         self.assertTrue(report['original_sources_preserved'])
         self.assertTrue(report['cancel_descendants_cleaned'])
         self.assertTrue(report['potential_numeric_calibration'])
-        from tests.test_native_render import process_alive
-        for pid in report['owned_pids']:
-            self.assertFalse(process_alive(pid), f'Owned process {pid} survived native gate')
+        from tests.owned_processes import verify_native_report
+        verify_native_report(root, 'advanced-native.json', native_pid, process.returncode)
 
 
 if __name__ == '__main__':

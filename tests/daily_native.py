@@ -44,14 +44,16 @@ def run_native(directory):
     from pymol import plugins
     from tests.test_desktop import grab_native_framebuffer
     from tests.test_polar import fragments
-    from tests.test_native_render import process_alive
+    from tests.owned_processes import OwnedProcesses, track_qt_jobs, publish_native_owner
     from tests.advanced_native import wait_for
     QTest=__import__(PYQT_NAME+'.QtTest',fromlist=['QTest']).QTest
     root=Path(directory).resolve()
     root.mkdir(parents=True,exist_ok=True)
+    publish_native_owner(root)
     plugins.PYMOLPLUGINSRC=str(root/'isolated-preferences.py')
     import molscene
-    report=dict(version=__version__,package_origin=str(Path(molscene.__file__).resolve()),owned_pids=[os.getpid()],closed=False,trace=[])
+    owned=OwnedProcesses()
+    report=dict(version=__version__,package_origin=str(Path(molscene.__file__).resolve()),owned_pids=[os.getpid()],owned_lifetimes=owned.records,closed=False,trace=[])
     real_attach=desktop.attach_workbench
     scheduled=False
     failed=[]
@@ -79,6 +81,7 @@ def run_native(directory):
         timer.setInterval(10)
         timer.timeout.connect(lambda:beats.__setitem__(0,beats[0]+1))
         timer.start()
+        track_qt_jobs(panel.jobs,report,owned)
         def track():
             process=panel.jobs.process
             if process is not None:
@@ -130,6 +133,7 @@ def run_native(directory):
                     report['cooperative_close']=True
                     report['closed']=True
                     report['owned_pids']=sorted(set(pid for pid in report['owned_pids'] if pid>0))
+                    assert owned.exited('cooperative-native-close'), 'Owned worker survived close'
                     for key in ('gl_valid','original_sources_preserved','coordinates_reloaded','session_reloaded','worker_responsive','job_cancelled','narrow_navigation','dialog_cancelled','literal_labels'):
                         assert report.get(key) is True,key
                     (root/'daily-native.json').write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding='utf-8')
@@ -221,6 +225,7 @@ def run_native(directory):
             reload_process=subprocess.Popen([sys.executable,'-B','-m','tests.daily_native','--reload',str(root)],
                 stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             report['owned_pids'].append(reload_process.pid)
+            owned.register('saved-products-reload',reload_process.pid)
             out,err=reload_process.communicate(timeout=30)
             (root/'reload.log').write_text(out+err,encoding='utf-8')
             assert reload_process.returncode==0,out+err
@@ -259,8 +264,7 @@ def run_native(directory):
             report['dock_width']=dock.width()
             report['panel_width']=panel.width()
             report['framebuffer_sha256']=hashlib.sha256((root/'daily-framebuffer.png').read_bytes()).hexdigest()
-            for pid in report['owned_pids']:
-                if pid!=os.getpid():assert not process_alive(pid),pid
+            assert owned.exited('saved-products-cleaned'), 'Owned process survived saved products'
             step('cooperative worker cancellation and normal native close')
             panel.session_output.setText(str(root/'cancel-session'))
             click('save_session',1)

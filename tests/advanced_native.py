@@ -103,7 +103,7 @@ def run_native(directory):
     from molscene import desktop
     from molscene.grids import Grid, write_dx, read_dx, grid_point
     from molscene.density import map_fingerprint
-    from tests.test_native_render import process_alive
+    from tests.owned_processes import OwnedProcesses, track_qt_jobs, publish_native_owner
     desktop._gui_runtime()
     from pymol.Qt import QtCore, QtWidgets, PYQT_NAME
     from pmg_qt import pymol_qt_gui
@@ -111,8 +111,10 @@ def run_native(directory):
     QTest = __import__(PYQT_NAME + '.QtTest', fromlist=['QTest']).QTest
     root = Path(directory)
     root.mkdir(parents=True, exist_ok=True)
+    publish_native_owner(root)
     plugins.PYMOLPLUGINSRC = str(root / 'isolated-preferences.py')
-    report = dict(visual={}, owned_pids=[os.getpid()], closed=False)
+    owned = OwnedProcesses()
+    report = dict(visual={}, owned_pids=[os.getpid()], owned_lifetimes=owned.records, closed=False)
     real_attach = desktop.attach_workbench
     scheduled = False
     failed = []
@@ -144,6 +146,7 @@ def run_native(directory):
         beat.timeout.connect(lambda: heartbeat.__setitem__(0, heartbeat[0] + 1))
         beat.start()
         panel.jobs.progress.connect(events.append)
+        track_qt_jobs(panel.jobs, report, owned)
         panel.jobs.progress.connect(lambda event: report['owned_pids'].append(int(event['pid']))
             if event.get('stage') == 'tool_ready' and type(event.get('pid')) is int else None)
         def click(name):
@@ -382,12 +385,17 @@ def run_native(directory):
             for path in failures:
                 outcome = json.loads(path.read_text())
                 report['owned_pids'].extend([outcome['native_pid'], outcome['parent_pid']])
+                for key in ('native_pid', 'parent_pid'):
+                    owned.register(str(path.relative_to(root)) + '-' + key, outcome[key])
             for path in (root / 'potential/report.json',):
                 rendering = json.loads(path.read_text()).get('analysis', {}).get('rendering', {})
                 report['owned_pids'].extend(rendering.get('process', {}).get(key) for key in ('native_pid','parent_pid','guardian_pid')
                                           if rendering.get('process', {}).get(key))
+                for key, pid in rendering.get('process', {}).items():
+                    if key in ('native_pid', 'parent_pid', 'guardian_pid') and pid:
+                        owned.register(str(path.relative_to(root)) + '-' + key, pid)
             report['owned_pids'] = sorted(set(report['owned_pids']))
-            wait_for(app, lambda: not any(process_alive(pid) for pid in report['owned_pids'] if pid != os.getpid()), timeout=10)
+            wait_for(app, lambda: owned.exited('cancel-descendants-cleaned'), timeout=10)
             report['cancel_descendants_cleaned'] = True
             step('mandatory associated-volume export and fresh result copy')
             density.output.setText(str(root / 'density'))
@@ -398,9 +406,11 @@ def run_native(directory):
             rendering_process = density_report['analysis']['rendering']['process']
             report['owned_pids'].extend(rendering_process[key] for key in
                 ('native_pid', 'parent_pid', 'guardian_pid') if rendering_process.get(key))
+            for key in ('native_pid', 'parent_pid', 'guardian_pid'):
+                if rendering_process.get(key):
+                    owned.register('density/report.json-' + key, rendering_process[key])
             report['owned_pids'] = sorted(set(report['owned_pids']))
-            wait_for(app, lambda: not any(process_alive(pid) for pid in report['owned_pids']
-                if pid != os.getpid()), timeout=10)
+            wait_for(app, lambda: owned.exited('density-descendants-cleaned'), timeout=10)
             load_result(root / 'density/report.json')
             assert panel.controller.results[-1]['loaded']['record']['name'] != original_map['name']
             assert cmd.count_atoms('original') == len(original_before['objects']['original']['1']['atoms'])

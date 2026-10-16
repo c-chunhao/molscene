@@ -221,14 +221,16 @@ class NativeDailyTests(unittest.TestCase):
         print('Daily native evidence: '+str(root),flush=True)
         env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1]))
         env.pop('QT_QPA_PLATFORM',None)
-        child=subprocess.run([sys.executable,'-B','-m','tests.daily_native',str(root)],cwd=Path(__file__).resolve().parents[1],env=env,capture_output=True,text=True,timeout=180)
-        (root/'process.log').write_text(child.stdout+child.stderr,encoding='utf-8')
-        self.assertEqual(child.returncode,0,child.stdout+child.stderr)
+        from tests.owned_processes import run_native_child
+        child,stdout,stderr,native_pid=run_native_child([sys.executable,'-B','-m','tests.daily_native',str(root)],root,timeout=180,
+            cwd=Path(__file__).resolve().parents[1],env=env)
+        (root/'process.log').write_text(stdout+stderr,encoding='utf-8')
+        self.assertEqual(child.returncode,0,stdout+stderr)
         report=json.loads((root/'daily-native.json').read_text())
         for key in ('closed','gl_valid','original_sources_preserved','coordinates_reloaded','session_reloaded','worker_responsive','job_cancelled','narrow_navigation','dialog_cancelled','literal_labels'):
             self.assertTrue(report[key],key)
-        from tests.test_native_render import process_alive
-        for pid in report['owned_pids']: self.assertFalse(process_alive(pid),str(pid)+' survived')
+        from tests.owned_processes import verify_native_report
+        verify_native_report(root,'daily-native.json',native_pid,child.returncode)
 
 if __name__=='__main__':
     if '--daily-controls-child' in sys.argv:
