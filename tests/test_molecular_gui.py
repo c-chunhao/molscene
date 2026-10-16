@@ -116,6 +116,24 @@ class ControlCases(unittest.TestCase):
         self.assertTrue(p.cancel_job.isEnabled()); p._job_idle()
         self.assertTrue(all(p.tabs.isTabEnabled(i) for i in range(5)))
 
+    def test_failed_job_restores_explicit_check_for_prior_result(self):
+        p=self.panel
+        record=dict(operation='trajectory',snapshot_status='current',frames=[])
+        p._current_record=record; p._populate_result(record)
+        self.assertTrue(p.check_source_button.isEnabled())
+        p._job_started(dict(operation='trajectory',output='failed-result',parameters={'request':{'reference_state':1}}))
+        self.assertFalse(p.check_source_button.isEnabled())
+        with patch.object(p.controller,'result_status',return_value='current') as check:
+            p._job_failed('deliberate worker failure')
+            self.assertIs(p._current_record,record)
+            self.assertTrue(p.check_source_button.isEnabled())
+            self.assertEqual(check.call_count,0)
+            p.check_source_button.click(); self.assertEqual(check.call_count,1)
+        record['cancelled']=True; p._job_idle()
+        self.assertFalse(p.check_source_button.isEnabled())
+        p._current_record=None; p._job_idle()
+        self.assertFalse(p.check_source_button.isEnabled())
+
 @unittest.skipUnless(HAS_GUI,'requires PyMOL and Qt')
 class MolecularGuiTests(unittest.TestCase):
     def test_isolated_molecular_controls(self):

@@ -823,6 +823,9 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self.page_selector.model().item(index).setEnabled(True)
         if getattr(self, '_current_record', None):
             self._annotation_available(self._current_record)
+            self._source_status(self._current_record)
+        else:
+            self.check_source_button.setEnabled(False)
         self.progress_bar.setRange(0, 1)
         self.progress_bar.setValue(1)
         self.cancel_job.setEnabled(False)
