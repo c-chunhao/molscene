@@ -162,6 +162,9 @@ preserves session styling or that a frozen save verifies later live scene state.
 Persistence results are labelled `Saved snapshot` in Results and cannot be
 annotated as a live scientific analysis. Opening a saved PSE remains an explicit
 normal session-open action; saving does not replace or reorient the live session.
+Native `save` changes `session_file`; all controller snapshot creation must
+restore that setting in a finally block. Saving a job snapshot must not change
+the user's session filename, including on a writer error.
 
 Provide CLI `coordinates INPUT --selection ... --state ... --format cif|pdb
 --output NEW_DIRECTORY` for local coordinate/session inputs, and
