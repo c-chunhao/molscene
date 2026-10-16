@@ -168,6 +168,7 @@ def qt_navigation(directory):
             if isinstance(page, QtWidgets.QScrollArea):
                 page.ensureWidgetVisible(button)
             app.processEvents()
+            assert button.isVisible() and button.isEnabled(), name
             QTest.mouseClick(button, QtCore.Qt.LeftButton)
             app.processEvents()
             assert not panel.status.text().startswith('Error:'), panel.status.text()
@@ -278,6 +279,16 @@ def qt_navigation(directory):
         panel._table_selected('rows')
         panel.result_table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         assert [panel.result_table.model().index(i,0).data() for i in range(3)] == ['-2','3','10']
+        assert not panel.findChild(QtWidgets.QPushButton, 'annotate_result').isEnabled()
+        # Sorting-only rows are not annotatable. Exercise lock recovery with a
+        # real supported result produced through the visible analysis control.
+        panel.tabs.setCurrentIndex(2)
+        panel.geometry_atoms[0].setText('ubq and name CA and resi 1')
+        panel.geometry_atoms[1].setText('ubq and name CA and resi 10')
+        click('run_geometry')
+        panel.tabs.setCurrentIndex(3)
+        assert panel._record()['operation'] == 'geometry'
+        assert panel.findChild(QtWidgets.QPushButton, 'annotate_result').isEnabled()
         panel._job_started({'operation':'interface','output':'unused','parameters':{'state':1}})
         assert not panel.findChild(QtWidgets.QPushButton, 'annotate_result').isEnabled()
         assert panel.result_filter.isEnabled()

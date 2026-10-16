@@ -52,6 +52,15 @@ def native_evidence(output):
             if tab is not None:
                 panel.tabs.setCurrentIndex(tab)
             button = panel.findChild(QtWidgets.QPushButton, name)
+            assert button is not None, name
+            # Jobs select Results. Return to the action's page after completion
+            # rather than scrolling or clicking controls on a hidden page.
+            for index in range(panel.tabs.count()):
+                if panel.tabs.widget(index).isAncestorOf(button):
+                    assert panel.tabs.isTabEnabled(index), name
+                    panel.tabs.setCurrentIndex(index)
+                    assert panel.tabs.currentIndex() == index, name
+                    break
             ancestor = button.parentWidget()
             while ancestor:
                 if ancestor.property('disclosure_content'):
@@ -64,6 +73,7 @@ def native_evidence(output):
             if isinstance(scroll, QtWidgets.QScrollArea):
                 scroll.ensureWidgetVisible(button)
             QTest.qWait(20)
+            assert button.isVisible() and button.isEnabled(), name
             QTest.mouseClick(button, QtCore.Qt.LeftButton)
             trace('click ' + name)
             assert not panel.status.text().startswith('Error'), panel.status.text()

@@ -339,12 +339,39 @@ def qt_test(directory):
         controller = WorkbenchController(cmd, root)
         panel = WorkbenchPanel(controller)
         panel.show()
+        def click(name):
+            button = panel.findChild(QtWidgets.QAbstractButton, name)
+            assert button is not None, name
+            # A finished job leaves Results selected. Navigate back before
+            # exposing a disclosure or clicking its action, as a user must.
+            for index in range(panel.tabs.count()):
+                if panel.tabs.widget(index).isAncestorOf(button):
+                    assert panel.tabs.isTabEnabled(index), name
+                    panel.tabs.setCurrentIndex(index)
+                    assert panel.tabs.currentIndex() == index, name
+                    break
+            ancestor = button.parentWidget()
+            while ancestor:
+                if ancestor.property('disclosure_content'):
+                    toggle = ancestor.parentWidget().findChild(QtWidgets.QToolButton)
+                    if not toggle.isChecked():
+                        panel.tabs.currentWidget().ensureWidgetVisible(toggle)
+                        app.processEvents()
+                        QTest.mouseClick(toggle, QtCore.Qt.LeftButton)
+                ancestor = ancestor.parentWidget()
+            page = panel.tabs.currentWidget()
+            if isinstance(page, QtWidgets.QScrollArea):
+                page.ensureWidgetVisible(button)
+            app.processEvents()
+            assert button.isVisible() and button.isEnabled(), name
+            QTest.mouseClick(button, QtCore.Qt.LeftButton)
+            app.processEvents()
         assert panel.tabs.count() == 5
         panel.tabs.setCurrentIndex(2)
-        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'geometry_section'), QtCore.Qt.LeftButton)
+        click('geometry_section')
         panel.geometry_atoms[0].setText('point_first')
         panel.geometry_atoms[1].setText('second')
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_geometry'), QtCore.Qt.LeftButton)
+        click('run_geometry')
         assert len(controller.results) == 1, panel.status.text()
         assert controller.results[0]['value'] == 5
         panel.tabs.setCurrentIndex(3)
@@ -352,7 +379,7 @@ def qt_test(directory):
         assert 'angstrom' in panel.result_details.toPlainText()
         panel.geometry_atoms[1].setText('none')
         panel.tabs.setCurrentIndex(2)
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_geometry'), QtCore.Qt.LeftButton)
+        click('run_geometry')
         assert 'Error' in panel.status.text()
         assert panel.findChild(QtWidgets.QPushButton, 'run_geometry').isEnabled()
         # External worker is replaced only at the executable boundary; QProcess,
@@ -403,7 +430,7 @@ def qt_test(directory):
         panel.contacts_b.setText('ubq and resi 11-20')
         expected = analysis.contacts(cmd, 'ubq and resi 1-10', 'ubq and resi 11-20', state=1)
         panel.tabs.setCurrentIndex(2)
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_contacts'), QtCore.Qt.LeftButton)
+        click('run_contacts')
         assert manager.active, panel.status.text()
         cmd.turn('y', 17)  # view-only changes must not make molecular data stale
         wait(lambda: not manager.active)
@@ -420,16 +447,15 @@ def qt_test(directory):
         panel.analysis_selection.setText('ubq and polymer.protein')
         panel.sasa_context.setText('ubq')
         expected_sasa = analysis.sasa(cmd, 'ubq and polymer.protein', context='ubq', state=1)
-        panel.tabs.currentWidget().ensureWidgetVisible(panel.findChild(QtWidgets.QToolButton, 'sasa_section'))
-        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'sasa_section'), QtCore.Qt.LeftButton)
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_sasa'), QtCore.Qt.LeftButton)
+        click('sasa_section')
+        click('run_sasa')
         assert manager.active
         wait(lambda: not manager.active)
         assert abs(controller.results[-1]['total_area_angstrom2'] - expected_sasa['total_area_angstrom2']) < 1e-5, panel.status.text()
         assert controller.results[-1]['snapshot_status'] == 'current'
         # Native coordinate edits while a process runs produce a stale record.
         panel.analysis_selection.setText('ubq and resi 1-10')
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_contacts'), QtCore.Qt.LeftButton)
+        click('run_contacts')
         cmd.translate([0.2, 0, 0], 'ubq and resi 1', state=1)
         wait(lambda: not manager.active)
         stale = controller.results[-1]
@@ -445,7 +471,7 @@ def qt_test(directory):
         panel.analysis_selection.setText('ubq and resi 1')
         panel.sasa_context.setText('ubq and resi 2')
         fail_count = len(failures)
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_sasa'), QtCore.Qt.LeftButton)
+        click('run_sasa')
         wait(lambda: not manager.active)
         assert len(failures) == fail_count + 1 and 'subset' in failures[-1]
         assert panel.findChild(QtWidgets.QPushButton, 'run_sasa').isEnabled()
@@ -458,7 +484,7 @@ def qt_test(directory):
         panel.image_ray.setChecked(False)
         panel.background.setCurrentText('transparent')
         camera = cmd.get_view()
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_export'), QtCore.Qt.LeftButton)
+        click('run_export')
         assert manager.active, panel.status.text()
         # Native Figure export starts a supervised Qt/OpenGL process. Keep its
         # startup budget separate from ordinary control/worker responsiveness.
@@ -470,7 +496,7 @@ def qt_test(directory):
         export = json.loads((destination/'report.json').read_text(encoding='utf-8'))
         assert export['analysis_records'][-1]['snapshot_status'] == 'stale'
         first_png = (destination/'scene.png').read_bytes()
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_export'), QtCore.Qt.LeftButton)
+        click('run_export')
         wait(lambda: not manager.active)
         assert 'Error' in panel.status.text()
         assert (destination/'scene.png').read_bytes() == first_png
@@ -483,9 +509,8 @@ def qt_test(directory):
         panel.batch_output.setText(str(root/'batch outputs'))
         panel.image_width.setValue(1000)
         panel.image_height.setValue(700)
-        panel.tabs.currentWidget().ensureWidgetVisible(panel.findChild(QtWidgets.QToolButton, 'batch_section'))
-        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'batch_section'), QtCore.Qt.LeftButton)
-        QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_batch'), QtCore.Qt.LeftButton)
+        click('batch_section')
+        click('run_batch')
         assert manager.active, panel.status.text()
         wait(lambda: manager.last_result is not None and manager.last_result.get('completed', 0) >= 1, timeout=20000)
         assert manager.active, 'Batch finished before a cooperative cancel could be tested'
