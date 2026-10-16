@@ -84,6 +84,12 @@ for arbitrary inputs. The caller must supply topology in its original DCD atom
 order. The deliberately nonlexical original fixture proves this runtime's
 ordering for that controlled input only.
 
+Legacy DCD readers receive a relative ASCII filename for Unicode paths, with a
+hash-checked owned temporary copy when the basename is Unicode. Only the
+synchronous native call changes the working directory; it restores that
+directory before verification or callbacks. Standalone replay likewise restores
+the caller's directory on success and failure and checks loaded counts.
+
 `trajectory_export.export_trajectory(input_session, output_dir, request,
 source_input=None)` archives the byte-preserved captured PSE and optional DCD;
 an optional hash-bound original coordinate source is copied separately. It
