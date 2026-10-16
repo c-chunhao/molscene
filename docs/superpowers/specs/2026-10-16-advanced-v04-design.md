@@ -33,6 +33,17 @@ Use separate focused modules for regular grids, density handling, timelines,
 animation export, external process lifetime, electrostatic computation and
 new output bundles. Avoid restructuring legacy render/analysis behavior.
 
+Advanced OpenGL image export uses a dedicated supervised official PyMOL Qt
+child. Explicit no-ray exports and volume-bearing scenes require a valid
+graphics context: ordinary headless CPU ray rendering can omit volume objects.
+Report requested versus effective render settings and actual GPU/opacity
+behavior. Preserve the CPU ray path for other ray-enabled advanced exports.
+Validate decoded image data and prove visible-volume content against a hidden
+control in native acceptance; PNG headers and object existence are insufficient.
+Reuse the existing guardian for cancellation, timeout and worker-death cleanup.
+One child renders an entire animation sequence with per-frame progress and
+closes its owned native window normally before publication.
+
 ## Shared grids and output bundles
 
 Define regular scalar grid geometry explicitly: shape `(nx,ny,nz)`, physical
