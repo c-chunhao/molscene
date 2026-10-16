@@ -1,5 +1,6 @@
 """Native workbench controls. All callbacks run serially on Qt's main thread."""
 from pymol.Qt import QtCore, QtWidgets
+from .navigation_panel import NavigationPanel, disclosure
 
 
 class WorkbenchPanel(QtWidgets.QWidget):
@@ -8,12 +9,20 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.controller = controller
         self.setObjectName('molscene_panel')
         root = QtWidgets.QVBoxLayout(self)
+        root.setContentsMargins(6, 6, 6, 6)
+        root.setSpacing(4)
+        self.selection_summary = QtWidgets.QLabel('No selection preview')
+        self.selection_summary.setObjectName('selection_summary')
+        self.selection_summary.setWordWrap(True)
+        self.selection_summary.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        root.addWidget(self.selection_summary)
         self.tabs = QtWidgets.QTabWidget()
         self.tabs.setObjectName('workbench_tabs')
         root.addWidget(self.tabs)
         self.status = QtWidgets.QLabel('Ready')
         self.status.setObjectName('status')
         self.status.setWordWrap(True)
+        self.status.setMaximumHeight(self.status.fontMetrics().lineSpacing() * 4)
         self.status.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         root.addWidget(self.status)
         from .jobs import JobManager
@@ -26,13 +35,28 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.progress_bar = QtWidgets.QProgressBar()
         self.progress_bar.setObjectName('job_progress')
         self.progress_bar.setRange(0, 1)
-        root.addWidget(self.progress_bar)
-        self.cancel_job = self._button(root, 'Cancel active job', 'cancel_job', self._cancel)
+        row = self._row(root)
+        row.addWidget(self.progress_bar)
+        self.cancel_job = self._button(row, 'Cancel', 'cancel_job', self._cancel)
         self.cancel_job.setEnabled(False)
         self._structure_tab()
         self._scene_tab()
         self._analysis_tab()
         self._results_tab()
+        # Long molecule names and output paths must never resize the native dock.
+        for label in self.findChildren(QtWidgets.QLabel):
+            label.setWordWrap(True)
+            label.setMinimumWidth(0)
+            label.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        for label in (self.status, self.selection_summary, self.result_source, self.result_summary, self.row_total):
+            label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+        for combo in self.findChildren(QtWidgets.QComboBox):
+            combo.setMinimumContentsLength(10)
+            combo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            combo.currentTextChanged.connect(combo.setToolTip)
+        for form in self.findChildren(QtWidgets.QFormLayout):
+            form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
+            form.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
         self.refresh()
         self.refresh_timer = QtCore.QTimer(self)
         self.refresh_timer.setInterval(1500)
@@ -66,7 +90,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(tab)
         row = self._row(layout)
-        self._button(row, 'Load coordinates…', 'load_coordinates', self._load)
+        self._button(row, 'Load…', 'load_coordinates', self._load)
         self._button(row, 'Open PSE…', 'open_session', self._session)
         self._button(row, 'Refresh', 'refresh', self.refresh)
         label = QtWidgets.QLabel('Molecular objects — select explicitly to change')
@@ -75,6 +99,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.object_list = QtWidgets.QListWidget()
         self.object_list.setObjectName('objects')
         self.object_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.object_list.setMaximumHeight(90)
+        self.object_list.setTextElideMode(QtCore.Qt.ElideMiddle)
         layout.addWidget(self.object_list)
         row = self._row(layout)
         self._button(row, 'Show', 'show_objects', lambda: self.controller.set_visible(self.selected_objects(), True))
@@ -101,24 +127,28 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.state.setRange(1, 1000000)
         self.state.setValue(max(1, int(self.controller.cmd.get_state())))
         row.addWidget(self.state)
-        self._button(row, 'Go to state', 'set_state', lambda: self.controller.set_state(self.state.value()))
+        self._button(row, 'Go', 'set_state', lambda: self.controller.set_state(self.state.value())).setToolTip('Display the requested state')
         row = self._row(layout)
         self._button(row, 'Capture', 'capture_selection', lambda: self._capture(self.selection.text()))
         self._button(row, 'Current sele', 'capture_current', lambda: self._capture('sele'))
-        row = self._row(layout)
+        picks = disclosure(layout, 'Native picks', 'picks_section')
+        row = self._row(picks)
         for number in range(1, 5):
             if number == 3:
-                row = self._row(layout)
+                row = self._row(picks)
             self._button(row, 'Pick ' + str(number), 'capture_pk' + str(number),
                          lambda n=number: self._capture('pk' + str(n), single=True))
+        self.navigation = NavigationPanel(self)
+        layout.addWidget(self.navigation)
+        advanced = disclosure(layout, 'Representation & color', 'representation_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
+        advanced.addLayout(form)
         self.representation = QtWidgets.QComboBox()
         self.representation.setObjectName('representation')
         self.representation.addItems(['cartoon', 'ribbon', 'sticks', 'lines', 'spheres', 'surface', 'mesh', 'dots', 'nonbonded'])
         form.addRow('Representation', self.representation)
-        row = self._row(layout)
+        row = self._row(advanced)
         self._button(row, 'Show', 'show_representation', self._representation)
         self._button(row, 'Hide', 'hide_representation', self._hide_representation)
         self.coloring = QtWidgets.QComboBox()
@@ -128,8 +158,9 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.color.setObjectName('single_color')
         form.addRow('Coloring', self.coloring)
         form.addRow('Single color', self.color)
-        self._button(layout, 'Apply coloring', 'apply_coloring', self._coloring)
-        self.tabs.addTab(self._scroll(tab), 'Structure & display')
+        self._button(advanced, 'Apply coloring', 'apply_coloring', self._coloring)
+        self.tabs.addTab(self._scroll(tab), 'Structure')
+        self.tabs.setTabToolTip(0, 'Structure & display')
 
     def _scene_tab(self):
         tab = QtWidgets.QWidget()
@@ -144,13 +175,19 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._button(layout, 'Store bookmark', 'store_scene', lambda: self.controller.store_scene(self.scene_name.text()))
         self.scene_list = QtWidgets.QListWidget()
         self.scene_list.setObjectName('scenes')
+        self.scene_list.setMaximumHeight(90)
+        self.scene_list.itemDoubleClicked.connect(lambda item: self.run(lambda: self.controller.restore_scene(item.text())))
         layout.addWidget(self.scene_list)
         row = self._row(layout)
-        self._button(row, 'Restore bookmark', 'restore_scene', lambda: self.controller.restore_scene(self._scene()))
-        self._button(row, 'Delete bookmark', 'delete_scene', lambda: self.controller.delete_scene(self._scene()))
+        self._button(row, 'Restore', 'restore_scene', lambda: self.controller.restore_scene(self._scene()))
+        self._button(row, 'Delete', 'delete_scene', lambda: self.controller.delete_scene(self._scene()))
+        row = self._row(layout)
+        self._button(row, 'Update selected', 'scene_update', lambda: self.controller.update_scene(self._scene()))
+        self._button(row, 'Rename…', 'scene_rename', self._rename_scene)
+        appearance = disclosure(layout, 'Appearance and labels', 'appearance_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
+        appearance.addLayout(form)
         self.background = QtWidgets.QComboBox()
         self.background.setObjectName('background')
         self.background.addItems(['white', 'black', 'transparent'])
@@ -167,24 +204,27 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.stick_radius.setSingleStep(0.05)
         self.stick_radius.setValue(0.25)
         form.addRow('Stick radius (Å)', self.stick_radius)
-        self._button(layout, 'Apply appearance', 'apply_appearance', lambda: self.controller.set_appearance(
+        self._button(appearance, 'Apply appearance', 'apply_appearance', lambda: self.controller.set_appearance(
             self.selection.text(), background=self.background.currentText(),
             surface_opacity=self.surface_opacity.value(), stick_radius=self.stick_radius.value(), state=self.state.value()))
         self.label_text = QtWidgets.QLineEdit('name')
         self.label_text.setObjectName('label_expression')
         self.label_text.setPlaceholderText('Native label expression, e.g. resn + resi')
         form.addRow('Label expression', self.label_text)
-        self._button(layout, 'Apply labels', 'apply_labels', lambda: self.controller.set_labels(
+        self._button(appearance, 'Apply labels', 'apply_labels', lambda: self.controller.set_labels(
             self.selection.text(), self.label_text.text(), state=self.state.value()))
         self._export_controls(layout)
         layout.addStretch()
-        self.tabs.addTab(self._scroll(tab), 'Figure & session')
+        self.tabs.addTab(self._scroll(tab), 'Figure')
+        self.tabs.setTabToolTip(1, 'Figure & session')
 
     def selected_objects(self):
         return [item.data(QtCore.Qt.UserRole) for item in self.object_list.selectedItems()]
 
     def _capture(self, selection, single=False):
         result = self.controller.capture_selection(selection, state=self.state.value(), single=single)
+        self.selection.setText(result['selection'])
+        self.navigation.summary(result)
         self.status.setText(f"Captured {result['atoms']} atom(s), state {result['state']}: {', '.join(result['objects'])}")
         return result
 
@@ -209,6 +249,12 @@ class WorkbenchPanel(QtWidgets.QWidget):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open PyMOL session', str(self.controller.workspace), 'PyMOL session (*.pse)')
         if path:
             self.controller.open_session(path)
+            record = getattr(self, '_current_record', None)
+            if record:
+                self.controller.result_status(record)
+                self._source_status(record)
+            # A PSE may replace identities without changing object names/counts.
+            self.navigation.update_inventory(self.controller.objects(), force=True)
 
     def _rename(self):
         names = self.selected_objects()
@@ -224,7 +270,20 @@ class WorkbenchPanel(QtWidgets.QWidget):
             raise ValueError('Select a scene bookmark')
         return item.text()
 
+    def _rename_scene(self):
+        old = self._scene()
+        name, ok = QtWidgets.QInputDialog.getText(self, 'Rename bookmark', 'New bookmark name', text=old)
+        if ok:
+            self.controller.rename_scene(old, name)
+            self.refresh()
+            found = self.scene_list.findItems(name, QtCore.Qt.MatchExactly)
+            if found:
+                self.scene_list.setCurrentItem(found[0])
+
     def run(self, callback):
+        if getattr(self, '_mutation_locked', False) and callback not in (self._cancel, self._csv, self._fasta):
+            self.status.setText('Wait for the active worker or cancel it before changing the live scene')
+            return None
         self.status.setText('Working…')
         try:
             result = callback()
@@ -234,40 +293,60 @@ class WorkbenchPanel(QtWidgets.QWidget):
             return result
         except Exception as exc:
             self.status.setText('Error: ' + str(exc))
+            self.status.setToolTip(self.status.text())
             return None
 
     def refresh(self):
         try:
+            if getattr(self, '_mutation_locked', False):
+                return
+            inventory = self.controller.objects()
             selected = set(self.selected_objects())
-            self.object_list.clear()
-            for obj in self.controller.objects():
-                item = QtWidgets.QListWidgetItem(f"{'●' if obj['enabled'] else '○'} {obj['name']} — {obj['atoms']} atoms; {obj['states']} state(s); chains {', '.join(obj['chains'])}")
-                item.setData(QtCore.Qt.UserRole, obj['name'])
-                self.object_list.addItem(item)
-                item.setSelected(obj['name'] in selected)
+            names = [obj['name'] for obj in inventory]
+            if [self.object_list.item(i).data(QtCore.Qt.UserRole) for i in range(self.object_list.count())] != names:
+                self.object_list.clear()
+                for obj in inventory:
+                    item = QtWidgets.QListWidgetItem()
+                    item.setData(QtCore.Qt.UserRole, obj['name'])
+                    self.object_list.addItem(item)
+                    item.setSelected(obj['name'] in selected)
+            for index, obj in enumerate(inventory):
+                item = self.object_list.item(index)
+                item.setText(f"{'●' if obj['enabled'] else '○'} {obj['name']} · {obj['atoms']} atoms")
+                item.setToolTip(f"{obj['name']} · {obj['states']} state(s) · chains {', '.join(obj['chains'])}")
             for combo in (self.align_mobile, self.align_target):
-                previous = combo.currentText()
-                combo.clear()
-                combo.addItems([obj['name'] for obj in self.controller.objects()])
-                combo.setCurrentText(previous)
-            selection = self.named_selections.currentText()
-            self.named_selections.clear()
-            self.named_selections.addItems(self.controller.selections())
-            self.named_selections.setCurrentText(selection)
-            scene = self.scene_list.currentItem().text() if self.scene_list.currentItem() else ''
-            self.scene_list.clear()
-            self.scene_list.addItems(self.controller.scenes())
-            found = self.scene_list.findItems(scene, QtCore.Qt.MatchExactly)
-            if found:
-                self.scene_list.setCurrentItem(found[0])
+                self._refresh_combo(combo, names)
+            self._refresh_combo(self.named_selections, self.controller.selections())
+            scenes = self.controller.scenes()
+            if [self.scene_list.item(i).text() for i in range(self.scene_list.count())] != scenes:
+                scene = self.scene_list.currentItem().text() if self.scene_list.currentItem() else ''
+                self.scene_list.clear()
+                self.scene_list.addItems(scenes)
+                found = self.scene_list.findItems(scene, QtCore.Qt.MatchExactly)
+                if found:
+                    self.scene_list.setCurrentItem(found[0])
+                elif len(scenes) == 1:
+                    self.scene_list.setCurrentRow(0)
+            self.navigation.update_inventory(inventory)
             record = getattr(self, '_current_record', None)
             if record and self.tabs.currentIndex() == 3 and not self.jobs.active:
                 previous = record.get('snapshot_status')
                 current = self.controller.result_status(record)
                 if previous != current:
-                    self._populate_result(record)
+                    self._source_status(record)
         except Exception as exc:
             self.status.setText('Error refreshing live scene: ' + str(exc))
+
+    def _refresh_combo(self, combo, values):
+        if [combo.itemText(i) for i in range(combo.count())] == values:
+            return
+        previous = combo.currentText()
+        combo.blockSignals(True)
+        combo.clear()
+        combo.addItems(values)
+        if previous in values:
+            combo.setCurrentText(previous)
+        combo.blockSignals(False)
     def _edit(self, form, label, name, text=''):
         entry = QtWidgets.QLineEdit(text)
         entry.setObjectName(name)
@@ -292,7 +371,12 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.analysis_state.valueChanged.connect(self.state.setValue)
         self.state.valueChanged.connect(self.analysis_state.setValue)
         self.analysis_selection = self._edit(form, 'Selection / target', 'analysis_selection', 'all')
-        self._button(layout, 'Inspect structure and coordinate sequence', 'run_inspect', self._inspect)
+        self.contacts_b = self._edit(form, 'Partner B', 'contacts_b', 'organic')
+        self._button(layout, 'Inspect structure', 'run_inspect', self._inspect).setToolTip('Inspect structure and observed coordinate sequence')
+        geometry = disclosure(layout, 'Geometry', 'geometry_section')
+        form = QtWidgets.QFormLayout()
+        form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
+        geometry.addLayout(form)
         self.geometry_kind = QtWidgets.QComboBox()
         self.geometry_kind.setObjectName('geometry_kind')
         self.geometry_kind.addItems(['distance', 'angle', 'dihedral'])
@@ -307,14 +391,14 @@ class WorkbenchPanel(QtWidgets.QWidget):
                          lambda n=index: self._geometry_pick(n))
             form.addRow(chr(65 + index) + ' (one atom)', row)
             self.geometry_atoms.append(entry)
-        self.geometry_annotation = QtWidgets.QCheckBox('Add live measurement annotation')
+        self.geometry_annotation = QtWidgets.QCheckBox('Add live annotation')
         self.geometry_annotation.setChecked(True)
-        layout.addWidget(self.geometry_annotation)
-        self._button(layout, 'Measure geometry', 'run_geometry', self._geometry)
+        geometry.addWidget(self.geometry_annotation)
+        self._button(geometry, 'Measure geometry', 'run_geometry', self._geometry)
+        contacts = disclosure(layout, 'Contacts / interface', 'contacts_section', True)
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
-        self.contacts_b = self._edit(form, 'Contacts selection B', 'contacts_b', 'organic')
+        contacts.addLayout(form)
         self.contact_cutoff = QtWidgets.QDoubleSpinBox()
         self.contact_cutoff.setObjectName('contact_cutoff')
         self.contact_cutoff.setRange(0.01, 10000)
@@ -322,24 +406,35 @@ class WorkbenchPanel(QtWidgets.QWidget):
         form.addRow('Contact cutoff (Å)', self.contact_cutoff)
         self.contact_heavy = QtWidgets.QCheckBox('Heavy atoms only')
         self.contact_heavy.setChecked(True)
-        layout.addWidget(self.contact_heavy)
-        self._button(layout, 'Calculate contacts in worker', 'run_contacts', self._contacts)
+        contacts.addWidget(self.contact_heavy)
+        self._button(contacts, 'Calculate contacts', 'run_contacts', self._contacts)
+        self.interface_altloc = QtWidgets.QComboBox()
+        self.interface_altloc.setObjectName('interface_altloc')
+        self.interface_altloc.addItems(['primary', 'all'])
+        form.addRow('Interface altloc', self.interface_altloc)
+        self._button(contacts, 'Calculate interface area', 'run_interface', self._interface)
+        note = QtWidgets.QLabel('Choose non-overlapping A and B. Interface area = (buried A + buried B) / 2; total buried area = sum (Å²).')
+        note.setToolTip('Non-solvent heavy atoms; primary altloc = blank + A; probe 1.4 Å, dot density 3. Surface loss is not affinity or binding energy. Complete methods are retained in result details and exports.')
+        note.setWordWrap(True)
+        contacts.addWidget(note)
+        sasa = disclosure(layout, 'SASA', 'sasa_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
+        sasa.addLayout(form)
         self.sasa_context = self._edit(form, 'SASA context', 'sasa_context')
         self.sasa_context.setPlaceholderText('Blank: byobject target')
         self.sasa_altloc = QtWidgets.QComboBox()
         self.sasa_altloc.addItems(['primary', 'all'])
         self.sasa_altloc.setObjectName('sasa_altloc')
         form.addRow('SASA altloc', self.sasa_altloc)
-        self._button(layout, 'Calculate SASA (Å²) in worker', 'run_sasa', self._sasa)
+        self._button(sasa, 'Calculate SASA (Å²)', 'run_sasa', self._sasa)
         note = QtWidgets.QLabel('SASA: non-solvent heavy atoms, primary = blank+A; probe 1.4 Å, dot density 3. Target must be a subset of context. Contacts: unique undirected pairs, maximum 100000; geometric proximity.')
         note.setWordWrap(True)
-        layout.addWidget(note)
+        sasa.addWidget(note)
+        alignment = disclosure(layout, 'Alignment', 'alignment_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
+        alignment.addLayout(form)
         self.align_mobile = QtWidgets.QComboBox()
         self.align_mobile.setObjectName('align_mobile')
         self.align_target = QtWidgets.QComboBox()
@@ -358,7 +453,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.align_cutoff.setObjectName('align_cutoff')
         form.addRow('Alignment cutoff (Å)', self.align_cutoff)
         self.align_cycles = self._spin(form, 'Refinement cycles', 'align_cycles', 0, 100, 5)
-        self._button(layout, 'Align live mobile object', 'run_align', self._align)
+        self._button(alignment, 'Align live mobile object', 'run_align', self._align)
         layout.addStretch()
         self.tabs.addTab(self._scroll(tab), 'Analysis')
 
@@ -377,11 +472,21 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.result_details.setReadOnly(True)
         self.result_details.setObjectName('result_details')
         self.result_details.setMaximumHeight(180)
-        layout.addWidget(self.result_details)
+        self.result_summary = QtWidgets.QLabel()
+        self.result_summary.setObjectName('result_summary')
+        self.result_summary.setWordWrap(True)
+        layout.addWidget(self.result_summary)
+        details = disclosure(layout, 'Details', 'result_details_section')
+        details.addWidget(self.result_details)
         self.result_tables = QtWidgets.QComboBox()
         self.result_tables.setObjectName('result_tables')
         self.result_tables.currentTextChanged.connect(self._table_selected)
         layout.addWidget(self.result_tables)
+        self.result_filter = QtWidgets.QLineEdit()
+        self.result_filter.setObjectName('result_filter')
+        self.result_filter.setPlaceholderText('Search complete result table…')
+        self.result_filter.setClearButtonEnabled(True)
+        layout.addWidget(self.result_filter)
         self.row_total = QtWidgets.QLabel('0 rows')
         self.row_total.setObjectName('result_row_total')
         self.row_total.setWordWrap(True)
@@ -389,42 +494,59 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.result_table = QtWidgets.QTableView()
         self.result_table.setObjectName('result_table')
         self._table_model = ResultTableModel(parent=self.result_table)
-        self.result_table.setModel(self._table_model)
+        self._result_proxy = ResultFilter(self.result_table)
+        self._result_proxy.setSourceModel(self._table_model)
+        self._result_proxy.setFilterKeyColumn(-1)
+        self._result_proxy.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.result_table.setModel(self._result_proxy)
+        self.result_table.setSortingEnabled(True)
+        self.result_table.sortByColumn(-1, QtCore.Qt.AscendingOrder)
+        self.result_filter.textChanged.connect(self._filter_results)
         self.result_table.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.result_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.result_table)
         self._button(layout, 'Export complete table CSV…', 'export_csv', self._csv)
         self._button(layout, 'Export coordinate FASTA…', 'export_fasta', self._fasta)
-        self._button(layout, 'Annotate selected result', 'annotate_result', self._annotate)
+        self.annotate_button = self._button(layout, 'Annotate selected result', 'annotate_result', self._annotate)
         self.result_overwrite = QtWidgets.QCheckBox('Overwrite chosen CSV/FASTA')
         self.result_overwrite.setObjectName('result_overwrite')
         layout.addWidget(self.result_overwrite)
         self.tabs.addTab(tab, 'Results')
 
     def _export_controls(self, layout):
+        image_settings = disclosure(layout, 'Image settings', 'image_section')
         form = QtWidgets.QFormLayout()
         form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
-        layout.addLayout(form)
+        image_settings.addLayout(form)
         self.image_width = self._spin(form, 'PNG width (px)', 'image_width', 1, 10000, 1600)
         self.image_height = self._spin(form, 'PNG height (px)', 'image_height', 1, 10000, 1200)
         self.image_dpi = self._spin(form, 'PNG DPI', 'image_dpi', 1, 2400, 300)
-        self.image_ray = QtWidgets.QCheckBox('Ray tracing in independent worker')
+        form = QtWidgets.QFormLayout()
+        form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
+        layout.addLayout(form)
+        self.image_ray = QtWidgets.QCheckBox('Ray tracing')
+        self.image_ray.setToolTip('Render in an independent worker')
         self.image_ray.setObjectName('image_ray')
         self.image_ray.setChecked(True)
         layout.addWidget(self.image_ray)
         self.export_directory = self._edit(form, 'Export directory', 'export_directory')
-        self._button(layout, 'Choose export directory…', 'choose_export_directory', lambda: self._directory(self.export_directory))
-        self.export_overwrite = QtWidgets.QCheckBox('Overwrite owned artifacts')
+        self._button(layout, 'Browse export directory…', 'choose_export_directory', lambda: self._directory(self.export_directory))
+        self.export_overwrite = QtWidgets.QCheckBox('Overwrite owned outputs')
         self.export_overwrite.setObjectName('export_overwrite')
         layout.addWidget(self.export_overwrite)
-        self._button(layout, 'Export current view bundle', 'run_export', self._export_scene)
+        self._button(layout, 'Export view bundle', 'run_export', self._export_scene)
         note = QtWidgets.QLabel('PML replays the accompanying PSE. Camera and native session are preserved. Result records retain stale/current status.')
         note.setWordWrap(True)
         layout.addWidget(note)
+        layout = disclosure(layout, 'Render directory', 'batch_section')
+        layout.addWidget(QtWidgets.QLabel('Uses the image settings above'))
+        form = QtWidgets.QFormLayout()
+        form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
+        layout.addLayout(form)
         self.batch_input = self._edit(form, 'Batch input directory', 'batch_input')
-        self._button(layout, 'Choose batch input directory…', 'choose_batch_input', lambda: self._directory(self.batch_input))
+        self._button(layout, 'Browse input…', 'choose_batch_input', lambda: self._directory(self.batch_input))
         self.batch_output = self._edit(form, 'Batch output directory', 'batch_output')
-        self._button(layout, 'Choose batch output directory…', 'choose_batch_output', lambda: self._directory(self.batch_output))
+        self._button(layout, 'Browse output…', 'choose_batch_output', lambda: self._directory(self.batch_output))
         self.batch_preset = QtWidgets.QComboBox()
         self.batch_preset.addItems(['cartoon', 'surface', 'pocket'])
         self.batch_preset.setObjectName('batch_preset')
@@ -438,7 +560,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.batch_radius.setRange(0.01, 1000)
         self.batch_radius.setValue(5)
         form.addRow('Pocket radius (Å)', self.batch_radius)
-        self._button(layout, 'Render directory in worker', 'run_batch', self._batch)
+        self._button(layout, 'Render directory', 'run_batch', self._batch)
 
     def _directory(self, entry):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose directory', str(self.controller.workspace))
@@ -473,6 +595,10 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._launch_job('sasa', dict(selection=self.analysis_selection.text(), context=self.sasa_context.text() or None,
             state=self.analysis_state.value(), altloc=self.sasa_altloc.currentText()))
 
+    def _interface(self):
+        self._launch_job('interface', dict(selection_a=self.analysis_selection.text(), selection_b=self.contacts_b.text(),
+            state=self.analysis_state.value(), altloc=self.interface_altloc.currentText()))
+
     def _image_parameters(self):
         return dict(width=self.image_width.value(), height=self.image_height.value(), dpi=self.image_dpi.value())
 
@@ -483,7 +609,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
         parameters.update(background=self.background.currentText(), ray=self.image_ray.isChecked(),
                           overwrite=self.export_overwrite.isChecked(), analysis_records=[
                               record for record in self.controller.results
-                              if record.get('operation') in ('geometry', 'contacts', 'sasa', 'inspect', 'align')
+                              if record.get('operation') in ('geometry', 'contacts', 'sasa', 'interface', 'inspect', 'align')
                               and not record.get('cancelled')])
         self._launch_job('export', parameters, output=self.export_directory.text())
 
@@ -506,6 +632,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self.jobs.start(self._active_job_path)
 
     def _job_started(self, job):
+        self._mutation_locked = True
+        self.annotate_button.setEnabled(False)
         self._job_operation = job['operation']
         self._job_output = job['output']
         self._job_state = job.get('parameters', {}).get('state', self.analysis_state.value())
@@ -528,6 +656,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self.status.setText(str(report.get('message', report)))
 
     def _job_idle(self):
+        self._mutation_locked = False
+        self.annotate_button.setEnabled(True)
         for index in range(3):
             self.tabs.widget(index).setEnabled(True)
         self.progress_bar.setRange(0, 1)
@@ -550,6 +680,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
             record = self.controller.record_result('batch', self.jobs.last_result, self.jobs.job.get('parameters', {}), state=self._job_state)
             self._show_record(record)
         self.status.setText('Error: ' + message)
+        self.status.setToolTip(self.status.text())
 
     def _job_cancelled(self, result):
         self._job_idle()
@@ -590,9 +721,23 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self.controller.result_status(self._current_record)
             self._populate_result(self._current_record)
 
+    def _source_status(self, result):
+        status = 'cancelled' if result.get('cancelled') else result.get('snapshot_status', 'unverified')
+        self.result_source.setText(f"State {result.get('state', '?')} · {status} · {result.get('calculated_at', '')}")
+        self.result_source.setToolTip('Source fingerprint: ' + str(result.get('source_fingerprint', 'unverified')))
+
     def _populate_result(self, result):
         import json
-        self.result_source.setText(f"State {result.get('state', '?')} · {result.get('snapshot_status', 'unverified')} · {result.get('calculated_at', '')}")
+        self._source_status(result)
+        if result.get('operation') == 'interface':
+            def area(value):
+                return format(value, '.6g') if isinstance(value, (int, float)) else '?'
+            self.result_summary.setText(f"Interface area: {area(result.get('interface_area_angstrom2'))} Å²\n"
+                f"(buried A + buried B) / 2\nTotal buried area: {area(result.get('total_buried_area_angstrom2'))} Å²\n"
+                f"Buried A: {area(result.get('partner_a', {}).get('buried_area_angstrom2'))} · "
+                f"Buried B: {area(result.get('partner_b', {}).get('buried_area_angstrom2'))} Å²")
+        else:
+            self.result_summary.setText(str(result.get('kind', result.get('operation', 'Analysis'))))
         summary = {key: (f'{len(value)} rows' if isinstance(value, list) else value)
                    for key, value in result.items()}
         self.result_details.setPlainText(json.dumps(summary, indent=2, ensure_ascii=False, allow_nan=False))
@@ -612,9 +757,13 @@ class WorkbenchPanel(QtWidgets.QWidget):
             rows = []
         old_model = self._table_model
         self._table_model = ResultTableModel(rows, self.result_table)
-        self.result_table.setModel(self._table_model)
+        self._result_proxy.setSourceModel(self._table_model)
         old_model.deleteLater()
-        self.row_total.setText(f'{len(rows)} / {len(rows)} rows available (complete table; CSV exports all rows)')
+        self._filter_results(self.result_filter.text())
+
+    def _filter_results(self, text):
+        self._result_proxy.setFilterFixedString(text)
+        self.row_total.setText(f'{self._result_proxy.rowCount()} / {self._table_model.rowCount()} rows shown · CSV exports all rows')
 
     def _csv(self):
         record = self._record()
@@ -631,9 +780,21 @@ class WorkbenchPanel(QtWidgets.QWidget):
             self.status.setText('Saved ' + output + '; snapshot ' + record['snapshot_status'])
 
     def _annotate(self):
+        if getattr(self, '_mutation_locked', False):
+            raise ValueError('Wait for the active worker before annotating the live scene')
         record = self.controller.annotate_result(self._record())
         self._populate_result(record)
         self.status.setText(f"Annotated {record['displayed_count']} item(s); total contacts {record.get('pair_count', 'n/a')}")
+
+
+class ResultFilter(QtCore.QSortFilterProxyModel):
+    def lessThan(self, left, right):
+        model = self.sourceModel()
+        a = model.rows[left.row()].get(model.columns[left.column()])
+        b = model.rows[right.row()].get(model.columns[right.column()])
+        if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+            return a < b
+        return str(left.data()).casefold() < str(right.data()).casefold()
 
 
 class ResultTableModel(QtCore.QAbstractTableModel):
@@ -669,7 +830,9 @@ class ResultTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
             labels = {'distance_angstrom': 'Distance (Å)', 'min_distance_angstrom': 'Min distance (Å)',
-                      'area_angstrom2': 'Area (Å²)', 'atom_a': 'Atom A', 'atom_b': 'Atom B'}
+                      'area_angstrom2': 'Area (Å²)', 'atom_a': 'Atom A', 'atom_b': 'Atom B',
+                      'isolated_area_angstrom2': 'Isolated SASA (Å²)', 'complex_area_angstrom2': 'Complex SASA (Å²)',
+                      'buried_area_angstrom2': 'Buried area (Å²)'}
             return labels.get(self.columns[section], self.columns[section]) if orientation == QtCore.Qt.Horizontal else str(section + 1)
         return None
 

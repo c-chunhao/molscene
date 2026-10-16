@@ -79,6 +79,7 @@ jobs:
               'test_native_startup_events_framebuffer_and_shutdown': 'test_desktop.NativeDesktopTests',
               'test_native_clean_preferences_startup_and_shutdown': 'test_desktop.NativeDesktopTests',
               'test_native_fixtures_exports_and_cooperative_window_close': 'test_workbench.QtWorkbenchTests',
+              'test_native_navigation_presets_and_interface_workflow': 'test_navigation_gui.NativeNavigationTests',
           }
           for name, case in required.items():
               assert re.search(r'^' + name + r' \(' + re.escape(case) + r'\) \.\.\. ok$', log, re.M), name + ' must execute successfully, not skip'

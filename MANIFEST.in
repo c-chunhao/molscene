@@ -4,6 +4,7 @@ include examples/data/sources.json
 include examples/README.md
 include examples/download_examples.py
 include examples/reproduce_v02.py
+include examples/reproduce_v03.py
 recursive-include tests *.py
 include README.zh-CN.md CONTRIBUTING.md
 include docs/*.md docs/*.json

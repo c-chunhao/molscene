@@ -32,6 +32,68 @@ Inspection returns atoms, residue sites, elements, objects, chains and coordinat
 
 Scientific CLI figures show protein cartoons with molecular lines, sticks for nonprotein atoms (including nucleic acids), and nonbonded marks for isolated atoms. Partial molecules without a cartoon trace therefore retain visible context in PNG, PSE and standalone PML. The legacy default `render` presets still require protein; explicit representations can render other molecules.
 
+## Partner interface area
+
+`analysis.interface(cmd, selection_a, selection_b, state=1, altloc='primary')`
+uses the same non-solvent heavy-atom/blank+A filtering as SASA. Original
+object/index identities bind retained membership with explicit-state
+`select_list`; overlap after filtering and either empty partner fail. Removed
+shared solvent/hydrogen/alternate atoms do not create retained overlap. The
+context is precisely A∪B, never the full source objects.
+
+Four SASA calculations produce A alone, B alone, A in A+B and B in A+B.
+Each partner's buried area is its isolated minus complex contribution. The
+result names their sum `total_buried_area_angstrom2` and half that sum
+`interface_area_angstrom2`. Raw differences remain signed. Complete residue
+rows include zero loss and retain partner, original object/segment/chain/
+residue label, state, atom count and isolated/complex/buried areas. A residue
+split between partners has separate rows. Probe radius is 1.4 Å and dot
+density is 3. Areas approximate a geometric surface; they are not interaction
+energies, binding affinities or chemistry-assigned hydrogen bonds.
+
+The CLI `interface` command writes schema-2 JSON, complete `interface.csv`,
+PNG/PSE/PML and copied input coordinates. Replay uses public PyMOL APIs and
+relative copied coordinates without importing MolScene. Retained partners use
+distinct colors, with buried residue sites highlighted. GUI interface jobs use
+the existing immutable PSE worker and source-fingerprint contract.
+
+## Live structure workflows
+
+`desktop/structure.py` contains Qt-free structure helpers; the controller
+checks the main thread before delegation. Browser rows group the exact
+object/segi/chain/resi/resn at the requested state, in source coordinate order.
+Labels remain strings, including blank chains, insertion codes and negative
+residue numbers. Observed one-letter codes do not reconstruct missing sequence.
+Selection creation revalidates each frozen object/index/identity rather than
+interpolating residue strings into selection grammar. Saved names reject
+reserved words, backend rewriting and collisions; native picks are protected.
+
+Focus uses explicit-state orientation, centering and zoom with a finite
+nonnegative buffer. Hiding solvent/H/D/T changes representations only. Live
+presets freeze selected membership; overview uses polymer traces, sticks and
+ion spheres where appropriate, while surface supports nonproteins. A pocket
+requires a ligand subset of the chosen context and a finite positive radius;
+it includes selected polymer residue sites with an atom-center distance ≤ that
+radius, expanding only within the selected requested-state context. Presets
+preserve atom colors and unrelated display settings; camera framing is explicit.
+Overview/pocket place sphere markers on selected polymer guides and stick
+atoms using atom-scoped scale 0.20. Surface does not add markers. These markers
+keep isolated/disconnected selected atoms visible without guessing cartoon
+connectivity; they do not replace the full-protein cartoon with sticks.
+
+`prepare_structure` creates a new object at state 1 from an explicit source
+state. Solvent, optional H/D/T and alternate filters run in that order, with
+disjoint removal counts and original retained identities. Primary alternates
+keep blank+A labels unchanged. Ions/ligands survive unless explicitly filtered.
+Invalid/colliding names, absent coordinates and empty retained sets fail before
+creation; failed partial creation is cleaned up. Original coordinates, bonds
+and atom properties are preserved. This is an atom filter, without hydrogen
+addition, atom repair, ligand optimization or protonation assignment.
+
+Scene update/rename uses native scene records, preserving other bookmarks and
+PSE persistence. Result search/sort is a Qt proxy over complete original rows;
+CSV/FASTA export uses those original rows and keeps source/state/staleness.
+
 ## Display and reproducibility
 
 Representation and coloring are shared between CLI and GUI. Original protein presets remain; explicit representation mode scopes the operation to a validated selection. Cartoon/ribbon require a suitable polymer and CA-only policy is applied only to true CA-only objects. B-factor coloring records its observed range without replacing source B-factors.

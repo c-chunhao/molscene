@@ -1,0 +1,250 @@
+{
+  "schema_version": 2,
+  "molscene_version": "0.3.0",
+  "verified_on": "2026-10-16",
+  "recorded_at": "2026-10-16T02:45:29.638617+00:00",
+  "tested_revision": "bc89a1e22d07ab8b77073af4b467c5c5b89d5b6a",
+  "equivalent_source_revision": "9d7b32a81b2d5f6d1e052d6a9a8fe7dd1a2ac077",
+  "revision_note": "Final source, examples, version, MANIFEST and CI bytes are frozen; later static evidence edits do not change those tested bytes.",
+  "frozen_source_sha256": {
+    ".github/workflows/ci.yml": "f895624421b913cf456fcc5d94fd767d9cee66164fc7395af1b429961e552bfd",
+    "examples/download_examples.py": "5697e7920f44d64116a8038ede8d972dc0c7fd52695c53f31a9bdeb96957aa2d",
+    "examples/reproduce_v02.py": "6a1589367b85106797b5d078be70281e15d41f8920c16d25dac73c006f475670",
+    "examples/reproduce_v03.py": "40e5d3c3c2c5640f41723f486d09dde596f06bf8b67a80f448792eee8ee66e7a",
+    "MANIFEST.in": "a2118f05171e9b78edd9244dcc1d1329d3a373c26e900fe2ee6db8503445c331",
+    "molscene/__init__.py": "69cf43dfd902289ee8c0a9e8d341b1e2d503b764beebf903cb09f0dad8e4baf9",
+    "molscene/__main__.py": "084c51488a3f064a81dd863f49ce4631adc79a962ab41d859867064724a0df11",
+    "molscene/analysis.py": "3ea7628ecde145c6130131ad9379b96a29cd65b050a7aed592440979888fd6e9",
+    "molscene/artifacts.py": "3ef98648ed8c137d01bac263237d5aa0dc20dd1d03d29d55e55a3d48b7d072eb",
+    "molscene/batch.py": "fc013b9fbab078c32d9bda7b2f93898ce07ceb670d9c38f6c18d9a6646f26929",
+    "molscene/cli.py": "58a47c7164c8543c278832e309eb61502c5ed06a86058fed1e81fc8daa516f73",
+    "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
+    "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
+    "molscene/desktop/controller.py": "2af431eb1089413c697ede09056e2c81cb5c930efd41f0ede39d3a2f771c4f37",
+    "molscene/desktop/jobs.py": "771591c0634a640fc50b45a74974f330c305ae8e5ed18a6e2f2f60c31cd8fb94",
+    "molscene/desktop/navigation_panel.py": "b6c48388eeb02b0bf11b1e84e161f4bcd64ba79d2cd52685b085989dbb919572",
+    "molscene/desktop/panel.py": "aa0f4ef8c15b53f3af2f2d530e95e27c8a20826774084d5573fd53439ba0cc21",
+    "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
+    "molscene/desktop/plugin/startup/__init__.py": "3c9b7e9214210642f6e93080026722d011a97b6f6a87dbc80e8d54dcd904ad61",
+    "molscene/desktop/plugin/startup/molscene_workbench.py": "f2cfbc8243185c87a792132e20b7c27acfd6757d25e6146dcc0a05d87fc89166",
+    "molscene/desktop/structure.py": "4b4eaa990aae3c2e2feed34c7b617074a23342dcb15df3653f4d57168b5fd85e",
+    "molscene/engine.py": "70d16bcd28086e50767283f1d63a177354416f1d70b9254fbbad26e084c2bc92",
+    "molscene/selftest.py": "a6fadcb7ff5e0d085d0f2fcc5dc410d8e15556719515c5400da890bfd9485539",
+    "molscene/snapshot.py": "3b5c0a033a4909f01068c0b67d5331ec1019f9e4b4ed830d37b67b28b942f8ce",
+    "molscene/styles.py": "d22b6d20601d84b07c83a5fcad33452d26ab32e6e229c081d2e0a1c22ef9ca8b",
+    "molscene/worker.py": "615c4ebbac97ef60ad8d877cd1fc31009ae63853eac9e1ba02ae86946b85cec3",
+    "pyproject.toml": "22b559aa65e96558ffd7f9a55e797d3c50ad80c1aa93c3644e6027176beb3fc6",
+    "tests/navigation_native.py": "8c2cae7faca5d6ff9669b8b27597a37ffde78468bd79ab83a92ed022571058b5",
+    "tests/test_analysis.py": "3dc5a43dd8bbd5145fb38ea21bb6c4cd7c4bc5b4bcea9852a9d939b5882f93ac",
+    "tests/test_batch.py": "357a1af2912da5f51ffa54bbf0b779d2d1a18fab74077acff2668562b9f88ec7",
+    "tests/test_cli.py": "d15dc6d73f4719ae81942c7601955d73317660a2d42103e87cbbae1dec2418dd",
+    "tests/test_desktop.py": "85734a97559021b4cf447d88a3db2f1fbccc03750330e0eaaacf31e29ff5213d",
+    "tests/test_engine.py": "b84d00a7fb6afaa1c99d6369729629931097879baec70516e1461bc04ca6494b",
+    "tests/test_integration.py": "c128433af26aab368cb43d5f21114f6200584c0a19122b47830215ece1cbd0d2",
+    "tests/test_interface.py": "55dc3b030f57b0fe9184020e8210938505134dd8cf7aade86fce4bdafbe9c267",
+    "tests/test_interface_engine.py": "42f0e85cacd0ff97e8e9805278db8532148f033f4454c636258c67383a70f9d3",
+    "tests/test_navigation_gui.py": "be17aa13585b3d6316819bfc8ae32247c8dcc0ecc439099c8c9efeaf0fffef1d",
+    "tests/test_reproduce_v02.py": "ef0f9a9cbfadac15fefdd5ff746f2bf3121481e61918ff7c4716878bc117d174",
+    "tests/test_reproduce_v03.py": "e12816b3e3e0d5143918882f6f53350417afb814d064e23fabdbdd64f11037ca",
+    "tests/test_structure_tools.py": "041d69b6dfc5ca320c531537850ecc931713934e6c335fa30d736861721256f3",
+    "tests/test_v02_cli.py": "9f5fa1aa6594a7061f19af6f04946a529dc1bc2a34548cd8cc96ff0e7c861b8d",
+    "tests/test_v02_engine.py": "a516901bd016fb313abd52adba268045042e40c324457aaa1ff3410acc09123d",
+    "tests/test_workbench.py": "9533335ed5cb7b0ca7d9aff8328c7ebce3afec238b98c4102fd8f58ffafda425",
+    "tests/test_worker.py": "2416ebd33bbaed9271837ce319c6921257e8ffd0d8ff8daf034aa862a2e21496",
+    "tests/workbench_native.py": "5ae595be33021607565c3f7039a1be11ce5c4bae605b669135e48a8b2dbef3b8"
+  },
+  "module_sha256": {
+    "molscene/__init__.py": "69cf43dfd902289ee8c0a9e8d341b1e2d503b764beebf903cb09f0dad8e4baf9",
+    "molscene/__main__.py": "084c51488a3f064a81dd863f49ce4631adc79a962ab41d859867064724a0df11",
+    "molscene/analysis.py": "3ea7628ecde145c6130131ad9379b96a29cd65b050a7aed592440979888fd6e9",
+    "molscene/artifacts.py": "3ef98648ed8c137d01bac263237d5aa0dc20dd1d03d29d55e55a3d48b7d072eb",
+    "molscene/batch.py": "fc013b9fbab078c32d9bda7b2f93898ce07ceb670d9c38f6c18d9a6646f26929",
+    "molscene/cli.py": "58a47c7164c8543c278832e309eb61502c5ed06a86058fed1e81fc8daa516f73",
+    "molscene/desktop/__init__.py": "60844b99f73dda3fc94d6a8e9d1235e0479700bd95c09a5e57e1130e61dec5e9",
+    "molscene/desktop/__main__.py": "25444130f24e29c4020c496f49de46836737912934a358b59062b96d174dcc2e",
+    "molscene/desktop/controller.py": "2af431eb1089413c697ede09056e2c81cb5c930efd41f0ede39d3a2f771c4f37",
+    "molscene/desktop/jobs.py": "771591c0634a640fc50b45a74974f330c305ae8e5ed18a6e2f2f60c31cd8fb94",
+    "molscene/desktop/navigation_panel.py": "b6c48388eeb02b0bf11b1e84e161f4bcd64ba79d2cd52685b085989dbb919572",
+    "molscene/desktop/panel.py": "aa0f4ef8c15b53f3af2f2d530e95e27c8a20826774084d5573fd53439ba0cc21",
+    "molscene/desktop/plugin/__init__.py": "2d4ec9e9dd9160bc19a92a3d96051159cca6a02c2abb40ae795cbf02cbf2f2f7",
+    "molscene/desktop/plugin/startup/__init__.py": "3c9b7e9214210642f6e93080026722d011a97b6f6a87dbc80e8d54dcd904ad61",
+    "molscene/desktop/plugin/startup/molscene_workbench.py": "f2cfbc8243185c87a792132e20b7c27acfd6757d25e6146dcc0a05d87fc89166",
+    "molscene/desktop/structure.py": "4b4eaa990aae3c2e2feed34c7b617074a23342dcb15df3653f4d57168b5fd85e",
+    "molscene/engine.py": "70d16bcd28086e50767283f1d63a177354416f1d70b9254fbbad26e084c2bc92",
+    "molscene/selftest.py": "a6fadcb7ff5e0d085d0f2fcc5dc410d8e15556719515c5400da890bfd9485539",
+    "molscene/snapshot.py": "3b5c0a033a4909f01068c0b67d5331ec1019f9e4b4ed830d37b67b28b942f8ce",
+    "molscene/styles.py": "d22b6d20601d84b07c83a5fcad33452d26ab32e6e229c081d2e0a1c22ef9ca8b",
+    "molscene/worker.py": "615c4ebbac97ef60ad8d877cd1fc31009ae63853eac9e1ba02ae86946b85cec3"
+  },
+  "environment": {
+    "platform": "Windows",
+    "python": "3.10.18",
+    "pymol_native": "3.2.0a",
+    "qt_binding": "PySide6",
+    "qt": "6.8.1",
+    "distributions": {
+      "pymol-open-source": "3.2.0a0",
+      "PySide6-Essentials": "6.8.1",
+      "shiboken6": "6.8.1",
+      "numpy": "2.2.6",
+      "Pillow": "12.3.0"
+    }
+  },
+  "source_backend": {
+    "discovered": 194,
+    "passed": 177,
+    "skipped": 17,
+    "seconds": 220.48,
+    "source_unchanged": true,
+    "failed": 0,
+    "returncode": 0,
+    "skip_scope": "17 local exFAT link/hardlink/junction or distinct Windows 8.3 alias capabilities; no backend/GUI dependency skips"
+  },
+  "source_plain": {
+    "discovered": 194,
+    "passed": 43,
+    "skipped": 151,
+    "seconds": 11.886,
+    "source_unchanged": true,
+    "failed": 0,
+    "returncode": 0,
+    "skip_scope": "Expected absent PyMOL/Qt/Pillow and filesystem capabilities"
+  },
+  "native_source_required_tests": {
+    "test_native_startup_events_framebuffer_and_shutdown": true,
+    "test_native_clean_preferences_startup_and_shutdown": true,
+    "test_native_fixtures_exports_and_cooperative_window_close": true,
+    "test_native_navigation_presets_and_interface_workflow": true
+  },
+  "source_doctor": {
+    "passed": true,
+    "python": "3.10.18",
+    "pymol_native": "3.2.0a"
+  },
+  "source_selftest": {
+    "passed": true,
+    "checks": [
+      "runtime",
+      "pdb_mmcif_coordinates",
+      "ca_selection",
+      "representations",
+      "distance_5_angstrom",
+      "rigid_alignment",
+      "session_restore",
+      "ray_image",
+      "portable_replay"
+    ]
+  },
+  "gallery": {
+    "manifest": "../examples/outputs/v0.3/validation.json",
+    "owned_files": 14,
+    "committed_blob_parity": true,
+    "relocated_standalone_replay": true,
+    "png_count": 5,
+    "visually_inspected": true,
+    "interface_area_angstrom2": 1806.5388121381402,
+    "total_buried_area_angstrom2": 3613.0776242762804,
+    "residue_rows": 198
+  },
+  "native_public_capture": {
+    "file": "screenshots/workbench-v03.png",
+    "sha256": "8d68b672e1282c41cb89e9780ab13a5b108defe8f62a75f6e3835b111a14e671",
+    "sampled_framebuffer_colors": 3222,
+    "real_native": true,
+    "image_edited": false,
+    "native_selection_indicators_hidden": true,
+    "private_paths_visible": false
+  },
+  "installed_wheel": {
+    "wheel": "molscene-0.3.0-py3-none-any.whl",
+    "sha256": "b1d2aced810be708e33b64de28f2334f6c4d30d9400b7e9038501abc484a6641",
+    "independent_environments": [
+      "plain",
+      "backend"
+    ],
+    "forced_install": true,
+    "outside_checkout": true,
+    "isolated_python_flag": "-I",
+    "source_path_injection": false,
+    "module_bytes_matched": 21,
+    "pinned_data_bytes_matched": 4,
+    "lazy_import_help_version": true,
+    "doctor": true,
+    "interface": {
+      "half_area_angstrom2": 1806.5388121381402,
+      "residue_rows": 198
+    },
+    "selftest_checks": 9,
+    "native_helper": "Exact copied tests/navigation_native.py, no sibling imports",
+    "native": {
+      "passed": true,
+      "gl_valid": true,
+      "ubq_selected_atoms": 17,
+      "small_geometry": {
+        "window": [
+          1280,
+          720
+        ],
+        "dock": 360,
+        "viewport": 915
+      },
+      "framebuffer_colors": 701,
+      "pocket_residues": 33,
+      "scene_edited": true,
+      "clean_copy_atoms": 1559,
+      "interface_area_angstrom2": 1806.5388121381402,
+      "interface_rows": 198,
+      "csv_rows": 198,
+      "large_geometry": {
+        "window": [
+          1920,
+          1047
+        ],
+        "dock": 360,
+        "viewport": 1555
+      },
+      "pocket_framebuffer_colors": 2368,
+      "source_unchanged": true,
+      "current_view_export": true,
+      "closed": true
+    }
+  },
+  "source_archive": {
+    "python_files_byte_matched": 42,
+    "pinned_data_files_byte_matched": 4,
+    "targeted_tests": [
+      {
+        "suite": "test_interface.py",
+        "discovered": 13,
+        "passed": 13,
+        "skipped": 0,
+        "failed": 0,
+        "seconds": 1.069
+      },
+      {
+        "suite": "test_interface_engine.py",
+        "discovered": 15,
+        "passed": 15,
+        "skipped": 0,
+        "failed": 0,
+        "seconds": 15.101
+      }
+    ],
+    "selftest_checks_passed": 9,
+    "note": "Archive/source and final static-document bytes are audited separately from the full source run."
+  },
+  "privacy": {
+    "public_files": 155,
+    "png_metadata_records": 19,
+    "pse_opcode_streams": 13,
+    "pse_unpickled_for_audit": false,
+    "private_machine_prefix_or_credential_findings": 0,
+    "scope": "Original tracked public text, PNG metadata and PSE opcode strings; synthetic path-attack fixtures are not private machine paths"
+  },
+  "release": {
+    "url": "https://github.com/c-chunhao/molscene/releases/tag/v0.3.0",
+    "ci_url": null,
+    "ci_conclusion": null,
+    "note": "Local validation is complete. Commit-specific remote CI and publication/server digests are recorded separately during publication. SHA256SUMS accompanies final release archives."
+  }
+}

@@ -125,6 +125,69 @@ class WorkbenchController:
             raise ValueError('Pick number must be 1, 2, 3 or 4')
         return self.capture_selection('pk' + str(number), state=state, single=True)
 
+    def residues(self, selection='all', *, state=1):
+        self._thread()
+        from .structure import residues
+        return residues(self.cmd, selection, state=state)
+
+    def select_residues(self, rows, *, state=1):
+        self._thread()
+        from .structure import select_residues
+        result = select_residues(self.cmd, rows, state=state)
+        self.captures.append(result)
+        return result
+
+    def selection_summary(self, selection, *, state=1):
+        self._thread()
+        from .structure import selection_summary
+        return selection_summary(self.cmd, selection, state=state)
+
+    def save_selection(self, name, selection, *, state=1):
+        self._thread()
+        from .structure import save_selection
+        result = save_selection(self.cmd, name, selection, state=state)
+        self.captures.append(result)
+        return result
+
+    def delete_selection(self, name):
+        self._thread()
+        from .structure import delete_selection
+        return delete_selection(self.cmd, name)
+
+    def focus_selection(self, selection, *, state=1, buffer=3.0, orient=True):
+        self._thread()
+        from .structure import focus_selection
+        return focus_selection(self.cmd, selection, state=state, buffer=buffer, orient=orient)
+
+    def hide_context(self, selection, *, state=1, solvent=True, hydrogens=True):
+        self._thread()
+        from .structure import hide_context
+        return hide_context(self.cmd, selection, state=state, solvent=solvent, hydrogens=hydrogens)
+
+    def apply_preset(self, selection, preset, *, state=1, ligand=None, radius=5.0, frame=True):
+        self._thread()
+        from .structure import apply_preset
+        return apply_preset(self.cmd, selection, preset, state=state, ligand=ligand,
+                            radius=radius, frame=frame)
+
+    def prepare_structure(self, selection, *, object_name, state=1, remove_solvent=True,
+                          remove_hydrogens=False, altloc='primary'):
+        self._thread()
+        from .structure import prepare_structure
+        return prepare_structure(self.cmd, selection, object_name=object_name, state=state,
+                                 remove_solvent=remove_solvent, remove_hydrogens=remove_hydrogens,
+                                 altloc=altloc)
+
+    def update_scene(self, name):
+        self._thread()
+        from .structure import update_scene
+        return update_scene(self.cmd, name)
+
+    def rename_scene(self, name, new_name):
+        self._thread()
+        from .structure import rename_scene
+        return rename_scene(self.cmd, name, new_name)
+
     def scenes(self):
         self._thread()
         return list(self.cmd.get_scene_list())
@@ -392,7 +455,7 @@ class WorkbenchController:
         from molscene.engine import _no_link
         self._thread()
         self._state(state)
-        if operation not in ('geometry', 'contacts', 'sasa', 'inspect', 'export', 'batch'):
+        if operation not in ('geometry', 'contacts', 'sasa', 'interface', 'inspect', 'export', 'batch'):
             raise ValueError('Unsupported worker operation')
         parameters = deepcopy(parameters)
         if operation == 'batch':
@@ -406,11 +469,13 @@ class WorkbenchController:
             if not lexical.is_dir():
                 raise ValueError('Batch input must be an existing directory')
             parameters['input_dir'] = str(lexical.resolve())
-        if operation in ('geometry', 'contacts', 'sasa', 'inspect'):
+        if operation in ('geometry', 'contacts', 'sasa', 'interface', 'inspect'):
+            if operation == 'interface':
+                self._state(parameters.get('state'))
             if parameters.get('state') != state:
                 raise ValueError('Job and selection states must match explicitly')
             selections = parameters.get('selections', []) if operation == 'geometry' else (
-                [parameters.get('selection_a'), parameters.get('selection_b')] if operation == 'contacts'
+                [parameters.get('selection_a'), parameters.get('selection_b')] if operation in ('contacts', 'interface')
                 else [parameters.get('selection', 'all')])
             if operation == 'sasa' and parameters.get('context'):
                 selections.append(parameters['context'])

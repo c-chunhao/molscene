@@ -1,4 +1,4 @@
-# MolScene 0.2
+# MolScene 0.3
 
 [![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
 
@@ -6,15 +6,26 @@
 
 [简体中文](README.zh-CN.md) · [Desktop guide](docs/GUI.md) · [Examples](examples/README.md) · [Validation](docs/TESTING.md) · [Scientific definitions](docs/INTERNALS.md)
 
-MolScene adds a dock to the upstream PyMOL Qt window and provides an offline CLI for local PDB/mmCIF structures. Rotate, zoom and pick atoms in the native viewport, apply representations and colors, calculate geometry, contacts and solvent-accessible surface area (SASA), and export an editable session with provenance. PyMOL supplies the molecular graphics engine and native interface; MolScene supplies the workbench, shared analysis definitions and reproducible output workflows.
+MolScene adds a dock to the upstream PyMOL Qt window and provides an offline CLI for local PDB/mmCIF structures. Navigate observed residues, pass exact selections to analysis, apply live presets, create cleaned copies and edit scene bookmarks. Calculate geometry, geometric contacts, solvent-accessible surface area (SASA) and partner interface area, then export figures, full tables and editable sessions with provenance. PyMOL supplies the molecular graphics engine and native interface; MolScene supplies the workbench, shared analysis definitions and reproducible output workflows.
 
-![Native PyMOL viewport and MolScene contact results](docs/screenshots/workbench-contacts.png)
+![Native PyMOL viewport and MolScene interface results](docs/screenshots/workbench-v03.png)
 
-Actual native desktop capture: 1HSG MK1/protein geometric contacts, state 1, 97 pairs. [Desktop guide and click trace](docs/GUI.md).
+Actual v0.3 native desktop capture: 1HSG protein chains A/B, state 1,
+1806.54 Å² half-total interface area. Results show 4 MET rows from the complete
+198-row table. [Desktop guide](docs/GUI.md).
 
 | Ubiquitin overview | HIV protease ligand pocket |
 | --- | --- |
 | ![Ubiquitin cartoon](examples/outputs/overview/scene.png) | ![MK1 ligand pocket](examples/outputs/pocket/scene.png) |
+
+| v0.3 protein interface | v0.3 live pocket preset |
+| --- | --- |
+| ![1HSG chains A/B interface](examples/outputs/v0.3/interface/scene.png) | ![Live MK1 pocket](examples/outputs/v0.3/live/pocket.png) |
+
+The 1HSG interface uses 757 retained protein atoms per partner and reports
+1806.538812 Å² under the half-total convention. The live pocket contains 236
+protein atoms in 33 residue sites within the geometric 5 Å neighborhood.
+[Complete v0.3 inventory and definitions](examples/README.md#v03-interface-and-live-workflows).
 
 ## Install and launch
 
@@ -59,6 +70,7 @@ python -m molscene dihedral examples/data/1ubq.pdb --selection-a "resi 1 and nam
 # Heavy-atom center distances, SASA in context, coordinate-derived sequence
 python -m molscene contacts examples/data/1hsg.pdb --selection-a "resn MK1" --selection-b "polymer.protein" --cutoff 4 --state 1 --output results/contacts
 python -m molscene sasa examples/data/1ubq.pdb --selection "polymer.protein" --context "not solvent and not hydro" --altloc primary --state 1 --output results/sasa
+python -m molscene interface examples/data/1hsg.pdb --selection-a "chain A and polymer.protein" --selection-b "chain B and polymer.protein" --altloc primary --state 1 --output results/interface
 python -m molscene inspect examples/data/1ubq.cif --state 1 --output results/inspect
 
 # Same-structure format consistency check; sorted nonrecursive batch
@@ -78,6 +90,7 @@ Every scientific operation fixes a positive coordinate `state` (CLI default 1). 
 | Render, geometry, alignment | `scene.png`, `scene.pse`, `scene.pml`, copied inputs |
 | Contacts | Scene outputs and complete `contacts.csv` |
 | SASA | Scene outputs and per-residue `sasa.csv` |
+| Interface | Scene outputs and complete partner/residue `interface.csv` |
 | Inspect | `chains.csv`, `sequence.fasta`; no forced ray rendering |
 | Batch | `batch.json`, `batch.csv`, numbered per-input output directories |
 
@@ -90,6 +103,10 @@ SASA uses a 1.4 Å solvent probe, dot density 3 and solvent-accessible dots. The
 Keep each output directory together for replay. CLI coordinate workflows reconstruct from copied coordinates and recorded API operations without MolScene. GUI export preserves arbitrary native edits with a bundled PSE; its PML loads that PSE, so it must travel with the script. Snapshot results carry state, time and semantic coordinate fingerprints; changed scenes are labelled stale. [The desktop guide](docs/GUI.md) explains this workflow.
 
 ## Scope and provenance
+
+Interface analysis takes two disjoint partners after non-solvent heavy-atom and altloc filtering. Its context is exactly their union, excluding other atoms even in the same object. It reports SASA(A alone) − SASA(A in A+B), the corresponding B loss, their **total buried area**, and **interface area = total buried area / 2**, in Å². Signed numerical differences are retained, with all residue rows. This geometric surface estimate is not an affinity or free energy.
+
+The residue browser shows coordinate sites actually present, preserving object, segment, chain and residue labels. Its observed sequence does not fill missing residues. Live overview/surface/pocket presets change scoped representations; the pocket is selected polymer residues with atom-center distance within the chosen ligand radius. A clean copy filters the chosen state into state 1 of a new object, with removal counts and original atom identities; it does not add hydrogens or assign protonation. Result search/sorting changes the preview while CSV export retains the complete table. See the separate [v0.3 reproduction guide](examples/README.md#v03-interface-and-live-workflows).
 
 MolScene's original code is [MIT licensed](LICENSE). PyMOL and Qt are separate dependencies under their respective distribution licenses. The native viewport, menus, command console, molecular engine and upstream Qt resources come from PyMOL; they were not recreated or copied from a commercial installation. This independent project is not affiliated with or endorsed by Schrödinger or the PyMOL project. See the [upstream open-source license](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) and [interface analysis](docs/INTERNALS.md).
 

@@ -195,6 +195,11 @@ def _tables(stage, kind, result):
         artifacts.write_csv(stage / 'sasa.csv', result['residues'],
                             ('object', 'segi', 'chain', 'resi', 'resn', 'state', 'area_angstrom2', 'atom_count'))
         return {'sasa_csv': 'sasa.csv'}
+    if kind == 'interface':
+        artifacts.write_csv(stage / 'interface.csv', result['residues'],
+            ('partner', 'object', 'segi', 'chain', 'resi', 'resn', 'state', 'atom_count',
+             'isolated_area_angstrom2', 'complex_area_angstrom2', 'buried_area_angstrom2'))
+        return {'interface_csv': 'interface.csv'}
     if kind == 'inspect':
         artifacts.write_csv(stage / 'chains.csv', result['chains'],
                             ('id', 'object', 'segi', 'chain', 'atom_count', 'residue_site_count',
@@ -280,6 +285,71 @@ def _alignment(scene, parameters):
                 target_selection=_scope('target', parameters['selection']))
 
 
+def _bind_atoms(scene, name, atoms, state):
+    """Record original indexes, avoiding case-insensitive identifier selectors."""
+    by_object = {}
+    for atom in atoms:
+        by_object.setdefault(atom['object'], []).append(atom['index'])
+    parts = []
+    for number, (obj, indexes) in enumerate(sorted(by_object.items())):
+        part = name + '_part_' + str(number)
+        scene.call('select_list', part, obj, indexes, state=state, mode='index')
+        parts.append(part)
+    scene.call('select', name, ' or '.join(parts) or 'none', state=state, enable=0, quiet=1)
+    for part in parts:
+        scene.call('delete', part)
+    return name
+
+
+def _interface_scene(scene, parameters, state):
+    selections = [_scope('molecule', parameters['selection_' + side]) for side in ('a', 'b')]
+    result = science.interface(scene.cmd, *selections, state=state, altloc=parameters['altloc'])
+    buried = []
+    residue_keys = ('object', 'segi', 'chain', 'resi', 'resn')
+    for side, selection, color, highlight in zip(('a', 'b'), selections,
+                                                ('marine', 'orange'), ('cyan', 'yelloworange')):
+        # Keep the figure's membership identical to SASA: PyMOL alt grammar is
+        # case-insensitive and would incorrectly retain lower-case "a".
+        atoms = [atom for atom in science.collect_atoms(scene.cmd,
+            '(' + selection + ') and not solvent and not elem H+D+T', state)
+            if parameters['altloc'] == 'all' or atom['alt'] in ('', 'A')]
+        if len(atoms) != result['partner_' + side]['selected_atom_count']:
+            raise RuntimeError('Interface display membership differs from scientific result')
+        name = _bind_atoms(scene, 'interface_' + side, atoms, state)
+        scene.call('show', 'cartoon', _scope(name, 'polymer'))
+        # Cartoon visibility depends on trace connectivity, not guide count.
+        # Small retained-guide markers keep isolated/disconnected fragments
+        # visible without replacing the whole-polymer cartoon presentation.
+        guides = _scope(name, 'polymer and guide')
+        scene.call('show', 'spheres', guides)
+        scene.call('set', 'sphere_scale', 0.3, guides)
+        nonpolymer = _scope(name, 'not polymer')
+        scene.call('show', 'sticks', nonpolymer)
+        # Unbonded nonprotein atoms need spheres; sticks alone produce no image.
+        scene.call('show', 'spheres', nonpolymer)
+        scene.call('set', 'sphere_scale', 0.3, nonpolymer)
+        if scene.cmd.count_atoms(_scope(name, 'polymer')) and not scene.cmd.count_atoms(_scope(name, 'polymer and guide')):
+            # A valid protein subset can contain only sidechain atoms. Without
+            # cartoon guides or selected bonds it otherwise renders blank.
+            scene.call('show', 'sticks', name)
+            scene.call('show', 'spheres', name)
+            scene.call('set', 'sphere_scale', 0.3, name)
+        scene.call('color', color, name)
+        sites = {tuple(row[key] for key in residue_keys) for row in result['residues']
+                 if row['partner'] == side.upper() and row['buried_area_angstrom2'] > 0}
+        site_atoms = [atom for atom in atoms if tuple(atom[key] for key in residue_keys) in sites]
+        highlighted = _bind_atoms(scene, 'interface_buried_' + side, site_atoms, state)
+        scene.call('show', 'sticks', highlighted)
+        scene.call('color', highlight, highlighted)
+        buried.extend(site_atoms)
+    _bind_atoms(scene, 'interface_buried', buried, state)
+    union = 'interface_a or interface_b'
+    scene.call('set', 'stick_radius', 0.16, union)
+    scene.call('orient', union, state=state)
+    scene.call('zoom', union, 3, state=state)
+    return result
+
+
 def _run(operation, sources, output_dir, parameters, overwrite):
     output = _output(output_dir, list(sources.values()), overwrite)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -335,6 +405,8 @@ def _run(operation, sources, output_dir, parameters, overwrite):
                             scene.call('set', 'transparency', parameters['surface_transparency'], active)
                             if parameters['style'] != 'pocket':
                                 scene.call('set', 'stick_radius', parameters['stick_radius'], active)
+                        elif operation == 'interface':
+                            result = _interface_scene(scene, parameters, state)
                         else:
                             _analysis_context(scene, active, state)
                             if operation in ('measure', 'angle', 'dihedral'):
@@ -447,6 +519,17 @@ def sasa(input_path, output_dir, *, selection='all', context=None, state=1, altl
         _selection(context, 'context')
     return _run('sasa', {'input': _input(input_path)}, output_dir,
         dict(options, selection=_selection(selection, 'selection'), context=context, altloc=altloc), overwrite)
+
+
+def interface(input_path, output_dir, *, selection_a, selection_b, state=1, altloc='primary',
+              width=1600, height=1200, dpi=300, overwrite=False):
+    """Render disjoint retained partners and export complete signed buried SASA."""
+    options = _options(width, height, dpi, state)
+    if altloc not in ('primary', 'all'):
+        raise ValueError('altloc must be primary or all')
+    return _run('interface', {'input': _input(input_path)}, output_dir,
+        dict(options, selection_a=_selection(selection_a, 'selection_a'),
+             selection_b=_selection(selection_b, 'selection_b'), altloc=altloc), overwrite)
 
 
 def inspect(input_path, output_dir, *, selection='all', state=1, overwrite=False):

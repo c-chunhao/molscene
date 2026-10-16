@@ -14,7 +14,19 @@ The central viewport, mouse controls, menus, command console and molecular engin
 
 启动后，中央三维视口及鼠标交互来自上游 PyMOL，MolScene 只添加工作台 dock。关闭 dock 后可从菜单重新打开，同一窗口仅保留一个 dock。工作空间保存快照及任务结果；使用适合自己的可写目录。
 
-![1HSG native desktop with the complete contacts table](screenshots/workbench-contacts.png)
+![v0.3 native interface result with MET-filtered preview](screenshots/workbench-v03.png)
+
+The v0.3 capture is an unedited native window from 2026-10-16: full 1HSG
+protein A/B context, state 1, interface area 1806.538812 Å² and total buried
+area 3613.077624 Å². The MET search shows 4 of the complete 198 residue rows.
+The native command/log dock and selection indicators were hidden using native
+controls before direct capture; the molecular data and result were unchanged.
+The real interface worker completed and the window closed normally. This source
+capture is separate from final source-suite and installed-wheel acceptance.
+
+以下旧截图及点击记录保留为 v0.2 历史证据；上方为本轮真实原生截图。
+
+![Historical v0.2 1HSG desktop and contacts table](screenshots/workbench-contacts.png)
 
 ![Ubiquitin in the real native viewport](screenshots/ubiquitin-viewport.png)
 
@@ -30,6 +42,44 @@ Load local PDB/mmCIF structures, or open a PSE through the separate session acti
 
 Apply representation and coloring to the intended selection. Available modes include cartoon/ribbon, sticks/lines, spheres, surface/mesh/dots and nonbonded; coloring supports chain, element, single color, rainbow and B-factor. Cartoon/ribbon need a suitable polymer. Preserve the backbone interpretation: a trace through every atom is not a valid protein cartoon. Scene bookmarks save and restore native scene views and travel with PSE sessions.
 
+## Residue navigation and live tools / 残基导航与现场操作
+
+Keep the intended coordinate state and context selected. The residue browser
+shows observed coordinate sites, with object/chain filters, text search and a
+polymer-only default. Disable that filter to locate ligands, ions or solvent.
+Refresh after native edits; unchanged periodic object refresh does not rescan
+all atoms or reset the browser selection. Residue labels retain segment,
+insertion code and blank-chain distinctions; this is not full SEQRES.
+
+Use selected objects, selected browser residues, current native `sele` or a
+named selection as the active selection. Check its atom/residue/state summary,
+then send it to analysis target/A or B. Browser handoff binds the original atom
+identities and rejects stale/deleted membership. Save a reusable name explicitly;
+collisions/reserved names fail. Delete only a chosen existing user selection.
+
+选择观测残基后可传到分析 A/B；发送前核对对象、原子数、残基数和 state。
+配体在默认聚合物筛选之外；先显示全部残基类型，再选择配体并使用配体传递按钮。
+此操作只设置 pocket 的 ligand，不会把完整 context 替换成配体本身。
+
+Focus centers/zooms the active selection with a nonnegative buffer and optional
+orientation. Hide solvent/hydrogen controls hide representations without
+deleting atoms. Live overview, surface and pocket presets apply to the active
+context, with an explicit camera-frame option. Pocket needs a nonempty ligand
+subset, positive radius and nearby selected polymer atoms. Its whole-residue
+neighborhood is geometric, not a chemical interaction assignment. Advanced
+representation/color/background controls remain available in their groups.
+
+Clean copy creates a new explicitly named object from the chosen source state,
+placing retained atoms in the new object's state 1. Choose solvent removal,
+optional H/D/T removal and primary blank+A versus all alternates. The result
+reports before/retained/removal counts and original retained identities. Source
+atoms, bonds and coordinates remain intact. This does not add hydrogens,
+repair missing atoms or assign a pH/protonation state. Scene bookmarks support
+update, rename and double-click recall; save the PSE to retain them.
+
+清理副本保留原结构，按所选 state 过滤并创建新对象的 state 1；不是自动质子化
+或结构修复。场景更新/重命名保留其他书签，并随 PSE 保存。
+
 ## Analysis and results / 分析与结果
 
 For a distance, capture A/B; for an angle capture A/B/C (B is the vertex); for a signed dihedral capture A/B/C/D. Inspect the returned identities and units. Empty, ambiguous or degenerate endpoints produce an error that leaves the window usable.
@@ -41,6 +91,19 @@ In **Analysis**, choose **Mobile object** and **Target object** for a live align
 接触与 SASA 从当前 state 的不可变 PSE 快照在独立进程计算。接触默认 cutoff 4 Å、仅重原子；它是几何距离，不是氢键或亲和力判定。SASA 默认 context 为目标所在对象中的非溶剂重原子、altloc 空白+A，探针半径 1.4 Å、dot density 3。target 必须属于过滤后的 context；完整 context 的遮挡参与计算。坐标序列来自观测 guide atoms，未知字符为 X，不补缺失残基。
 
 Results record state, calculation time, snapshot byte identity and a semantic coordinate fingerprint. Changing coordinates, molecular content or state after capture can make a result stale. A camera change alone does not change the molecular fingerprint. Stale/unverified results remain evidence of their source snapshot; they must not be interpreted as current-scene analyses or receive current-scene annotations. Inspect complete CSV/FASTA outputs for tables; any bounded table preview is labelled with displayed/total rows.
+
+For interface area, use analysis target as partner A and the partner field as B,
+then run interface analysis. Partners must be disjoint after non-solvent heavy-
+atom and altloc filtering; context is exactly their union. Read both partner
+losses, their total buried area and the explicitly labelled half-total interface
+area, all in Å². This surface geometry does not predict affinity. The complete
+partner/residue table includes zero loss rows.
+
+Results search/sorting changes only visible rows. The visible/total count
+distinguishes a filtered preview from the full table; CSV export retains the
+complete underlying result. Source, state and stale/current status remain
+visible. Live mutation and analysis controls are disabled while a snapshot
+worker is active; completed results remain searchable.
 
 Live alignments track both requested coordinate states after transformation. Editing or deleting either state marks the result stale in the GUI and exported report; camera or displayed-frame changes alone preserve its status. Older mixed-state alignment records without both fingerprints are unverified. Other single-state analyses continue to require the recorded global state.
 

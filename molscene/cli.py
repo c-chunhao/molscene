@@ -65,10 +65,17 @@ def _parser():
     sasa.add_argument('--context', help='Context selection (default: non-solvent heavy atoms)')
     sasa.add_argument('--altloc', choices=('primary', 'all'), default='primary', help='Default: blank and A altloc')
     sasa.add_argument('--state', type=int, default=1)
+    interface = commands.add_parser('interface', help='Buried SASA of two disjoint partners (square angstrom)')
+    interface.add_argument('input')
+    interface.add_argument('--selection-a', required=True)
+    interface.add_argument('--selection-b', required=True)
+    interface.add_argument('--state', type=int, default=1)
+    interface.add_argument('--altloc', choices=('primary', 'all'), default='primary',
+                           help='Default: exact blank and A altloc')
     batch = commands.add_parser('batch', help='Render sorted local PDB/CIF/mmCIF files, nonrecursive')
     batch.add_argument('input_dir')
     _render_arguments(batch)
-    for command in (render, measure, align, *geometry, sasa, batch):
+    for command in (render, measure, align, *geometry, sasa, interface, batch):
         command.add_argument('--output', required=True, help='Output directory')
         command.add_argument('--width', type=int, default=1600)
         command.add_argument('--height', type=int, default=1200)
@@ -96,6 +103,8 @@ def _present_analysis(command, report):
         'dihedral': ('value', 'Dihedral', 'degrees'),
         'contacts': ('pair_count', 'Contacts', 'pairs; geometric proximity only'),
         'sasa': ('total_area_angstrom2', 'SASA', 'square angstrom'),
+        'interface': ('interface_area_angstrom2', 'Interface area',
+                      'square angstrom; half the total buried SASA; geometric area only'),
         'inspect': ('atom_count', 'Inspected', 'atoms'),
     }[command]
     if isinstance(analysis.get(key), (int, float)):
@@ -180,7 +189,9 @@ def main(argv=None):
             print(f"RMSD: {report['analysis']['rmsd_angstrom']:.6g} angstrom; {report['analysis']['aligned_atoms']} aligned atoms.")
         else:
             options['state'] = args.state
-            if args.command == 'sasa':
+            if args.command == 'interface':
+                options.update(selection_a=args.selection_a, selection_b=args.selection_b, altloc=args.altloc)
+            elif args.command == 'sasa':
                 options.update(selection=args.selection, context=args.context, altloc=args.altloc)
             else:
                 for letter in ('ab' if args.command == 'contacts' else 'abc' if args.command == 'angle' else 'abcd'):

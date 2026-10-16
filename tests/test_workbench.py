@@ -338,6 +338,7 @@ def qt_test(directory):
         panel.show()
         assert panel.tabs.count() == 4
         panel.tabs.setCurrentIndex(2)
+        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'geometry_section'), QtCore.Qt.LeftButton)
         panel.geometry_atoms[0].setText('point_first')
         panel.geometry_atoms[1].setText('second')
         QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_geometry'), QtCore.Qt.LeftButton)
@@ -416,6 +417,8 @@ def qt_test(directory):
         panel.analysis_selection.setText('ubq and polymer.protein')
         panel.sasa_context.setText('ubq')
         expected_sasa = analysis.sasa(cmd, 'ubq and polymer.protein', context='ubq', state=1)
+        panel.tabs.currentWidget().ensureWidgetVisible(panel.findChild(QtWidgets.QToolButton, 'sasa_section'))
+        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'sasa_section'), QtCore.Qt.LeftButton)
         QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_sasa'), QtCore.Qt.LeftButton)
         assert manager.active
         wait(lambda: not manager.active)
@@ -475,6 +478,8 @@ def qt_test(directory):
         panel.batch_output.setText(str(root/'batch outputs'))
         panel.image_width.setValue(1000)
         panel.image_height.setValue(700)
+        panel.tabs.currentWidget().ensureWidgetVisible(panel.findChild(QtWidgets.QToolButton, 'batch_section'))
+        QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'batch_section'), QtCore.Qt.LeftButton)
         QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'run_batch'), QtCore.Qt.LeftButton)
         assert manager.active, panel.status.text()
         wait(lambda: manager.last_result is not None and manager.last_result.get('completed', 0) >= 1, timeout=20000)

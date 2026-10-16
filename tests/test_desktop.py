@@ -374,6 +374,10 @@ def native_test(output):
             entry.setText('pickable')
             QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'capture_selection'), QtCore.Qt.LeftButton)
             assert '1 atom' in panel.status.text()
+            picks = panel.findChild(QtWidgets.QToolButton, 'picks_section')
+            panel.tabs.currentWidget().ensureWidgetVisible(picks)
+            QTest.mouseClick(picks, QtCore.Qt.LeftButton)
+            panel.tabs.currentWidget().ensureWidgetVisible(panel.findChild(QtWidgets.QPushButton, 'capture_pk1'))
             QTest.mouseClick(panel.findChild(QtWidgets.QPushButton, 'capture_pk1'), QtCore.Qt.LeftButton)
             assert '1 atom' in panel.status.text()
             report['panel_events'] = True

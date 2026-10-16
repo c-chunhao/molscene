@@ -32,6 +32,75 @@ The alignment uses the same 1UBQ structure in PDB and mmCIF formats. It is a coo
 
 Regeneration normalizes LF and hashes only a closed list of validated report artifacts, input copies and fixed batch summaries/items. Unrelated descendant files are preserved byte-for-byte and excluded from `validation.json`, including when `--overwrite` is used. Reported artifact paths must use fixed relative names and cannot traverse links or reparse points or refer to hardlinked files.
 
+## v0.3 interface and live workflows
+
+The new gallery has its own directory; the historical v0.2 outputs and
+`reproduce_v02.py` remain unchanged. From the checkout root in a backend/Pillow
+environment, run:
+
+```sh
+python -m examples.reproduce_v03 --output results/gallery-v03
+```
+
+Use `--output examples/outputs/v0.3 --overwrite` to replace its fixed owned
+artifacts. The generator runs the real `molscene interface` CLI on the pinned
+1HSG protease chains A/B, using `polymer.protein`, state 1 and primary altloc.
+It checks each signed isolated-minus-complex difference, all partner/residue
+sums and the half-total interface convention. The MK1 ligand and waters are
+excluded from these two protein partners; context is exactly their union.
+These coordinate chains are not an automatic biological-assembly reconstruction.
+
+The live example uses the same public coordinate bytes with the Qt-free
+controller on a real PyMOL context. It captures observed catalytic residue
+sites, saves a named selection, applies overview/surface/geometric-pocket
+presets, updates/renames a scene and creates a solvent/H-D-T/altloc-filtered
+copy. It compares original atom/bond data before and after. Its PML reopens the
+bundled PSE in a fresh context and verifies semantic atom identity and scene
+names. This controller evidence is distinct from native widget/mouse acceptance.
+
+The closed inventory contains six files in `interface/`: `scene.png`,
+`scene.pse`, `scene.pml`, `report.json`, `interface.csv`, `inputs/input.pdb`.
+It contains eight files in `live/`: `overview.png`, `surface.png`, `pocket.png`,
+`clean.png`, `scene.pse`, `scene.pml`, `workflows.json`, `inputs/input.pdb`.
+`validation.json` records SHA-256 and byte count for exactly those 14 files;
+it does not hash itself. Text artifacts use LF, matching committed Git blobs
+and example ZIP bytes; input coordinates keep their pinned original bytes.
+Unrelated files are preserved byte-for-byte, including same-name descendants.
+Every owned destination and ancestor is checked for links/reparse points
+before resolution/generation; hardlinked owned files are rejected. The script
+does not recursively clean a destination. Existing owned files require
+`--overwrite` even when no manifest is present.
+
+Observed on 2026-10-16 (Asia/Shanghai), with Python 3.10.18 and open-source
+PyMOL native 3.2.0a, on the v0.3 implementation:
+
+| v0.3 calculation | Recorded result |
+| --- | --- |
+| 1HSG partner A / B retained protein atoms | 757 / 757 |
+| Partner A isolated / complex SASA | 6732.574285 / 4936.178322 Å² |
+| Partner B isolated / complex SASA | 6818.204382 / 5001.522722 Å² |
+| A / B buried difference | 1796.395964 / 1816.681661 Å² |
+| Total buried area / half-total interface area | 3613.077624 / 1806.538812 Å² |
+| Complete interface residue rows | 198, including zero-loss rows |
+| Live source / observed sites / observed protein sites | 1686 atoms / 326 sites / 198 protein sites |
+| MK1 / geometric 5 Å pocket | 45 ligand atoms / 236 protein atoms in 33 sites |
+| Clean copy | 1559 retained; 127 solvent atoms removed; 0 H/D/T and 0 alternate removals |
+| Standalone relocated replay | Interface coordinate PML and live bundled PSE/PML passed atom/bond/scene comparison |
+
+The five 1000 × 750 PNGs were visually inspected for readable protein traces,
+distinct partner colors and buried highlights, ligand/pocket neighborhood,
+surface and cleaned-copy context. Small guide/stick markers support isolated
+atoms; they do not add atoms or change scientific membership. The source PDB
+has 127 solvent atoms, while all-residue and protein-site counts remain distinct.
+No numerical result was changed during public privacy checks. JSON/CSV retain
+full precision; values in this table are rounded for reading.
+
+Image dimensions/content, input hashes and finite numeric consistency are
+automated checks. Scientific appearance and the real desktop capture are
+reviewed separately; nonblank pixels alone do not validate a figure. Pixel
+identity across PyMOL builds is not promised. The v0.3 release's actual run
+counts, values and package/native evidence belong in [TESTING](../docs/TESTING.md).
+
 ## What the selections mean
 
 The pinned 1UBQ file loads as 660 atoms and one protein chain with 76 protein residues. Counting every residue identifier, including solvent, gives 134 residues; a report's all-residue count must not be presented as protein length.

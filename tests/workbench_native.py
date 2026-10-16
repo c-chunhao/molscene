@@ -52,6 +52,14 @@ def native_evidence(output):
             if tab is not None:
                 panel.tabs.setCurrentIndex(tab)
             button = panel.findChild(QtWidgets.QPushButton, name)
+            ancestor = button.parentWidget()
+            while ancestor:
+                if ancestor.property('disclosure_content'):
+                    toggle = ancestor.parentWidget().findChild(QtWidgets.QToolButton)
+                    if not toggle.isChecked():
+                        panel.tabs.currentWidget().ensureWidgetVisible(toggle)
+                        QTest.mouseClick(toggle, QtCore.Qt.LeftButton)
+                ancestor = ancestor.parentWidget()
             scroll = panel.tabs.currentWidget()
             if isinstance(scroll, QtWidgets.QScrollArea):
                 scroll.ensureWidgetVisible(button)

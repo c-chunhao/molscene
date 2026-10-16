@@ -5,7 +5,7 @@ refer to the original object and atom index, including across temporary copies.
 """
 import math
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from itertools import product
 from urllib.parse import quote
 
@@ -226,7 +226,12 @@ def sasa(cmd, selection='all', context=None, state=1, altloc='primary'):
         model.atom.append(atom)
         source_by_id[identifier] = source
     temporary = cmd.get_unused_name('_molscene_sasa')
+    auto_hide = cmd.get_setting_int('auto_hide_selections')
     try:
+        # Loading a disposable object must not hide existing named selections.
+        # Suppress that backend side effect and restore the preference even if
+        # loading or area evaluation fails, without toggling source selections.
+        cmd.set('auto_hide_selections', 0)
         cmd.load_model(model, temporary, state=1, zoom=0, quiet=1)
         # Imported nonpolymer atoms can acquire the backend's ignore flag.
         # The numerical context includes every retained atom, regardless of any
@@ -269,7 +274,96 @@ def sasa(cmd, selection='all', context=None, state=1, altloc='primary'):
                                     selected_filtered_atom_count=len(raw_target) - len(target),
                                     context_filtered_atom_count=len(raw_context) - len(surrounding)))
     finally:
-        cmd.delete(temporary)
+        try:
+            cmd.delete(temporary)
+        finally:
+            cmd.set('auto_hide_selections', auto_hide)
+
+
+def interface(cmd, selection_a, selection_b, state=1, altloc='primary'):
+    """Buried SASA of disjoint partners in exactly their filtered union.
+
+    Each partner loses its isolated SASA on assembly. The interface area is
+    half the sum of those losses, including signed numerical differences.
+    This geometric area is not an affinity, energy or contact classification.
+    """
+    if altloc not in ('primary', 'all'):
+        raise ValueError('altloc must be primary or all')
+    with ExitStack() as stack:
+        selections, members, input_counts = [], [], []
+        for expression in (selection_a, selection_b):
+            # Bind expressions before creating any SASA context objects. This
+            # freezes even "all" and spatial predicates to original membership.
+            raw = stack.enter_context(_resolved_selection(cmd, expression, state))
+            input_counts.append(len(collect_atoms(cmd, raw, state)))
+            filtered = '(' + raw + ') and not solvent and not elem H+D+T'
+            atoms = [atom for atom in collect_atoms(cmd, filtered, state)
+                     if altloc == 'all' or atom['alt'] in ('', 'A')]
+            if not atoms:
+                raise ValueError('Interface requires nonempty partners after SASA filtering')
+            # Match SASA's case-sensitive alternate policy in Python, then bind
+            # exact original indexes; PyMOL's alt selector may ignore case.
+            by_object = defaultdict(list)
+            for atom in atoms:
+                by_object[atom['object']].append(atom['index'])
+            parts = []
+            for obj, indexes in sorted(by_object.items()):
+                part = cmd.get_unused_name('_molscene_partner')
+                stack.callback(cmd.delete, part)
+                cmd.select_list(part, obj, indexes, state=state, mode='index')
+                parts.append(part)
+            retained = stack.enter_context(_resolved_selection(cmd, ' or '.join(parts), state))
+            selections.append(retained)
+            members.append(atoms)
+        if {_identity(a) for a in members[0]} & {_identity(a) for a in members[1]}:
+            raise ValueError('Interface partners overlap after SASA filtering')
+        first, second = selections
+        union = '(' + first + ') or (' + second + ')'
+        isolated = [sasa(cmd, selected, context=selected, state=state, altloc=altloc)
+                    for selected in selections]
+        assembled = [sasa(cmd, selected, context=union, state=state, altloc=altloc)
+                     for selected in selections]
+
+        partners, residues = [], []
+        for label, atoms, alone, together in zip(('A', 'B'), members, isolated, assembled):
+            isolated_area = alone['total_area_angstrom2']
+            complex_area = together['total_area_angstrom2']
+            partners.append(dict(selected_atom_count=len(atoms),
+                                 isolated_area_angstrom2=isolated_area,
+                                 complex_area_angstrom2=complex_area,
+                                 buried_area_angstrom2=isolated_area - complex_area))
+            # Join against retained original residues so zero-loss residues and
+            # a residue split across A/B both remain in the exported result.
+            grouped = defaultdict(list)
+            for atom in atoms:
+                grouped[_residue_key(atom)].append(atom)
+            isolated_rows = {_residue_key(row): row for row in alone['residues']}
+            complex_rows = {_residue_key(row): row for row in together['residues']}
+            for key, group in sorted(grouped.items()):
+                isolated_area = isolated_rows[key]['area_angstrom2']
+                complex_area = complex_rows[key]['area_angstrom2']
+                residues.append(dict(_residue(group[0]), partner=label, state=state,
+                                     atom_count=len(group), isolated_area_angstrom2=isolated_area,
+                                     complex_area_angstrom2=complex_area,
+                                     buried_area_angstrom2=isolated_area - complex_area))
+        total = math.fsum(partner['buried_area_angstrom2'] for partner in partners)
+        parameters = dict(selection_a=selection_a, selection_b=selection_b,
+                          dot_solvent=1, solvent_radius=1.4, dot_density=3,
+                          state=state, altloc=altloc, heavy_only=True, exclude_solvent=True,
+                          context_atom_count=sum(map(len, members)))
+        for side, count, atoms in zip(('a', 'b'), input_counts, members):
+            parameters['partner_' + side + '_input_atom_count'] = count
+            parameters['partner_' + side + '_filtered_atom_count'] = count - len(atoms)
+            parameters['partner_' + side + '_retained_atom_count'] = len(atoms)
+        return dict(kind='interface', state=state, partner_a=partners[0], partner_b=partners[1],
+                    total_buried_area_angstrom2=total, interface_area_angstrom2=total / 2,
+                    residues=residues, parameters=parameters,
+                    selection_state_policy='requested_state_only',
+                    definition='Partner buried area = SASA(partner in isolation) - '
+                    'SASA(partner in filtered A union B); total buried area is the sum '
+                    'of both partners; interface area is half that sum. Signed raw '
+                    'differences are retained. Geometric SASA, not affinity, energy '
+                    'or chemically assigned contacts.')
 
 
 _RESIDUE_CODES = dict(zip(
