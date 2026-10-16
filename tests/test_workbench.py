@@ -336,7 +336,7 @@ def qt_test(directory):
         controller = WorkbenchController(cmd, root)
         panel = WorkbenchPanel(controller)
         panel.show()
-        assert panel.tabs.count() == 4
+        assert panel.tabs.count() == 5
         panel.tabs.setCurrentIndex(2)
         QTest.mouseClick(panel.findChild(QtWidgets.QToolButton, 'geometry_section'), QtCore.Qt.LeftButton)
         panel.geometry_atoms[0].setText('point_first')

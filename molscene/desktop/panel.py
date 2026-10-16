@@ -43,11 +43,15 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._scene_tab()
         self._analysis_tab()
         self._results_tab()
+        from .advanced_panel import AdvancedPanel
+        self.advanced = AdvancedPanel(self)
+        self.tabs.addTab(self.advanced, 'Advanced')
         # Long molecule names and output paths must never resize the native dock.
         for label in self.findChildren(QtWidgets.QLabel):
             label.setWordWrap(True)
             label.setMinimumWidth(0)
-            label.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            label.setSizePolicy(QtWidgets.QSizePolicy.Ignored if label.property('advanced_dynamic_text')
+                                else QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         for label in (self.status, self.selection_summary, self.result_source, self.result_summary, self.row_total):
             label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
         for combo in self.findChildren(QtWidgets.QComboBox):
@@ -55,7 +59,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
             combo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
             combo.currentTextChanged.connect(combo.setToolTip)
         for form in self.findChildren(QtWidgets.QFormLayout):
-            form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
+            form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapAllRows if form.property('advanced_form') else QtWidgets.QFormLayout.WrapLongRows)
             form.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
         self.refresh()
         self.refresh_timer = QtCore.QTimer(self)
@@ -66,6 +70,10 @@ class WorkbenchPanel(QtWidgets.QWidget):
         # exit, while Qt and Python are still alive to disconnect it safely.
         if isinstance(parent, QtWidgets.QDockWidget) and parent.parentWidget() is not None:
             self.close_guard = NativeCloseGuard(self, parent, parent.parentWidget())
+
+    def closeEvent(self, event):
+        self.advanced.stop_preview()
+        super().closeEvent(event)
 
     def _scroll(self, widget):
         scroll = QtWidgets.QScrollArea()
@@ -328,6 +336,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
                 elif len(scenes) == 1:
                     self.scene_list.setCurrentRow(0)
             self.navigation.update_inventory(inventory)
+            self.advanced.refresh()
             record = getattr(self, '_current_record', None)
             if record and self.tabs.currentIndex() == 3 and not self.jobs.active:
                 previous = record.get('snapshot_status')
@@ -624,19 +633,28 @@ class WorkbenchPanel(QtWidgets.QWidget):
         self._launch_job('batch', dict(input_dir=self.batch_input.text(), render_options=options,
                                       overwrite=self.export_overwrite.isChecked()), output=self.batch_output.text())
 
-    def _launch_job(self, operation, parameters, output=None):
+    def _launch_job(self, operation, parameters, output=None, *, state=None):
         if self.jobs.active:
             raise ValueError('Wait for the active job or cancel it first')
         self._active_job_path = self.controller.prepare_job(operation, parameters, output=output,
-                                                          state=self.analysis_state.value())
+                                                          state=self.analysis_state.value() if state is None else state)
         self.jobs.start(self._active_job_path)
 
     def _job_started(self, job):
         self._mutation_locked = True
+        self.advanced.set_job_active(True)
         self.annotate_button.setEnabled(False)
         self._job_operation = job['operation']
         self._job_output = job['output']
         self._job_state = job.get('parameters', {}).get('state', self.analysis_state.value())
+        if job['operation'] == 'potential':
+            self._job_state = job['parameters']['request']['state']
+        elif job['operation'] == 'density':
+            self._job_state = job['parameters']['request']['source_state']
+        elif job['operation'] in ('timeline_project', 'animation'):
+            self._job_state = job['parameters']['timeline']['keyframes'][0]['state']
+        elif job['operation'] == 'tools':
+            self._job_state = 1
         if job['operation'] == 'export':
             self._job_state = int(self.controller.cmd.get_state())
         for index in range(3):
@@ -657,6 +675,7 @@ class WorkbenchPanel(QtWidgets.QWidget):
 
     def _job_idle(self):
         self._mutation_locked = False
+        self.advanced.set_job_active(False)
         self.annotate_button.setEnabled(True)
         for index in range(3):
             self.tabs.widget(index).setEnabled(True)
@@ -669,6 +688,8 @@ class WorkbenchPanel(QtWidgets.QWidget):
         if not isinstance(result, dict):
             self.status.setText('Error: worker result is not an object')
             return
+        if self._job_operation == 'tools':
+            self.advanced.potential.show_tools_result(result)
         result.setdefault('output_path', self._job_output)
         record = self.controller.record_result(self._job_operation, result, self.jobs.job.get('parameters', {}), state=self._job_state)
         self._show_record(record)
@@ -676,14 +697,18 @@ class WorkbenchPanel(QtWidgets.QWidget):
 
     def _job_failed(self, message):
         self._job_idle()
-        if self._job_operation == 'batch' and isinstance(self.jobs.last_result, dict):
-            record = self.controller.record_result('batch', self.jobs.last_result, self.jobs.job.get('parameters', {}), state=self._job_state)
+        if self._job_operation in ('batch', 'tools') and isinstance(self.jobs.last_result, dict):
+            if self._job_operation == 'tools':
+                self.advanced.potential.show_tools_result(self.jobs.last_result)
+            record = self.controller.record_result(self._job_operation, self.jobs.last_result, self.jobs.job.get('parameters', {}), state=self._job_state)
             self._show_record(record)
         self.status.setText('Error: ' + message)
         self.status.setToolTip(self.status.text())
 
     def _job_cancelled(self, result):
         self._job_idle()
+        if self._job_operation == 'tools':
+            self.advanced.potential.show_tools_result(result)
         result.setdefault('output_path', self._job_output)
         record = self.controller.record_result(self._job_operation, result, self.jobs.job.get('parameters', {}), state=self._job_state)
         self._show_record(record)
@@ -852,6 +877,7 @@ class NativeCloseGuard(QtCore.QObject):
     def eventFilter(self, watched, event):
         if watched is not self.window or event.type() != QtCore.QEvent.Close:
             return False
+        self.panel.advanced.stop_preview()
         if self.panel.jobs.active:
             self.closing = True
             event.ignore()
