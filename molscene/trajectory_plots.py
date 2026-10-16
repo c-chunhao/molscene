@@ -9,8 +9,14 @@ def line_svg(x,y,*,title,xlabel,ylabel):
     if not x or len(x)!=len(y) or len(x)>MAX_POINTS or not all(math.isfinite(float(v)) for v in (*x,*y)):
         raise ValueError('Plot data must be finite, matched, nonempty and bounded')
     xmin,xmax=min(x),max(x); ymin,ymax=min(0.,min(y)),max(y)
-    if xmin==xmax: xmin-=.5; xmax+=.5
-    if ymin==ymax: ymax=ymin+1.
+    def expand(low,high):
+        if low!=high: return low,high
+        pad=max(abs(low)*.05,.5)
+        left,right=low-pad,high+pad
+        return (left if math.isfinite(left) else low,
+                right if math.isfinite(right) else high)
+    xmin,xmax=expand(xmin,xmax)
+    ymin,ymax=expand(ymin,ymax)
     xscale=max(abs(xmin),abs(xmax),1.)
     yscale=max(abs(ymin),abs(ymax),1.)
     def px(v): return 90+650*(v/xscale-xmin/xscale)/(xmax/xscale-xmin/xscale)

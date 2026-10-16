@@ -103,3 +103,7 @@ class PlotExtremeTests(unittest.TestCase):
     def test_finite_extreme_time_range_keeps_finite_svg_positions(self):
         svg=trajectory_plots.line_svg([-1e308,1e308],[1,2],title='T',xlabel='Time (ps)',ylabel='Rg (angstrom)')
         self.assertNotIn('nan',svg.lower()); self.assertNotIn('inf',svg.lower())
+
+    def test_constant_large_time_range_does_not_divide_by_zero(self):
+        svg=trajectory_plots.line_svg([1e308,1e308],[1,2],title='T',xlabel='Time (ps)',ylabel='Rg (angstrom)')
+        ET.fromstring(svg); self.assertNotIn('nan',svg.lower())
