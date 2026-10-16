@@ -170,6 +170,13 @@ def _cleanup_owned(path, identity):
             _cleanup_owned(entry, _identity(entry))
         else:
             no_link(entry.parent)
+            if os.name == 'nt' and stat.S_ISREG(info.st_mode) and not info.st_mode & stat.S_IWRITE:
+                # chmod affects all hardlinks, so only touch a verified unique
+                # owned regular file; never change permissions through aliases.
+                _regular(entry)
+                if not _same_object(entry, (info.st_dev, info.st_ino)):
+                    raise ValueError('Owned file changed during cleanup')
+                entry.chmod(info.st_mode | stat.S_IWRITE)
             entry.unlink()
     if _same_object(path, identity):
         no_link(path)
@@ -190,6 +197,7 @@ class Bundle:
         self.cancelled = cancelled
         self.failure_path = self.destination.parent/('.molscene-failure-'+uuid.uuid4().hex)
         self._logs, self._sources = {}, {}
+        self._cached_logs = {}
         self._input_copies = set()
         self._owned = {}
         self._published = self._entered = False
@@ -282,9 +290,15 @@ class Bundle:
         self._active()
         if not isinstance(logs, dict):
             raise ValueError('Log registration must map roles to paths')
+        registered = dict(self._logs)
+        names = {(role+'.log').casefold(): role for role in registered}
         for role, candidate in logs.items():
             if not isinstance(role, str) or not re.fullmatch(r'[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}', role):
                 raise ValueError('Invalid failure-log role')
+            filename = _relative(role+'.log')
+            alias = names.get(filename.casefold())
+            if alias is not None and alias != role:
+                raise ValueError('Failure-log roles alias the same filename')
             path = checked_path(candidate)
             if path in self._input_copies:
                 raise ValueError('Scientific input copies cannot be retained as logs')
@@ -293,40 +307,69 @@ class Bundle:
             if path.exists():
                 if _regular(path).st_size > MAX_LOG_BYTES:
                     raise ValueError('Failure log exceeds byte limit')
-            if role in self._logs and self._logs[role] != path:
+            if role in registered and registered[role] != path:
                 raise ValueError('Failure-log role is already registered')
-            self._logs[role] = path
+            registered[role] = path
+            names[filename.casefold()] = role
+        self._logs = registered
+
+    def _log_bytes(self, path):
+        root = next(p for p in self._owned if p in path.parents)
+        if not _same_object(root, self._owned[root]) or path in self._input_copies:
+            raise ValueError('Failure log is no longer owned')
+        info = _regular(path)
+        with path.open('rb') as reader:
+            opened = os.fstat(reader.fileno())
+            if (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino):
+                raise ValueError('Failure log changed before reading')
+            data = reader.read(MAX_LOG_BYTES)
+            truncated = bool(reader.read(1)) or info.st_size > MAX_LOG_BYTES
+        return data, truncated
+
+    @staticmethod
+    def _secondary(error, stage, secondary):
+        diagnostic = dict(stage=stage, type=type(secondary).__name__, message=str(secondary)[:4096])
+        if not hasattr(error, 'bundle_diagnostics'):
+            error.bundle_diagnostics = []
+        error.bundle_diagnostics.append(diagnostic)
+        return diagnostic
+
+    def _finalize_scratch(self):
+        # Retain only bounded, verified registered logs in memory so a later
+        # rename failure/cancellation still has diagnostics after scratch is gone.
+        for role, path in self._logs.items():
+            if self.scratch in path.parents and path.exists():
+                self._cached_logs[role] = self._log_bytes(path)
+        identity = self._owned[self.scratch]
+        _cleanup_owned(self.scratch, identity)
+        if self.scratch.exists():
+            raise ValueError('Owned scratch could not be finalized')
+        del self._owned[self.scratch]
 
     def _retain_failure(self, error):
-        records = {}
-        valid = []
-        for role, path in self._logs.items():
-            try:
-                root = next(p for p in self._owned if p in path.parents)
-                if not _same_object(root, self._owned[root]):
-                    continue
-                info = _regular(path)
-                valid.append((role, path, info.st_size))
-            except (OSError, ValueError, StopIteration):
-                continue
+        records, evidence_errors = {}, []
         no_link(self.failure_path)
         self.failure_path.mkdir()
-        if valid:
-            (self.failure_path/'logs').mkdir()
-        for role, source, size in valid:
-            target = self.failure_path/'logs'/(role+'.log')
-            with source.open('rb') as reader, target.open('xb') as writer:
-                remaining = MAX_LOG_BYTES
-                while remaining:
-                    chunk = reader.read(min(65536, remaining))
-                    if not chunk:
-                        break
-                    writer.write(chunk)
-                    remaining -= len(chunk)
-            records[role] = dict(path='logs/'+role+'.log', sha256=sha256(target),
-                                 bytes=target.stat().st_size, truncated=size > MAX_LOG_BYTES)
+        for role, source in self._logs.items():
+            try:
+                if role in self._cached_logs:
+                    data, truncated = self._cached_logs[role]
+                elif source.exists():
+                    data, truncated = self._log_bytes(source)
+                else:
+                    continue
+                (self.failure_path/'logs').mkdir(exist_ok=True)
+                target = self.failure_path/'logs'/(role+'.log')
+                with target.open('xb') as writer:
+                    writer.write(data)
+                records[role] = dict(path='logs/'+role+'.log', sha256=sha256(target),
+                                     bytes=target.stat().st_size, truncated=truncated)
+            except (OSError, ValueError, StopIteration) as secondary:
+                record = self._secondary(error, 'retain log', secondary)
+                evidence_errors.append(dict(record, role=role))
         write_json(self.failure_path/'failure.json', dict(schema_version=1, cancelled=isinstance(error, CancelledError),
-                   error=dict(type=type(error).__name__, message=str(error)[:4096]), logs=records))
+                   error=dict(type=type(error).__name__, message=str(error)[:4096]), logs=records,
+                   evidence_errors=evidence_errors))
 
     def publish(self):
         self._active()
@@ -358,6 +401,7 @@ class Bundle:
                 raise ValueError('Copied source changed before publication')
         self._validate_destination()
         self._check_cancel()
+        self._finalize_scratch()
         if self.destination.exists():
             # rmdir itself refuses nonempty directories, including races after checks.
             self._validate_destination()
@@ -366,14 +410,33 @@ class Bundle:
         no_link(self.destination)
         _rename_noreplace(self.stage, self.destination)
         self._published = True
+        self._owned.clear()
+        self._cached_logs.clear()
         return self.destination
 
     def __exit__(self, exc_type, error, traceback):
+        original = error
         try:
             if error is not None and not self._published:
-                self._retain_failure(error)
-        finally:
+                try:
+                    self._retain_failure(error)
+                except Exception as secondary:
+                    self._secondary(error, 'retain failure evidence', secondary)
             for path, identity in self._owned.items():
-                _cleanup_owned(path, identity)
+                try:
+                    _cleanup_owned(path, identity)
+                except Exception as secondary:
+                    if error is None:
+                        error = secondary
+                        try:
+                            self._retain_failure(error)
+                        except Exception as retention_error:
+                            self._secondary(error, 'retain failure evidence', retention_error)
+                    else:
+                        self._secondary(error, 'cleanup', secondary)
+        finally:
             self._entered = False
+            self._cached_logs.clear()
+        if original is None and error is not None:
+            raise error
         return False

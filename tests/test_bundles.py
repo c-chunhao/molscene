@@ -1,10 +1,13 @@
 """Real filesystem transactions and adversarial publication boundaries."""
 import hashlib
 import errno
+import ctypes
 import json
 import os
 from pathlib import Path
 import tempfile
+import stat
+import struct
 import unittest
 from unittest.mock import patch
 
@@ -257,6 +260,134 @@ class BundleTests(unittest.TestCase):
         with self.bundle() as bundle:
             with self.assertRaises(ValueError):
                 bundle.retain_failure_logs({'source':self.source})
+
+    def test_readonly_scratch_is_cleaned_before_success(self):
+        with self.bundle() as bundle:
+            self.fill(bundle)
+            readonly = bundle.scratch/'readonly-tool-output'
+            readonly.write_bytes(b'owned tool temporary')
+            readonly.chmod(stat.S_IREAD)
+            # Restore only our own test file if the regression leaves it behind.
+            self.addCleanup(lambda: readonly.chmod(stat.S_IWRITE) if readonly.exists() else None)
+            bundle.publish()
+        self.assertTrue(self.destination.is_dir())
+        self.assertFalse(bundle.scratch.exists())
+        self.assertFalse(bundle.failure_path.exists())
+        self.assertEqual(self.source.read_bytes(), self.original)
+
+    def test_scratch_cleanup_failure_never_commits(self):
+        original_cleanup = bundles._cleanup_owned
+        failure = PermissionError('locked scratch output')
+        def blocked(path, identity):
+            if path == bundle.scratch:
+                raise failure
+            return original_cleanup(path, identity)
+        with self.assertRaises(PermissionError) as raised:
+            with self.bundle() as bundle:
+                self.fill(bundle)
+                with patch.object(bundles, '_cleanup_owned', side_effect=blocked):
+                    bundle.publish()
+        self.assertIs(raised.exception, failure)
+        self.assertFalse(self.destination.exists())
+        self.assertEqual(json.loads((bundle.failure_path/'failure.json').read_text())['error']['message'], 'locked scratch output')
+
+    def test_scratch_log_survives_late_publication_failure(self):
+        with self.assertRaisesRegex(OSError, 'publication denied'):
+            with self.bundle() as bundle:
+                self.fill(bundle)
+                log = bundle.scratch/'solver.stderr'
+                log.write_bytes(b'last diagnostic')
+                bundle.retain_failure_logs({'solver':log})
+                with patch.object(bundles, '_rename_noreplace', side_effect=OSError('publication denied')):
+                    bundle.publish()
+        self.assertFalse(self.destination.exists())
+        self.assertEqual((bundle.failure_path/'logs/solver.log').read_bytes(), b'last diagnostic')
+
+    def test_log_roles_reject_case_aliases_and_windows_devices(self):
+        with self.bundle() as bundle:
+            a, b = bundle.scratch/'a', bundle.scratch/'b'
+            for roles in ({'solver':a, 'SOLVER':b}, {'CON':a}, {'nul.output':a}, {'COM1':a}, {'LPT9.more':a}):
+                with self.subTest(roles=list(roles)), self.assertRaises(ValueError):
+                    bundle.retain_failure_logs(roles)
+            # Rejected batches must not partially register their first entry.
+            bundle.retain_failure_logs({'SOLVER':b})
+            with self.assertRaises(ValueError):
+                bundle.retain_failure_logs({'solver':a})
+
+    def test_log_copy_failure_preserves_original_error_and_failure_metadata(self):
+        original_error = RuntimeError('original solver failure')
+        real_open = Path.open
+        def fail_log(path, *args, **kwargs):
+            if path == bundle.failure_path/'logs/solver.log':
+                raise PermissionError('evidence denied')
+            return real_open(path, *args, **kwargs)
+        with patch.object(Path, 'open', fail_log), self.assertRaises(RuntimeError) as raised:
+            with self.bundle() as bundle:
+                log = bundle.scratch/'stderr'
+                log.write_bytes(b'diagnostic')
+                bundle.retain_failure_logs({'solver':log})
+                raise original_error
+        self.assertIs(raised.exception, original_error)
+        metadata = json.loads((bundle.failure_path/'failure.json').read_text())
+        self.assertEqual(metadata['error']['message'], 'original solver failure')
+        self.assertEqual(metadata['evidence_errors'][0]['role'], 'solver')
+        self.assertIn('evidence denied', metadata['evidence_errors'][0]['message'])
+
+    def test_failure_metadata_write_error_does_not_mask_operation_error(self):
+        original_error = RuntimeError('original operation failure')
+        with patch.object(bundles, 'write_json', side_effect=PermissionError('evidence disk denied')):
+            with self.assertRaises(RuntimeError) as raised:
+                with self.bundle():
+                    raise original_error
+        self.assertIs(raised.exception, original_error)
+        self.assertIn('evidence disk denied', str(original_error.bundle_diagnostics))
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows junction mechanism')
+    def test_windows_junction_rejected_without_traversal(self):
+        # Direct bounded Win32 calls: no visible helper, shell or global changes.
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        create = kernel.CreateFileW
+        create.argtypes = (ctypes.c_wchar_p, ctypes.c_uint32, ctypes.c_uint32,
+                           ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p)
+        create.restype = ctypes.c_void_p
+        ioctl = kernel.DeviceIoControl
+        ioctl.argtypes = (ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p, ctypes.c_uint32,
+                          ctypes.c_void_p, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p)
+        ioctl.restype = ctypes.c_int
+        close = kernel.CloseHandle
+        close.argtypes = (ctypes.c_void_p,)
+        close.restype = ctypes.c_int
+        outside = self.root/'junction-target'
+        outside.mkdir()
+        sentinel = outside/'sentinel'
+        sentinel.write_bytes(b'external bytes')
+        with self.bundle() as bundle:
+            junction = bundle.stage/'inputs'
+            junction.mkdir()
+            substitute = ('\\??\\'+str(outside)).encode('utf-16-le')
+            printable = str(outside).encode('utf-16-le')
+            strings = substitute+b'\0\0'+printable+b'\0\0'
+            buffer = struct.pack('<IHHHHHH', 0xA0000003, 8+len(strings), 0,
+                                 0, len(substitute), len(substitute)+2, len(printable))+strings
+            handle = create(str(junction), 0x40000000, 7, None, 3, 0x02200000, None)
+            if handle == ctypes.c_void_p(-1).value:
+                raise ctypes.WinError(ctypes.get_last_error())
+            try:
+                count = ctypes.c_uint32()
+                raw = ctypes.create_string_buffer(buffer)
+                result = ioctl(handle, 0x900A4, raw, len(buffer), None, 0, ctypes.byref(count), None)
+                error = ctypes.get_last_error() if not result else 0
+            finally:
+                close(handle)
+            if error in (1, 50):
+                self.skipTest('filesystem does not support junction reparse data: WinError '+str(error))
+            if error:
+                raise ctypes.WinError(error)
+            self.assertTrue(junction.lstat().st_file_attributes & 0x400)
+            with self.assertRaises(ValueError):
+                bundle.copy_input(self.source, 'inputs/source.pse')
+        self.assertEqual(sentinel.read_bytes(), b'external bytes')
+        self.assertEqual(set(outside.iterdir()), {sentinel})
 
     def test_scientific_copies_cannot_be_registered_as_failure_logs(self):
         with self.bundle() as bundle:
