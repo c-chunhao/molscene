@@ -1,5 +1,6 @@
 """Real headless map geometry, immutable registration and portable replay."""
 import hashlib
+from array import array
 import importlib.util
 import itertools
 import json
@@ -78,6 +79,67 @@ class DensityEngineTests(unittest.TestCase):
             density.load_density(self.c,self.path,format='ccp4',name='failed')
         self.assertEqual(self.c.get_names('objects'), ['sentinel'])
         self.assertEqual(self.c.get_setting_int('normalize_ccp4_maps'),1)
+
+    def wide_dx(self):
+        from molscene.grids import Grid, write_dx
+        values=[4.9326540340094691e-5,2.3141592653589793e-16,1.,2.,3.,4.,5.,6.]
+        path=self.root/'full precision.dx'
+        write_dx(path,Grid((2,2,2),(11.,-7.,3.),((2.,0.,0.),(0.,3.,0.),(0.,0.,4.)),
+                          array('d',values),'unknown',{}))
+        expected=[struct.unpack('<f',struct.pack('<f',v))[0] for v in values]
+        return path,expected
+
+    def test_wide_dx_writer_values_load_exactly_without_changing_source(self):
+        path,expected=self.wide_dx(); original=path.read_bytes()
+        record=density.load_density(self.c,path,format='dx',name='wide',state=2)
+        field=self.c.get_volume_field('wide',state=2,copy=1).ravel().tolist()
+        self.assertEqual(field,expected)
+        self.assertGreater(field[0],0); self.assertGreater(field[1],0)
+        self.assertEqual(record['value_sha256'],hashlib.sha256(struct.pack('<8d',*expected)).hexdigest())
+        self.assertEqual(record['source_sha256'],hashlib.sha256(original).hexdigest())
+        self.assertEqual(path.read_bytes(),original)
+        self.assertEqual(self.c.get_setting_int('normalize_ccp4_maps'),1)
+        for row,(i,j,k) in zip(self.points('wide',2),itertools.product(range(2),repeat=3)):
+            self.assertVector(row[:3],[11+2*i,-7+3*j,3+4*k])
+
+    def test_wide_dx_export_relocated_standalone_replay_preserves_values(self):
+        path,expected=self.wide_dx(); original=path.read_bytes()
+        out=self.root/'bundle'
+        report=density_export.export_density(None,out,dict(map_path=str(path),format='dx',
+            registration=dict(kind='matrix',matrix=D,copy_name='registered'),
+            display=dict(kind='surface',level=2.5),render=dict(width=32,height=32)))
+        relocated=self.root/"relocated 中文';$()"; shutil.move(str(out),str(relocated))
+        code='''import builtins,json,os,pathlib,pymol2,sys
+original=builtins.__import__
+def isolated(name,*args,**kwargs):
+ if name=='molscene' or name.startswith('molscene.'): raise ImportError('MolScene deliberately unavailable')
+ return original(name,*args,**kwargs)
+builtins.__import__=isolated
+root=pathlib.Path(sys.argv[1]); os.chdir(root)
+with pymol2.PyMOL() as pm:
+ c=pm.cmd; c.do('@replay.pml'); c.ray(32,32)
+ c.dump('contour.txt','registered_surface',state=1)
+ observed={'raw':c.get_volume_field('registered',state=1,copy=1).ravel().tolist(),
+           'matrix':list(c.get_object_matrix('registered',state=1)),
+           'normalizer':c.get_setting_int('normalize_ccp4_maps')}
+ (root/'observed.json').write_text(json.dumps(observed))
+'''
+        result=subprocess.run([sys.executable,'-B','-c',code,str(relocated)],cwd=self.root,
+                              capture_output=True,text=True,timeout=90)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        observed=json.loads((relocated/'observed.json').read_text())
+        self.assertEqual(observed['raw'],expected)
+        self.assertGreater(observed['raw'][1],0)
+        self.assertVector(observed['matrix'],D)
+        self.assertEqual(observed['normalizer'],1)
+        self.assertTrue((relocated/'contour.txt').stat().st_size)
+        self.assertEqual(path.read_bytes(),original)
+        self.assertEqual((relocated/'inputs/density.dx').read_bytes(),original)
+        self.assertEqual(report['analysis']['density']['source']['value_sha256'],
+                         hashlib.sha256(struct.pack('<8d',*expected)).hexdigest())
+        manifest=json.loads((relocated/'manifest.json').read_text())
+        for name,meta in manifest['files'].items():
+            self.assertEqual(hashlib.sha256((relocated/name).read_bytes()).hexdigest(),meta['sha256'])
 
     def test_registered_origin_map_world_composition(self):
         record = self.load_origin()

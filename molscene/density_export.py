@@ -8,6 +8,7 @@ from .artifacts import checked_path, sha256, write_json
 from .bundles import Bundle, CancelledError
 from . import density
 from .grids import compose, inverse_affine
+from .native_maps import replay_dx_loader_source
 from .snapshot import scene_fingerprint
 
 
@@ -76,8 +77,9 @@ def _write_replay(path,metadata,has_session):
         '_density_data = '+ascii(metadata)]
     if has_session: lines.append("cmd.load(str(_density_root / 'source.pse'), format='pse')")
     source=metadata['source']
+    if source['format']=='dx': lines.append(replay_dx_loader_source())
     if not metadata['associated_snapshot_map']:
-        lines.extend(_load_lines(source['name'],source['source_path'],source['format'],source['state']))
+        lines.extend(_load_lines(source))
     registration=metadata['registration']
     if registration is not None:
         alignment=registration['alignment']
@@ -86,7 +88,7 @@ def _write_replay(path,metadata,has_session):
             lines.append(f"cmd.create({model!r}, {'%'+args['mobile']!r}, source_state={args['mobile_state']}, target_state=1, zoom=0)")
             lines.append(f"cmd.transform_object({model!r}, {ascii(alignment['replay_transform'])}, state=1, homogenous=1, transpose=0)")
         rec=registration['record']
-        lines.extend(_load_lines(rec['name'],rec['source_path'],rec['format'],1))
+        lines.extend(_load_lines(rec))
         transform=list(compose(inverse_affine(rec['load_matrix']),rec['world_matrix']))
         lines.append(f"cmd.transform_object({rec['name']!r}, {ascii(transform)}, state=1, homogenous=1, transpose=0)")
     disp=metadata['display']; spec=disp['display']; name=disp['name']; source_name=disp['source']
@@ -104,7 +106,11 @@ def _write_replay(path,metadata,has_session):
     path.write_text('\n'.join(lines),encoding='utf-8')
 
 
-def _load_lines(name,relative,format,state):
+def _load_lines(record):
+    name,relative,format,state=(record[k] for k in ('name','source_path','format','state'))
+    if format=='dx':
+        return [f'load_native_dx_file(cmd, _density_root / {relative!r}, {ascii(record["grid"])}, '
+                f'{record["source_sha256"]!r}, name={name!r}, state={state})']
     return ["_density_normalizer = cmd.get_setting_int('normalize_ccp4_maps')",
             'try:',"    cmd.set('normalize_ccp4_maps', 0)",
             f'    cmd.load(str(_density_root / {relative!r}), {name!r}, format={format!r}, state={state}, zoom=0)',
