@@ -1,0 +1,15 @@
+{
+  "3c70.cif": {
+    "url": "https://files.rcsb.org/download/3C70.cif",
+    "bytes": 817668,
+    "sha256": "a3e5e2bc4997710ba916b6f8b6fd01acd85d9e6912fd063b2ac79b4d581fbb88",
+    "retrieved": "2026-10-17",
+    "attribution": "RCSB PDB / wwPDB deposited structure 3C70"
+  },
+  "assembly-original.cif": {
+    "kind": "original synthetic analytic fixture"
+  },
+  "assembly-original.pdb": {
+    "kind": "original synthetic analytic fixture"
+  }
+}
