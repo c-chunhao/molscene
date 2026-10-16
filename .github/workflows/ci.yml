@@ -134,32 +134,9 @@ jobs:
           metadata = next(distribution.locate_file(file).resolve(strict=True)
               for file in distribution.files if str(file).endswith('.dist-info/METADATA'))
           print(json.dumps({'executable': str(Path(sys.executable).resolve(strict=True)),
-              'metadata': str(metadata), 'python': sys.version, 'bits': struct.calcsize('P') * 8}))
+              'metadata': str(metadata), 'prefix': str(Path(sys.prefix).resolve(strict=True)), 'python': sys.version, 'bits': struct.calcsize('P') * 8}))
           PY
-          python - <<'PY'
-          import json, os, shutil, sys
-          from pathlib import Path
-          from molscene.external_tools import load_tools
-          runtime = json.loads(Path('artifacts/pdb2pqr-runtime.json').read_text())
-          assert runtime['bits'] == 64
-          def entry(executable, *, prefix=(), runtime_files=(), timeout=1200):
-              executable = Path(executable).resolve(strict=True)
-              assert executable.is_file() and not executable.is_symlink()
-              return dict(argv=[str(executable), *prefix], architecture='x64',
-                  path_dirs=[str(executable.parent)], runtime_files=list(runtime_files),
-                  timeout_seconds=timeout, memory_limit_mib=4096)
-          apbs_metadata = next(Path(sys.prefix, 'conda-meta').glob('apbs-3.4.1-py311ha92c01f_1.json')).resolve(strict=True)
-          tools = {'apbs': entry(shutil.which('apbs'), runtime_files=[{'path': str(apbs_metadata), 'role': 'package_metadata'}]),
-              'pdb2pqr': entry(runtime['executable'], prefix=['-B', '-m', 'pdb2pqr'], timeout=600,
-                  runtime_files=[{'path': runtime['executable'], 'role': 'interpreter'},
-                                 {'path': runtime['metadata'], 'role': 'package_metadata'}]),
-              'ffmpeg': entry(shutil.which('ffmpeg')), 'ffprobe': entry(shutil.which('ffprobe'))}
-          path = Path('artifacts/tools.json').resolve()
-          path.write_text(json.dumps({'schema_version': 1, 'tools': tools}, indent=2) + '\n')
-          load_tools(path)
-          with open(os.environ['GITHUB_ENV'], 'a') as handle:
-              handle.write('MOLSCENE_TOOLS_CONFIG=' + str(path) + '\n')
-          PY
+          python scripts/prepare_ci_tools.py
       - name: Assert actual tools architecture version and H264 encoder
         run: |
           python -m molscene tools --config "$MOLSCENE_TOOLS_CONFIG" | tee artifacts/tools-probe.json
