@@ -427,8 +427,15 @@ def export_potential(session_path, output_dir, request, *, cancelled=None, progr
                 cmd.zoom(display['molecule']+' or '+display['legend'], buffer=4)
                 _check(cancelled,progress,'render')
                 render = spec['render']
-                cmd.png(str(stage/'scene.png'),width=render['width'],height=render['height'],dpi=render['dpi'],ray=int(render['ray']),quiet=1)
                 cmd.save(str(stage/'scene.pse'))
+                from . import native_render
+                if native_render.requires_native(cmd,render['ray']):
+                    native=native_render.render_native(stage/'scene.pse',[stage/'scene.png'],render,
+                        work_dir=scratch,cancelled=cancelled,bundle=bundle)
+                    rendering=native_render.report_metadata(native,stage); warnings.extend(native['warnings'])
+                else:
+                    cmd.png(str(stage/'scene.png'),width=render['width'],height=render['height'],dpi=render['dpi'],ray=1,quiet=1)
+                    rendering=dict(backend='cpu_ray',requested_ray=render['ray'],effective_ray=True,width=render['width'],height=render['height'])
                 _write_replay(stage/'replay.pml',cmd,display,source_session=session_path is not None,view=cmd.get_view())
                 for filename in ('scene.png','scene.pse','replay.pml'):
                     _nonempty(stage/filename)
@@ -449,7 +456,7 @@ def export_potential(session_path, output_dir, request, *, cancelled=None, progr
                               created_at=datetime.now(timezone.utc).isoformat(),operation='potential',passed=True,inputs=inputs,parameters=parameters,
                               structure=dict(atom_count=display['coverage']['atom_count'],preparation=prep_report,
                                              pqr={key:value for key,value in parsed.items() if key != 'atoms'} if mode != 'import' or spec['pqr_path'] else None),
-                              analysis=dict(raw_grid=raw_metadata,display=display,conversion=dict(source_unit=spec['units'],target_unit=spec['display_units'],factor=factor,temperature=spec['temperature']),
+                              analysis=dict(raw_grid=raw_metadata,display=display,rendering=rendering,conversion=dict(source_unit=spec['units'],target_unit=spec['display_units'],factor=factor,temperature=spec['temperature']),
                                             solver=memory,model='linearized Poisson-Boltzmann; mg-auto; symmetric monovalent ions; smol molecular dielectric surface' if mode != 'import' else 'imported potential; solver/model unverified'),
                               artifacts={name:name for name in inventory},artifact_hashes=hashes,snapshot_id=snapshot_id,source_fingerprints=source_fingerprints,
                               advanced_fingerprints=dict(files={role:row['sha256'] for role,row in inputs.items()},maps={display['map']+'/1':map_digest},timeline=None,display_snapshot=snapshot_id,

@@ -6,7 +6,7 @@ import struct
 from . import __version__
 from .artifacts import checked_path, sha256, write_json
 from .bundles import Bundle, CancelledError
-from . import density
+from . import density, native_render
 from .grids import compose, inverse_affine
 from .native_maps import replay_dx_loader_source
 from .snapshot import scene_fingerprint
@@ -159,8 +159,15 @@ def export_density(session_path,output_dir,request,*,cancelled=None,progress=Non
             view=list(cmd.get_view())
             stage('render',3,'Rendering density scene')
             render=request['render']
-            cmd.png(str(bundle.stage/'scene.png'),width=render['width'],height=render['height'],dpi=render['dpi'],ray=int(render['ray']),quiet=1)
             cmd.save(str(bundle.stage/'scene.pse'))
+            render_warnings=[]
+            if native_render.requires_native(cmd,render['ray']):
+                native=native_render.render_native(bundle.stage/'scene.pse',[bundle.stage/'scene.png'],render,
+                    work_dir=bundle.scratch,cancelled=cancelled,bundle=bundle)
+                rendering=native_render.report_metadata(native,bundle.stage); render_warnings=native['warnings']
+            else:
+                cmd.png(str(bundle.stage/'scene.png'),width=render['width'],height=render['height'],dpi=render['dpi'],ray=1,quiet=1)
+                rendering=dict(backend='cpu_ray',requested_ray=render['ray'],effective_ray=True,width=render['width'],height=render['height'])
             metadata=dict(schema_version=1,source=_relative_record(record,relative),
                           associated_snapshot_map=request['map_name'] is not None,registration=deepcopy(registration),display=display,view=view,
                           matrix_convention='Row-major column coordinates; source world to registered world; translation angstrom')
@@ -184,13 +191,13 @@ def export_density(session_path,output_dir,request,*,cancelled=None,progress=Non
         if session is not None: artifacts['source_session']='source.pse'
         report=dict(schema_version=2,tool='molscene',tool_version=__version__,pymol_version=version,
             created_at=datetime.now(timezone.utc).isoformat(),operation='density',inputs=inputs,parameters=parameters,
-            structure={},analysis=dict(density=metadata),artifacts=artifacts,passed=True,
+            structure={},analysis=dict(density=metadata,rendering=rendering),artifacts=artifacts,passed=True,
             replay_contract='Relative source inputs and public PyMOL calls; no MolScene dependency',snapshot_id=snapshot,
             source_fingerprints=fingerprints,advanced_fingerprints=dict(files={k:v['sha256'] for k,v in inputs.items()},
                 maps=advanced_maps,timeline=None,display_snapshot=snapshot,selection=None,session_epoch=None),
             limitations=['Rigid registration maps coordinate frames; it does not optimize density correlation, refine atoms, or assess experimental quality.',
                           'Raw map values have unknown units unless separately established. Bounds are geometric diagnostics only.',
-                          'Aligned-copy registration requires global, mobile and target matrix_mode -1, 0 or 1; mode2 is unsupported.'],warnings=[],
+                          'Aligned-copy registration requires global, mobile and target matrix_mode -1, 0 or 1; mode2 is unsupported.'],warnings=render_warnings,
             artifact_hashes={name:sha256(bundle.stage/name) for name in inventory if name not in ('report.json','manifest.json')})
         write_json(bundle.stage/'report.json',report)
         stage('publish',5,'Publishing validated density bundle')

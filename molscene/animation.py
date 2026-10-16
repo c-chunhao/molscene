@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import struct
 
-from . import __version__, timeline
+from . import __version__, timeline, native_render
 from .artifacts import checked_path, sha256, write_json
 from .bundles import Bundle, CancelledError
 from .snapshot import scene_fingerprint
@@ -195,13 +195,21 @@ def _export(session_path,output_dir,document,*,render=None,mp4=False,tools=None,
             cmd=pm.cmd; cmd.load(str(bundle.stage/'source.pse'))
             timeline.validate_timeline(doc,cmd)
             artifacts=dict(session='source.pse',timeline='timeline.json',replay='replay.pml',report='report.json',manifest='manifest.json')
+            rendering=None; render_warnings=[]
             if frames:
                 (bundle.stage/'frames').mkdir(); artifacts['frames']=frames
-                for frame,name in enumerate(frames,1):
-                    _cancel(cancelled); timeline.seek_timeline(cmd,doc,frame)
-                    cmd.png(str(bundle.stage/name),width=spec['width'],height=spec['height'],dpi=spec['dpi'],ray=int(spec['ray']),quiet=1)
-                    _png(bundle.stage/name,spec['width'],spec['height'])
-                    emit('render',frame,f'Rendered frame {frame} of {len(frames)}')
+                if native_render.requires_native(cmd,spec['ray'],timeline=doc):
+                    native=native_render.render_native(bundle.stage/'source.pse',[bundle.stage/name for name in frames],spec,
+                        work_dir=bundle.scratch,timeline=doc,cancelled=cancelled,bundle=bundle,
+                        progress=lambda event:emit('render',event['completed'],event['message']))
+                    rendering=native_render.report_metadata(native,bundle.stage); render_warnings=native['warnings']
+                else:
+                    rendering=dict(backend='cpu_ray',requested_ray=spec['ray'],effective_ray=True,width=spec['width'],height=spec['height'])
+                    for frame,name in enumerate(frames,1):
+                        _cancel(cancelled); timeline.seek_timeline(cmd,doc,frame)
+                        cmd.png(str(bundle.stage/name),width=spec['width'],height=spec['height'],dpi=spec['dpi'],ray=1,quiet=1)
+                        _png(bundle.stage/name,spec['width'],spec['height'])
+                        emit('render',frame,f'Rendered frame {frame} of {len(frames)}')
             video=None
             if mp4:
                 completed=len(frames)
@@ -209,6 +217,8 @@ def _export(session_path,output_dir,document,*,render=None,mp4=False,tools=None,
                 video=_encode(bundle,tools,doc,spec,cancelled,tool_progress)
                 artifacts.update(video='animation.mp4',tools='tools.json',logs=list(_VIDEO[2:]))
             report=_report(cmd,doc,inputs,artifacts,spec,bundle.stage,'animation' if spec else 'timeline_project')
+            if rendering is not None: report['analysis']['rendering']=rendering
+            report['warnings'].extend(render_warnings)
             if video is not None: report['analysis']['video']=video
             write_json(bundle.stage/'report.json',report)
         emit('publish',total-1,'Publishing verified timeline bundle')
