@@ -33,6 +33,44 @@ class NativeMapTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             native_dx_text(grid)
 
+    def test_standalone_parser_matches_complete_scientific_dx_document(self):
+        positions='object 1 class gridpositions counts 2 2 2\n'
+        geometry='origin -10 -10 -10\ndelta 20 0 0\ndelta 0 20 0\ndelta 0 0 20\n'
+        connections='object 2 class gridconnections counts 2 2 2\n'
+        payload='object 3 class array type double rank 0 items 8 data follows\n0 1 2 3 4 5 6 7\n'
+        field='attribute "dep" string "positions"\nobject "grid" class field\ncomponent "positions" value 1\ncomponent "connections" value 2\ncomponent "data" value 3\n'
+        valid=[positions+geometry+payload+connections+field,
+               field+positions+payload+geometry+connections,
+               connections+positions+payload+geometry+field]
+        invalid=[valid[0]+connections, valid[0]+'object 1 class field\n',
+                 valid[0]+'component "data" value 3\n', valid[0]+'8\n',
+                 valid[0].replace('"connections" value 2','"connections" value 3'),
+                 valid[0].replace('items 8','items 16777217'),
+                 valid[0].replace('0 1 2 3 4 5 6 7','0 1 2 3 4 5 6 nan'),
+                 valid[0]+'object "'+('x'*4097)+'" class field\n']
+        namespace={}
+        exec(replay_dx_loader_source(),namespace)
+        calls=[]
+        namespace['_load_native_parts']=lambda cmd,shape,origin,basis,values,**kw: calls.append((shape,origin,basis,list(values)))
+        metadata=grid_metadata(Grid((2,2,2),(-10.,)*3,((20.,0.,0.),(0.,20.,0.),(0.,0.,20.)),array('d',range(8)),'V',{}))
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'ordered.dx'
+            for text in valid:
+                with self.subTest(valid=text):
+                    path.write_text(text,encoding='ascii')
+                    grid=read_dx(path)
+                    namespace['load_native_dx_file'](None,path,metadata,hashlib.sha256(path.read_bytes()).hexdigest(),name='ordered')
+                    self.assertEqual(calls[-1],(list(grid.shape),list(grid.origin),[list(row) for row in grid.basis],list(grid.values)))
+            for text in invalid:
+                with self.subTest(invalid=text[:100]):
+                    path.write_text(text,encoding='ascii')
+                    with self.assertRaises(ValueError):
+                        read_dx(path)
+                    count=len(calls)
+                    with self.assertRaises(ValueError):
+                        namespace['load_native_dx_file'](None,path,metadata,hashlib.sha256(path.read_bytes()).hexdigest(),name='rejected')
+                    self.assertEqual(len(calls),count)
+
     @unittest.skipUnless(importlib.util.find_spec('pymol2'),'PyMOL unavailable')
     def test_public_load_and_standalone_replay_verify_full_field_geometry_and_source_hash(self):
         import pymol2

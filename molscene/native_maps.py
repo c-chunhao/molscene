@@ -9,7 +9,6 @@ import hashlib
 import inspect
 import math
 from pathlib import Path
-import shlex
 import struct
 
 
@@ -90,6 +89,39 @@ def _dx_file_digest(path):
     return digest.hexdigest()
 
 
+def _native_dx_tokens(stream):
+    """Bounded lexer matching the scientific DX importer's supported grammar."""
+    token,quote,comment='',False,False
+    total=0
+    while True:
+        chunk=stream.read(65536)
+        if not chunk:
+            break
+        total+=len(chunk)
+        if total>512*1024*1024:
+            raise ValueError('Replay DX exceeds byte limit')
+        for char in chunk:
+            if comment:
+                if char=='\n':
+                    comment=False
+                continue
+            if char=='"':
+                quote=not quote
+            elif not quote and (char.isspace() or char=='#'):
+                if token:
+                    yield token
+                    token=''
+                comment=char=='#'
+            else:
+                token+=char
+                if len(token)>4096:
+                    raise ValueError('Replay DX token exceeds limit')
+    if quote:
+        raise ValueError('Replay DX has an unterminated string')
+    if token:
+        yield token
+
+
 def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
     """Replay an already validated DX association, verifying bytes and count."""
     path=Path(path)
@@ -102,12 +134,12 @@ def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
     shape,origin,basis=metadata['shape'],metadata['origin_angstrom'],metadata['basis_angstrom']
     _native_geometry(shape,origin,basis)
     count=math.prod(shape)
-    values=array('d')
+    values=None
     with path.open(encoding='ascii') as stream:
-        lexer=shlex.shlex(stream,posix=True)
-        lexer.whitespace_split=True
+        lexer=iter(_native_dx_tokens(stream))
         positions=connections=source_origin=None
         source_basis=[]
+        objects,components={},{}
         def take(expected=None):
             token=next(lexer)
             if expected is not None and token!=expected:
@@ -116,10 +148,16 @@ def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
         try:
             for token in lexer:
                 if token=='object':
-                    take(); take('class'); kind=take()
+                    object_name=take()
+                    if object_name in objects:
+                        raise ValueError('Replay contains duplicate objects')
+                    take('class'); kind=take()
+                    objects[object_name]=kind
                     if kind in ('gridpositions','gridconnections'):
                         take('counts')
                         dimensions=[int(take()) for _ in range(3)]
+                        if dimensions!=list(shape):
+                            raise ValueError('Replay grid dimensions differ from metadata')
                         if kind=='gridpositions' and positions is None:
                             positions=dimensions
                         elif kind=='gridconnections' and connections is None:
@@ -127,6 +165,8 @@ def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
                         else:
                             raise ValueError('Replay contains duplicate grids')
                     elif kind=='array':
+                        if values is not None or positions is None:
+                            raise ValueError('Replay requires one scalar array after gridpositions')
                         take('type')
                         if take() not in ('double','float'):
                             raise ValueError('Replay requires a scalar float array')
@@ -134,26 +174,34 @@ def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
                         if int(take())!=count:
                             raise ValueError('Replay map scalar item count does not match metadata')
                         take('data'); take('follows')
-                        break
-                    else:
+                        values=array('d')
+                        for _ in range(count):
+                            value=float(take())
+                            if not math.isfinite(value):
+                                raise ValueError('Replay scalar values must be finite')
+                            values.append(value)
+                    elif kind!='field':
                         raise ValueError('Unexpected replay DX object before data')
                 elif token=='origin' and source_origin is None:
                     source_origin=[float(take()) for _ in range(3)]
                 elif token=='delta' and len(source_basis)<3:
                     source_basis.append([float(take()) for _ in range(3)])
+                elif token=='attribute':
+                    take('dep'); take('string'); take('positions')
+                elif token=='component':
+                    role=take(); take('value'); reference=take()
+                    if role not in ('positions','connections','data') or role in components:
+                        raise ValueError('Replay contains invalid or duplicate field components')
+                    components[role]=reference
                 else:
-                    raise ValueError('Unexpected replay DX header token')
-            else:
-                raise ValueError('Replay map has no scalar data')
-            if positions!=list(shape) or connections!=list(shape) or source_origin!=list(origin) or source_basis!=[list(row) for row in basis]:
+                    raise ValueError('Unexpected replay DX data or declaration')
+            if values is None or positions!=list(shape) or connections!=list(shape) or source_origin!=list(origin) or source_basis!=[list(row) for row in basis]:
                 raise ValueError('Replay map physical geometry differs from source metadata')
-            for _ in range(count):
-                values.append(float(next(lexer)))
-        except (StopIteration,ValueError,OverflowError) as error:
+            for role,kind in (('positions','gridpositions'),('connections','gridconnections'),('data','array')):
+                if role in components and objects.get(components[role])!=kind:
+                    raise ValueError('Replay component refers to the wrong object')
+        except (StopIteration,ValueError,OverflowError,UnicodeError) as error:
             raise ValueError('Replay map has truncated or invalid scalar data') from error
-        following=next(lexer,None)
-        if following not in (None,'attribute','object','component'):
-            raise ValueError('Replay map has excess scalar values')
     if _dx_file_digest(path)!=source_sha256:
         raise ValueError('Replay source changed while parsing')
     return _load_native_parts(cmd,shape,origin,basis,values,name=name,state=state)
@@ -161,6 +209,6 @@ def load_native_dx_file(cmd, path, metadata, source_sha256, *, name, state=1):
 
 def replay_dx_loader_source():
     """Return the same implementation as self-contained stdlib/public-cmd code."""
-    imports='from array import array\nimport hashlib\nimport math\nfrom pathlib import Path\nimport shlex\nimport struct\n'
-    functions=(_native_geometry,_native_text,_load_native_parts,_dx_file_digest,load_native_dx_file)
+    imports='from array import array\nimport hashlib\nimport math\nfrom pathlib import Path\nimport struct\n'
+    functions=(_native_geometry,_native_text,_load_native_parts,_dx_file_digest,_native_dx_tokens,load_native_dx_file)
     return imports+'\n'+'\n'.join(inspect.getsource(function) for function in functions)

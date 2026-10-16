@@ -98,16 +98,40 @@ class ElectrostaticsTests(unittest.TestCase):
             dx=folder/'source.dx'
             write_dx(dx,Grid((3,3,3),(-10.,)*3,((10.,0.,0.),(0.,10.,0.),(0.,0.,10.)),array('d',[0.]*27),'unknown',{}))
             with pymol2.PyMOL() as pm:
-                pm.cmd.pseudoatom('protein',pos=[1.1234567,2.2345678,3.3456789],vdw=2.7)
-                expected=pm.cmd.get_model('protein').atom[0].coord
+                pm.cmd.pseudoatom('source_molecule',pos=[1.1234567,2.2345678,3.3456789],vdw=2.7)
+                expected=pm.cmd.get_model('source_molecule').atom[0].coord
                 pm.cmd.save(str(snapshot))
-            report=export_potential(snapshot,folder/'out',dict(mode='import',dx_path=str(dx),selection='protein',render={'width':160,'height':120}))
+            report=export_potential(snapshot,folder/'out',dict(mode='import',dx_path=str(dx),selection='source_molecule',render={'width':160,'height':120}))
             self.assertNotIn('display.dx',report['artifact_hashes'])
             with pymol2.PyMOL() as replay:
                 replay.cmd.do('@'+str(folder/'out/replay.pml'),echo=0)
                 atom=replay.cmd.get_model(report['analysis']['display']['molecule']).atom[0]
                 self.assertEqual(atom.coord,expected)
                 self.assertAlmostEqual(atom.vdw,2.7,places=6)
+
+    @unittest.skipUnless(HAS_PYMOL, 'PyMOL unavailable')
+    def test_import_and_standalone_replay_accept_connections_after_data(self):
+        import pymol2
+        with tempfile.TemporaryDirectory() as folder:
+            folder=Path(folder)
+            pqr=folder/'ion.pqr'
+            pqr.write_text('ATOM 1 C ALA 1 0 0 0 1 1.7\n')
+            dx=folder/'ordered.dx'
+            grid=Grid((3,3,3),(-10.,)*3,((10.,0.,0.),(0.,10.,0.),(0.,0.,10.)),array('d',range(27)),'V',{})
+            write_dx(dx,grid)
+            connection='object 2 class gridconnections counts 3 3 3\n'
+            dx.write_text(dx.read_text().replace(connection,'')+connection,encoding='ascii')
+            self.assertEqual(read_dx(dx).values,grid.values)
+            before=dx.read_bytes()
+            report=export_potential(None,folder/'out',dict(mode='import',pqr_path=str(pqr),dx_path=str(dx),units='V',render={'width':160,'height':120}))
+            self.assertTrue(report['passed'])
+            self.assertEqual((folder/'out/inputs/potential.dx').read_bytes(),before)
+            self.assertNotIn('display.dx',report['artifact_hashes'])
+            with pymol2.PyMOL() as replay:
+                replay.cmd.do('@'+str(folder/'out/replay.pml'),echo=0)
+                actual=replay.cmd.get_volume_field(report['analysis']['display']['map'],copy=1)
+                self.assertEqual(tuple(actual.shape),grid.shape)
+                self.assertEqual(list(actual.flat),list(grid.values))
 
     @unittest.skipUnless(HAS_PYMOL, 'PyMOL unavailable')
     def test_cancelled_export_never_publishes_and_preserves_inputs(self):
