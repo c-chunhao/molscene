@@ -1,11 +1,10 @@
 {
   "schema_version": 1,
   "molscene_version": "0.4.0",
-  "recorded_at": "2026-10-16T10:09:26.509920+00:00",
+  "recorded_at": "2026-10-16T10:31:58.596238+00:00",
   "status": "local_acceptance_recorded_no_ci_claim",
   "provenance": {
     "wheel_build_code_commit": "7ea9a28639c395755d24077d2a4890642db0c5a2",
-    "final_test_and_sdist_commit_prefix": "99e09702",
     "source_change_since_wheel": [
       "tests/test_workbench.py"
     ],
@@ -53,7 +52,7 @@
           "changed_frozen_files": [
             ".github/workflows/ci.yml"
           ],
-          "note": "Final public commit adds static documentation only; final Git blob checks and CI are in release publication-evidence.json."
+          "note": "This identity was checked at b43305b only. The later test/CI portability delta is recorded separately below; final commit, CI and package identities belong to release provenance."
         },
         "public_evidence_links": [],
         "exact_head_github_five_jobs": null
@@ -86,7 +85,67 @@
         }
       }
     },
-    "publication_note": "Public commit, exact-head CI and final server/download evidence belong to release publication-evidence.json. The recorded post-suite CI-only delta changes the workflow; do not claim its CI bytes equal the s4 freeze. Verify runtime/test/example byte identity to the public head; later static evidence additions are recorded separately."
+    "publication_note": "Public commit, exact-head CI and final server/download evidence belong to release publication-evidence.json. The two identified post-suite waves change CI and test prerequisites; do not claim those bytes equal the earlier full-suite freeze. Final provenance separately verifies unchanged runtime/examples and the reviewed test delta.",
+    "recorded_local_full_test_and_pre_portability_sdist_commit_prefix": "99e09702",
+    "source_change_since_wheel_scope": "The recorded complete local suite at 99e09702, before the separately identified portability delta.",
+    "post_full_suite_ci_portability_delta": {
+      "base": "39a90fdd8355c167ee90b839a980cf0bab887c5f",
+      "fixture_commit": "8b358410685828c9879b4bbbe3f93c6613111dcf",
+      "tools_commit": "5e727233f421eba88d667c640de36a31a3b80064",
+      "integrated_code_head": "22ccbb9f1e6d37e8b5e2dd698a9dcdd030e2f0f6",
+      "changed_files": [
+        ".github/workflows/ci.yml",
+        "MANIFEST.in",
+        "scripts/prepare_ci_tools.py",
+        "tests/test_advanced_cli.py",
+        "tests/test_advanced_controller.py",
+        "tests/test_advanced_worker.py",
+        "tests/test_bundles.py",
+        "tests/test_electrostatics_real.py",
+        "tests/test_external_tools.py",
+        "tests/test_native_render.py"
+      ],
+      "runtime_and_examples_git_trees_equal_local_full_suite": true,
+      "tests_changed_after_local_full_suite": true,
+      "change": "Canonical test fixture paths/interpreters, explicit UTF-8 for a Unicode worker script, absolute scientific evidence cwd; CI prepares unique byte/mode-identical executable and metadata copies while preserving all production link and unique-file guards.",
+      "existing_assertion_fail_skip_calls_preserved": true,
+      "independent_review": "APPROVED; bounded to the identified portability changes.",
+      "local_plain_sequential_runs": {
+        "3.10": {
+          "discovered": 440,
+          "passed": 155,
+          "skipped": 285,
+          "failures": 0,
+          "errors": 0,
+          "seconds": 58.975,
+          "log_sha256": "c975413b2bb523717e4ee4ac3d1c033448e627b0afada024fb881476dd16f20b"
+        },
+        "3.13": {
+          "discovered": 440,
+          "passed": 154,
+          "skipped": 286,
+          "failures": 0,
+          "errors": 0,
+          "seconds": 56.415,
+          "log_sha256": "beaea6074aa2fd9722f5970da18c92f54589e009f096a7fc1c00def73b4347b2"
+        }
+      },
+      "scope_note": "The original local complete suite and installed-wheel numeric/native results remain attached to their recorded source hashes. These later changes affect test prerequisites and CI preparation only. They require a new exact-head five-job hosted run; this document does not infer success.",
+      "first_hosted_run": {
+        "url": "https://github.com/c-chunhao/molscene/actions/runs/38885631691",
+        "head": "39a90fdd8355c167ee90b839a980cf0bab887c5f",
+        "conclusion": "failure",
+        "linux_integration": {
+          "discovered": 440,
+          "passed": 422,
+          "skipped": 8,
+          "failures": 5,
+          "errors": 5,
+          "seconds": 148.095
+        }
+      },
+      "final_sdist_note": "The release source archive is rebuilt after this delta and static evidence updates. Its exact commit, inventory and hashes are recorded in source-provenance.json and publication-evidence.json; earlier archive checks remain historical records."
+    }
   },
   "frozen_source_sha256": {
     ".github/workflows/ci.yml": "9eacf2b5ead89f6a524b417874aa55de7b33f9b329397e58ec3a51c9483690df",

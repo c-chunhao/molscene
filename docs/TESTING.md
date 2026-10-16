@@ -142,7 +142,7 @@ corresponding frozen-source runs; until then these are acceptance requirements.
 
 ## Recorded v0.4 local acceptance
 
-Final source and sdist test freeze: `99e09702`; retained wheel build code: `7ea9a28`. Runtime modules match the retained wheel and final source. Only `tests/test_workbench.py` changed between these code freezes. Post-suite CI-only commit `b43305b5287666f24c944f46d1b8b98cda4cb463` changes two workflow regexes; CI bytes differ from the s4 freeze. Local affected-test evidence is recorded separately and public-head runtime/test/example byte identity still requires final confirmation. Public commit, CI and final downloaded release hashes are recorded separately in `publication-evidence.json`; no CI success is claimed here.
+Recorded complete local source/test freeze: `99e09702`; retained wheel runtime build: `7ea9a28`. Runtime modules and examples remain byte-identical through the later CI portability changes. The tests later canonicalize temporary/interpreter paths, specify UTF-8 for the Unicode worker script and resolve scientific evidence cwd; original assertions and production protections are preserved. CI prepares unique byte-identical tool copies beside their original executables, retaining library/venv lookup and actual original/copy identity evidence. Those post-suite changes passed independent review and new sequential Python 3.10/3.13 plain runs; they do not retroactively change the local results below. The release sdist is rebuilt with the corrected fixtures. Exact final commit, full five-job CI, archive inventories and downloaded asset hashes are recorded in `source-provenance.json` and `publication-evidence.json`; no hosted success is inferred here.
 
 | Run | Discovered | Passed | Skipped | Failed/errors | Seconds |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -152,7 +152,7 @@ Final source and sdist test freeze: `99e09702`; retained wheel build code: `7ea9
 
 All twelve required cases executed in the complete backend and isolated installed-wheel runs. Plain dependency/platform skips do not validate backend/desktop behavior; exact passed IDs and sanitized per-case skip reasons are retained in `validation-v04.json`.
 
-The wheel and sdist audit records 41 matching modules; the sdist contains 201 members with 199 source files byte-matched. Archive hashes and exact bytes are in the JSON record. Installed and plain package origins were checked independently.
+The recorded local wheel/sdist audit checked 41 matching modules; that pre-portability sdist contains 201 members with 199 source files byte-matched. Its hashes remain in the JSON record. The final release sdist has a separate fresh inventory/hash in release provenance and includes the later test/CI preparation fixes. Installed and plain package origins were checked independently.
 
 Actual advanced gallery potential, public projection identity/privacy, isolated relocated replay and nine offline selftest checks passed their recorded gates. The extracted-sdist example explicitly skipped potential and establishes secondary packaging behavior only. Legacy gallery manifest bytes and image header dimensions were checked; this aggregator does not itself decode images or inspect scientific appearance. Refer to their generator/audit evidence.
 
