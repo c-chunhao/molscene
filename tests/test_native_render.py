@@ -150,6 +150,114 @@ class NativeRenderProtocolTests(unittest.TestCase):
             self.assertIsNone(_evidence_directory())
 
 
+@unittest.skipUnless(importlib.util.find_spec('pymol2') or os.environ.get('MOLSCENE_REQUIRE_ADVANCED')=='1',
+                     'requires headless PyMOL')
+class FigureRenderRoutingTests(unittest.TestCase):
+    def setUp(self):
+        import pymol2
+        from molscene.snapshot import scene_fingerprint
+        self.tmp=tempfile.TemporaryDirectory(prefix='figure-route-'); self.addCleanup(self.tmp.cleanup)
+        self.root=Path(self.tmp.name); self.source=self.root/'source.pse'
+        with pymol2.PyMOL() as pm:
+            c=pm.cmd; c.pseudoatom('anchor',pos=[0,0,0],state=1); c.pseudoatom('anchor',pos=[1,2,3],state=2)
+            c.alter('anchor','vdw=2.7'); c.hide('everything')
+            c.load_raw('object 1 class gridpositions counts 2 2 2\norigin -4 -4 -4\ndelta 8 0 0\ndelta 0 8 0\ndelta 0 0 8\n'
+                       'object 2 class gridconnections counts 2 2 2\nobject 3 class array type double rank 0 items 8 data follows\n'
+                       '0 1 0 1 0 1 0 1\n','dx','map')
+            c.volume('vol','map',[0,0,0,1,0,1,1,0,0,.8]); c.zoom('map'); c.turn('y',37); c.frame(2)
+            self.view=list(c.get_view()); self.ramp=c.volume_color('vol',state=1)
+            self.radii=[a.vdw for a in c.get_model('anchor',state=2).atom]
+            self.fingerprint=scene_fingerprint(c,2); c.save(str(self.source))
+        self.original=self.source.read_bytes()
+
+    def fake_native(self,session_path,outputs,render,**kwargs):
+        import pymol2
+        with pymol2.PyMOL() as pm:
+            c=pm.cmd; c.load(str(session_path)); self.assertEqual(c.get_state(),2)
+            self.assertEqual(list(c.get_view()),self.view)
+            self.assertEqual(c.volume_color('vol',state=1),self.ramp)
+            self.assertEqual([a.vdw for a in c.get_model('anchor',state=2).atom],self.radii)
+            self.assertEqual(c.get_setting_int('ray_opaque_background'),0)
+        path=Path(outputs[0]); path.write_bytes(png_bytes(render['width'],render['height']))
+        count=render['width']*render['height']
+        row=dict(frame=1,path=str(path),**native.validate_png(path,render['width'],render['height']),
+                 pixels=dict(count=count,rgba_min=[20,40,60,255],rgba_max=[20,40,60,255],nonblack_rgb_gt3=count,opaque_pixels=count),
+                 view_before=self.view,view_after=self.view)
+        return dict(backend='native_opengl',requested_ray=render['ray'],effective_ray=False,width=render['width'],height=render['height'],
+            renderer=['test vendor','test renderer','test version'],warnings=[native.WARNING],
+            result=dict(schema_version=1,request_id='0'*32,source_sha256=hashlib.sha256(Path(session_path).read_bytes()).hexdigest(),
+                        passed=True,frames=[row],native_pid=123,parent_pid=124,renderer=['test vendor','test renderer','test version'],
+                        pymol_version='test',qt_binding='test',gl_valid=True,close_requested=True,close_event_seen=True,initial_view=self.view),
+            process=dict(guardian_pid=124,returncode=0))
+
+    def test_figure_routes_native_and_preserves_final_session_replay_and_analysis(self):
+        from molscene.engine import export_session
+        import pymol2
+        for ray in (True,False):
+            output=self.root/str(ray)
+            with patch('molscene.native_render.render_native',side_effect=self.fake_native):
+                report=export_session(self.source,output,width=16,height=16,dpi=72,ray=ray,background='transparent',
+                    analysis_records=[dict(state=2,source_fingerprint=self.fingerprint)])
+            rendering=report['analysis']['rendering']
+            self.assertEqual(rendering['backend'],'native_opengl'); self.assertEqual(rendering['requested_ray'],ray)
+            self.assertIs(rendering['effective_ray'],False); self.assertNotIn('passed',report)
+            self.assertEqual(rendering['source_sha256'],hashlib.sha256((output/'scene.pse').read_bytes()).hexdigest())
+            self.assertEqual(rendering['session'],'scene.pse'); self.assertEqual(report['analysis_records'][0]['snapshot_status'],'current')
+            self.assertEqual(self.source.read_bytes(),self.original); self.assertEqual(report['view'],self.view)
+            self.assertTrue(report['warnings'])
+            self.assertEqual({p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()},
+                             {'scene.png','scene.pse','scene.pml','report.json','inputs/input.pse'})
+            with pymol2.PyMOL() as replay:
+                old=Path.cwd()
+                try: os.chdir(output); replay.cmd.do('@scene.pml',echo=0)
+                finally: os.chdir(old)
+                self.assertEqual(replay.cmd.get_state(),2); self.assertEqual(list(replay.cmd.get_view()),self.view)
+                self.assertEqual(replay.cmd.volume_color('vol',state=1),self.ramp)
+
+    def test_figure_native_failure_and_cancellation_retain_only_reachable_bounded_diagnostics(self):
+        from molscene.engine import export_session
+        from molscene.external_tools import ExternalToolError
+        from molscene.bundles import CancelledError
+        for kind in ('failure','cancel','missing_result'):
+            output=self.root/kind; output.mkdir(); (output/'report.json').write_text('existing')
+            stages=[]
+            def fail(name,entry,args,cwd,prefix,*rest,**kwargs):
+                request=native.read_json(Path(cwd)/'request.json'); stages.append(Path(request['source']).parent)
+                Path(request['outputs'][0]).write_bytes(b'partial PNG')
+                stdout=Path(str(prefix)+'.stdout.log'); stderr=Path(str(prefix)+'.stderr.log')
+                stdout.write_text('started'); stderr.write_text('bounded native failure')
+                if kind=='cancel': raise CancelledError('cancelled at native boundary')
+                if kind=='missing_result': return dict(returncode=0)
+                raise ExternalToolError('failed at native boundary',dict(returncode=9,stdout_path=str(stdout),stderr_path=str(stderr)))
+            expected={'failure':ExternalToolError,'cancel':CancelledError,'missing_result':FileNotFoundError}[kind]
+            with patch('molscene.external_tools._managed',side_effect=fail),self.assertRaises(expected) as raised:
+                export_session(self.source,output,width=16,height=16,dpi=72,overwrite=True)
+            failure=Path(raised.exception.failure_path)
+            self.assertTrue((failure/'failure.json').is_file()); self.assertIn(str(failure),str(raised.exception))
+            self.assertEqual((output/'report.json').read_text(),'existing'); self.assertFalse((output/'scene.png').exists())
+            self.assertEqual(self.source.read_bytes(),self.original); self.assertTrue(stages)
+            self.assertTrue(all(not stage.exists() for stage in stages))
+            self.assertEqual({p.relative_to(failure).as_posix() for p in failure.rglob('*') if p.is_file()},
+                             {'failure.json','logs/native.stdout.log','logs/native.stderr.log'})
+            self.assertEqual((failure/'logs/native.stderr.log').read_text(),'bounded native failure')
+            if kind=='failure':
+                for stream in ('stdout','stderr'):
+                    self.assertEqual(Path(raised.exception.result[stream+'_path']),failure/'logs'/('native.'+stream+'.log'))
+
+    def test_figure_native_bounds_are_actionable_and_cpu_dimensions_remain_legacy(self):
+        from molscene.engine import export_session
+        import pymol2
+        for width,height,dpi in ((1,16,72),(4097,16,72),(16,16,1201)):
+            with self.assertRaisesRegex(ValueError,r'Native OpenGL.*16.*4096.*1200'):
+                export_session(self.source,self.root/'invalid',width=width,height=height,dpi=dpi)
+        hidden=self.root/'hidden.pse'
+        with pymol2.PyMOL() as pm:
+            pm.cmd.load(str(self.source)); pm.cmd.disable('vol'); pm.cmd.save(str(hidden))
+        with patch('molscene.native_render.render_native',side_effect=AssertionError('CPU scene must not launch native')):
+            report=export_session(hidden,self.root/'cpu',width=1,height=16,dpi=2400,ray=True)
+        self.assertEqual(report['parameters']['width'],1); self.assertEqual(report['parameters']['dpi'],2400)
+
+
 def process_alive(pid):
     if os.name=='nt':
         import ctypes
@@ -257,6 +365,42 @@ class NativeRenderTests(unittest.TestCase):
             self.assertEqual((rendering['width'],rendering['height']),(64,48))
             for row in rendering['images']:
                 self.assertFalse(Path(row['path']).is_absolute()); self.assertEqual(row['pixels']['count'],3072)
+        # Figure must export the exact current volume view through this same
+        # required native gate, preserving its legacy final-PSE replay contract.
+        from molscene.engine import export_session
+        from molscene.snapshot import scene_fingerprint
+        figure_source=root/'figure-source.pse'
+        with pymol2.PyMOL() as pm:
+            c=pm.cmd; c.load(str(source)); c.enable('vol'); c.hide('everything','anchor')
+            c.alter('anchor','vdw=2.7'); c.save(str(figure_source))
+            figure_bytes=figure_source.read_bytes(); figure_view=list(c.get_view()); figure_state=c.get_state()
+            figure_ramp=c.volume_color('vol',state=1); figure_radius=c.get_model('anchor').atom[0].vdw
+            fingerprint=scene_fingerprint(c,figure_state)
+            reports['figure']=export_session(figure_source,root/'fig',width=128,height=128,dpi=72,ray=True,background='black',
+                analysis_records=[dict(state=figure_state,source_fingerprint=fingerprint)])
+            self.assertEqual(list(c.get_view()),figure_view); self.assertEqual(c.get_state(),figure_state)
+        figure=reports['figure']; rendering=figure['analysis']['rendering']
+        self.assertEqual(rendering['backend'],'native_opengl'); self.assertTrue(rendering['requested_ray'])
+        self.assertFalse(rendering['effective_ray']); self.assertTrue(rendering['renderer'])
+        self.assertNotIn('passed',figure); self.assertEqual(figure['analysis_records'][0]['snapshot_status'],'current')
+        self.assertEqual(figure_source.read_bytes(),figure_bytes); self.assertEqual(figure['view'],figure_view)
+        self.assertEqual(rendering['source_sha256'],hashlib.sha256((root/'fig/scene.pse').read_bytes()).hexdigest())
+        self.assertEqual(rendering['session'],'scene.pse')
+        self.assertGreater(rendering['images'][0]['pixels']['nonblack_rgb_gt3'],100)
+        with Image.open(root/'fig/scene.png') as image,Image.open(root/'b.png') as hidden:
+            self.assertEqual(image.size,(128,128))
+            self.assertIsNotNone(ImageChops.difference(image.convert('RGB'),hidden.convert('RGB')).getbbox())
+        with pymol2.PyMOL() as replay:
+            old=Path.cwd()
+            try: os.chdir(root/'fig'); replay.cmd.do('@scene.pml',echo=0)
+            finally: os.chdir(old)
+            self.assertEqual(list(replay.cmd.get_view()),figure_view); self.assertEqual(replay.cmd.get_state(),figure_state)
+            self.assertEqual(replay.cmd.volume_color('vol',state=1),figure_ramp)
+            self.assertEqual(replay.cmd.get_model('anchor').atom[0].vdw,figure_radius)
+            self.assertIn('vol',replay.cmd.get_names('objects',enabled_only=1))
+        self.assertTrue(rendering['process']['close_event_seen']); self.assertEqual(rendering['process']['returncode'],0)
+        for key in ('native_pid','parent_pid','guardian_pid'):
+            self.assertFalse(process_alive(rendering['process'][key]),f'Figure process {key} survived')
         self.assertEqual(source.read_bytes(),before)
         (root/'consumer-reports.json').write_text(json.dumps(reports,indent=2))
 

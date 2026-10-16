@@ -582,15 +582,53 @@ def export_session(session_path, output_dir, *, width=1600, height=1200, dpi=300
                 raise ValueError('Session contains no molecular atoms to export')
             pm.cmd.bg_color('white' if background == 'transparent' else background)
             pm.cmd.set('ray_opaque_background', int(background != 'transparent'))
-            pm.cmd.png(str(stage / 'scene.png'), width=width, height=height, dpi=dpi, ray=int(ray), quiet=1)
-            pm.cmd.set_view(view)
-            pm.cmd.save(str(stage / 'scene.pse'))
+            from . import native_render
+            rendering = None
+            if native_render.requires_native(pm.cmd, ray):
+                if not (16 <= width <= 4096 and 16 <= height <= 4096 and dpi <= 1200):
+                    raise ValueError('Native OpenGL export requires width and height 16..4096 and dpi 1..1200; choose supported dimensions')
+                from .bundles import Bundle
+                from .external_tools import ExternalToolError
+                import uuid
+                pm.cmd.save(str(stage / 'scene.pse'))
+                # Reuse Bundle only for owned scratch and bounded failure logs.
+                # Legacy publication/overwrite stays with artifacts.commit below.
+                diagnostics = Bundle(output.parent / ('.molscene-native-' + uuid.uuid4().hex),
+                    protected=[source, stage, output], inventory=['manifest.json'])
+                try:
+                    with diagnostics:
+                        native = native_render.render_native(stage / 'scene.pse', [stage / 'scene.png'],
+                            dict(width=width, height=height, dpi=dpi, ray=ray),
+                            work_dir=diagnostics.scratch, bundle=diagnostics)
+                        rendering = native_render.report_metadata(native, stage)
+                        rendering.update(session='scene.pse', source_sha256=native['result']['source_sha256'])
+                except Exception as error:
+                    if (diagnostics.failure_path / 'failure.json').is_file():
+                        error.failure_path = str(diagnostics.failure_path)
+                        suffix = '; native diagnostics retained at ' + error.failure_path
+                        # Legacy worker reports str(error), not custom attributes.
+                        error.args = (str(error) + suffix,)
+                        if isinstance(error, OSError):
+                            error.strerror = (error.strerror or 'Native rendering failed') + suffix
+                        if isinstance(error, ExternalToolError):
+                            for stream in ('stdout', 'stderr'):
+                                retained = artifacts.checked_path(diagnostics.failure_path / 'logs' / ('native.' + stream + '.log'))
+                                if stream + '_path' in error.result:
+                                    error.result[stream + '_path'] = str(retained) if retained.is_file() else None
+                    raise
+            else:
+                pm.cmd.png(str(stage / 'scene.png'), width=width, height=height, dpi=dpi, ray=int(ray), quiet=1)
+                pm.cmd.set_view(view)
+                pm.cmd.save(str(stage / 'scene.pse'))
             replay = _Scene(pm.cmd)
             replay.lines.append("cmd.load(str(_molscene_root / 'scene.pse'))")
             replay.write_replay(stage / 'scene.pml')
             produced = dict(png='scene.png', session='scene.pse', replay='scene.pml', report='report.json', inputs=list(local.values()))
             report = _report(pm.cmd, 'export', dict(width=width, height=height, dpi=dpi,
                 background=background, ray=ray, state=state), input_report, {}, {'kind': 'export'}, produced)
+            if rendering is not None:
+                report['analysis']['rendering'] = rendering
+                report['warnings'] = native['warnings']
             digest = input_report[0]['sha256']
             report.update(snapshot_id=digest, view=view, replay_contract='bundled_session')
             fingerprint = scene_fingerprint(pm.cmd, state)
