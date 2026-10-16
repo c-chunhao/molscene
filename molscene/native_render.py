@@ -161,13 +161,13 @@ def validate_png(path, width, height):
 
 def validate_result(request, path):
     data=read_json(path)
-    required={'schema_version','request_id','source_sha256','passed','native_pid','launcher_pid','renderer',
+    required={'schema_version','request_id','source_sha256','passed','native_pid','parent_pid','renderer',
               'pymol_version','qt_binding','gl_valid','close_requested','close_event_seen','initial_view','frames'}
     if not isinstance(data,dict) or set(data)!=required: raise ValueError('Invalid native result schema')
     if (type(data['schema_version']) is not int or data['schema_version']!=1 or data['request_id']!=request['request_id'] or data['source_sha256']!=request['source_sha256']
             or any(data[key] is not True for key in ('passed','gl_valid','close_requested','close_event_seen'))):
         raise ValueError('Native renderer did not complete successfully')
-    if any(type(data[key]) is not int or data[key]<=0 for key in ('native_pid','launcher_pid')):
+    if any(type(data[key]) is not int or data[key]<=0 for key in ('native_pid','parent_pid')):
         raise ValueError('Invalid native process identity')
     if not isinstance(data['renderer'],list) or len(data['renderer'])!=3 or any(not isinstance(s,str) or not s for s in data['renderer']):
         raise ValueError('Native graphics renderer is missing')
@@ -250,5 +250,5 @@ def report_metadata(record, stage):
     return dict(backend=record['backend'],requested_ray=record['requested_ray'],effective_ray=False,
                 width=record['width'],height=record['height'],renderer=record['renderer'],
                 pymol_version=result['pymol_version'],qt_binding=result['qt_binding'],images=images,
-                process=dict(native_pid=result['native_pid'],launcher_pid=result['launcher_pid'],guardian_pid=process['guardian_pid'],
+                process=dict(native_pid=result['native_pid'],parent_pid=result['parent_pid'],guardian_pid=process['guardian_pid'],
                              returncode=process['returncode'],close_event_seen=result['close_event_seen']))

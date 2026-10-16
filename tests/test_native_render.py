@@ -98,7 +98,7 @@ class NativeRenderProtocolTests(unittest.TestCase):
             bytes=image.stat().st_size,pixels=dict(count=256,rgba_min=[20,40,60,255],rgba_max=[20,40,60,255],
             nonblack_rgb_gt3=256,opaque_pixels=256),view_before=view,view_after=view)
         return dict(schema_version=1,request_id=request['request_id'],source_sha256=request['source_sha256'],passed=True,
-            native_pid=123,launcher_pid=124,renderer=['test vendor','test renderer','test version'],pymol_version='test',
+            native_pid=123,parent_pid=124,renderer=['test vendor','test renderer','test version'],pymol_version='test',
             qt_binding='test',gl_valid=True,close_requested=True,close_event_seen=True,initial_view=view,frames=[row])
 
     def test_parent_accepts_flat_valid_image_and_rejects_corrupt_identity_or_pixels(self):
@@ -125,6 +125,30 @@ class NativeRenderProtocolTests(unittest.TestCase):
         with patch('molscene.external_tools._managed',side_effect=unsuccessful),self.assertRaises(ExternalToolError):
             native.render_native(self.source,[self.root/'frame.png'],self.spec,work_dir=self.root)
 
+    def test_process_metadata_distinguishes_renderer_parent_and_guardian(self):
+        request=self.request(); result=self.result(request); target=self.root/'result.json'
+        for parent,guardian in ((124,124),(124,125)):
+            with self.subTest(parent=parent,guardian=guardian):
+                result['parent_pid']=parent; native.write_json(target,result)
+                native.validate_result(request,target)
+                record=dict(result=result,process=dict(guardian_pid=guardian,returncode=0),backend='native_opengl',
+                            requested_ray=True,width=16,height=16,renderer=result['renderer'])
+                metadata=native.report_metadata(record,self.root)
+                self.assertEqual(metadata['process'],dict(native_pid=123,parent_pid=parent,guardian_pid=guardian,
+                                                         returncode=0,close_event_seen=True))
+        legacy=copy.deepcopy(result); legacy['launcher_pid']=legacy.pop('parent_pid'); native.write_json(target,legacy)
+        with self.assertRaises(ValueError): native.validate_result(request,target)
+
+    def test_native_evidence_directory_prefers_override_and_creates_standard_fallback(self):
+        self.assertTrue(callable(globals().get('_evidence_directory')),'native evidence directory helper required')
+        explicit=self.root/'explicit'; standard=self.root/'standard'/'nested'
+        with patch.dict(os.environ,{'MOLSCENE_NATIVE_EVIDENCE':'','MOLSCENE_TEST_ARTIFACTS':str(standard)}):
+            self.assertEqual(_evidence_directory(),standard); self.assertTrue(standard.is_dir())
+        with patch.dict(os.environ,{'MOLSCENE_NATIVE_EVIDENCE':str(explicit),'MOLSCENE_TEST_ARTIFACTS':str(standard)}):
+            self.assertEqual(_evidence_directory(),explicit); self.assertTrue(explicit.is_dir())
+        with patch.dict(os.environ,{'MOLSCENE_NATIVE_EVIDENCE':'','MOLSCENE_TEST_ARTIFACTS':''}):
+            self.assertIsNone(_evidence_directory())
+
 
 def process_alive(pid):
     if os.name=='nt':
@@ -143,6 +167,13 @@ def process_alive(pid):
     return True
 
 
+def _evidence_directory():
+    value=os.environ.get('MOLSCENE_NATIVE_EVIDENCE') or os.environ.get('MOLSCENE_TEST_ARTIFACTS')
+    if not value: return None
+    directory=Path(value); directory.mkdir(parents=True,exist_ok=True)
+    return directory
+
+
 @unittest.skipUnless(os.environ.get('MOLSCENE_REQUIRE_ADVANCED')=='1' or os.environ.get('MOLSCENE_NATIVE_RENDER')=='1',
                      'requires allocated native desktop focus')
 class NativeRenderTests(unittest.TestCase):
@@ -154,7 +185,7 @@ class NativeRenderTests(unittest.TestCase):
         from PIL import Image, ImageChops
         from molscene.timeline import new_timeline,capture_keyframe,edit_keyframe
         from molscene.bundles import Bundle,CancelledError
-        evidence=os.environ.get('MOLSCENE_NATIVE_EVIDENCE')
+        evidence=_evidence_directory()
         if evidence:
             root=Path(tempfile.mkdtemp(prefix='run-',dir=evidence))
         else:
@@ -185,7 +216,7 @@ class NativeRenderTests(unittest.TestCase):
         self.assertEqual(data['frames'][1]['pixels']['nonblack_rgb_gt3'],0)
         with Image.open(root/'a.png') as a,Image.open(root/'b.png') as b:
             self.assertEqual(a.size,(128,128)); self.assertIsNotNone(ImageChops.difference(a.convert('RGB'),b.convert('RGB')).getbbox())
-        for pid in (data['native_pid'],data['launcher_pid'],result['process']['guardian_pid']):
+        for pid in (data['native_pid'],data['parent_pid'],result['process']['guardian_pid']):
             self.assertFalse(process_alive(pid),f'owned successful process {pid} survived')
         cancelled=[False]; events=[]
         def progress(event):
@@ -201,7 +232,7 @@ class NativeRenderTests(unittest.TestCase):
         self.assertFalse(destination.exists()); self.assertTrue(events)
         failures=list(root.glob('.molscene-failure-*/logs/native.result.log')); self.assertEqual(len(failures),1)
         cancelled_result=native.read_json(failures[0]); self.assertFalse(cancelled_result['passed'])
-        for pid in (cancelled_result['native_pid'],cancelled_result['launcher_pid']):
+        for pid in (cancelled_result['native_pid'],cancelled_result['parent_pid']):
             self.assertFalse(process_alive(pid),f'owned cancelled process {pid} survived')
         (root/'evidence.json').write_text(json.dumps(dict(success=result,cancelled=cancelled_result,events=events),indent=2))
         # Exercise public consumers, including a volume disabled at export time

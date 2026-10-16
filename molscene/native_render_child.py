@@ -40,7 +40,7 @@ def install():
     from molscene.timeline import validate_timeline,seek_timeline
     request=_request; work=Path(request['work_dir']); window=get_qtwindow()
     result=dict(schema_version=1,request_id=request['request_id'],source_sha256=request['source_sha256'],
-                passed=False,native_pid=os.getpid(),launcher_pid=os.getppid(),renderer=None,
+                passed=False,native_pid=os.getpid(),parent_pid=os.getppid(),renderer=None,
                 pymol_version=cmd.get_version()[0],qt_binding=PYQT_NAME,gl_valid=False,
                 close_requested=False,close_event_seen=False,initial_view=None,frames=[])
     def save(): write_json(work/'result.json',result)
