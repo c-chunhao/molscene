@@ -16,8 +16,15 @@ python examples/reproduce_v05.py --output results/gallery-v05
 值为 8..48，同一对象/状态中的其它标签也共享大小。文字/颜色附着于原子身份，普通坐标
 状态之间共享。[操作与格式限制](docs/GUI.md#v05-daily-controls)、[科学边界](docs/INTERNALS.md#v05-polar-label-and-persistence-contracts)。
 
-下方图像及测试数字保留历史版本标识。[v0.5 验收要求](docs/TESTING.md#v05-release-acceptance)
-不是已完成验收的声明；示例运行不替代原生 GUI、真实外部求解器或最终公开提交的 CI。
+下方先展示 v0.5 示例，之后保留旧版图像和数字的版本标识。[测试记录](docs/TESTING.md)
+分别记录源码、独立安装包、原生桌面和公开提交的 CI 验证。
+
+| v0.5 引导式残基标签 | v0.5 极性接触候选 |
+| --- | --- |
+| ![泛素的引导式标签](docs/screenshots/guided-labels-v05.png) | ![合成片段的氮氧接触候选](docs/screenshots/polar-fragments-v05.png) |
+
+实际 PyMOL CPU ray 输出：左为固定 1UBQ 结构的前五个观测残基；右为原创合成胺/羰基片段，
+N–O 距离 3.0 Å，氮为蓝色、氧为红色。[复现完整结果与回放](examples/README.md)。
 
 **在 PyMOL 原生桌面中完成结构分析与可复现制图。**
 

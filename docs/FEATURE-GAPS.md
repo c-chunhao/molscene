@@ -4,7 +4,7 @@
 
 Assessment: 2026-10-16. The table distinguishes native command availability from
 an integrated MolScene contract and from actual recorded release acceptance.
-The [testing record](TESTING.md#v05-release-acceptance) lists remaining final gates;
+The [testing record](TESTING.md#v05-release-acceptance) separates required gates and recorded runs;
 historical v0.4 successes do not establish v0.5 source/package/native/CI success.
 
 | Workflow | Native PyMOL capability | v0.4 baseline | v0.5 integrated contract | Remaining boundary |
@@ -140,5 +140,5 @@ assembly, trajectory analysis and specialized commercial components remain open.
 - [Public querying implementation](https://github.com/schrodinger/pymol-open-source/blob/master/modules/pymol/querying.py)
 - [Historical release features, explicitly versioned](https://pymol.org/features.html)
 
-本报告优先解决日常制图与分析中的操作障碍。商业版还有动画时间线、专用格式、
-建模及其他组件；本轮不将原生窗口中存在的命令包装成已经由 MolScene 验证的功能。
+本轮优先完善常用制图、分析与保存。相机/状态时间线、密度配准和 LPBE 电势沿用
+v0.4 的范围；多轨编辑、轨迹统计、化学建模和专用格式仍按上表列为后续工作。

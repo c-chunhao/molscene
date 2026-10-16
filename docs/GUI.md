@@ -2,6 +2,13 @@
 
 ## v0.5 daily controls
 
+![v0.5 guided-label controls in the native Qt window](screenshots/daily-controls-v05.png)
+
+Actual v0.5 Windows/Qt6 native capture with a 360-logical-pixel dock. The bonded
+synthetic fixture and literal `B:Q'R7` label exercise the polar and label controls.
+The capture is preserved without pixel edits; source/native test identity and
+save/reload/cancellation evidence are recorded in [TESTING](TESTING.md).
+
 The five pages keep their order: **Structure, Figure, Analysis, Results,
 Advanced**. At 360–540 logical pixels the full-name page selector replaces the
 tab bar; widening the dock restores tabs. Both routes stay synchronized. During

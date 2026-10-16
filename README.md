@@ -20,10 +20,17 @@ preview exact targets before applying; native positive `label_size` 8..48 is
 shared by labels in each affected object/state. Text/color belong to atom
 identities shared across ordinary coordinate states. [Daily controls](docs/GUI.md#v05-daily-controls).
 
-The images and measured acceptance records below retain their original release
-labels. [v0.5 release gates](docs/TESTING.md#v05-release-acceptance) distinguish
-required execution from historical evidence; gallery generation alone does not
-establish native GUI, external solver or final hosted-CI acceptance.
+The first gallery shows v0.5 examples. Older figures and records retain their
+release labels. [Validation](docs/TESTING.md) records source, installed-package,
+native desktop and hosted-CI checks separately.
+
+| v0.5 guided residue labels | v0.5 typed polar candidate |
+| --- | --- |
+| ![Guided labels on ubiquitin](docs/screenshots/guided-labels-v05.png) | ![Synthetic bonded nitrogen–oxygen candidate](docs/screenshots/polar-fragments-v05.png) |
+
+Actual PyMOL CPU-ray output: the first five observed residues of pinned 1UBQ,
+and original bonded amine/carbonyl fragments with a 3.0 Å N–O separation.
+Nitrogen is blue and oxygen red. [Reproduce the complete bundles](examples/README.md).
 
 [![Tests](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-chunhao/molscene/actions/workflows/ci.yml)
 
