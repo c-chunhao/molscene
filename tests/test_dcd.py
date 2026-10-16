@@ -63,6 +63,47 @@ class DCDTests(unittest.TestCase):
         self.assertEqual(metadata['native_mapping'],[dict(source_frame=i,state=i) for i in range(1,7)])
 
     @unittest.skipUnless(importlib.util.find_spec('pymol2') is not None,'requires user PyMOL')
+    def test_native_unicode_directory_and_basename_preserve_all_frames_and_input_bytes(self):
+        import pymol2
+        root=Path(self.temp.name)/"中文 ' directory"; root.mkdir()
+        for filename in ('trajectory.dcd',"轨迹 ' original.dcd"):
+            with self.subTest(filename=filename), pymol2.PyMOL() as pm:
+                path=root/filename; path.write_bytes(original_dcd()); before=path.read_bytes()
+                c=pm.cmd
+                for i,name in enumerate(('Z9','A1','Y8','B2')):
+                    c.pseudoatom('topology',name=name,resi=str(i+1),pos=[-900,-900,-900])
+                identities=[(a.index,a.name,a.resi,a.resn,a.chain,a.segi,a.symbol,a.alt) for a in c.get_model('topology').atom]
+                cwd=Path.cwd(); metadata=dcd.load_dcd(c,'topology',path)
+                self.assertEqual(Path.cwd(),cwd)
+                self.assertEqual(c.count_states('topology'),6)
+                for state,expected in enumerate(ORACLE,1):
+                    self.assertEqual(c.get_coordset('topology',state).tolist(),expected)
+                    self.assertEqual([(a.index,a.name,a.resi,a.resn,a.chain,a.segi,a.symbol,a.alt) for a in c.get_model('topology',state).atom],identities)
+                self.assertEqual(path.read_bytes(),before)
+                self.assertEqual(set(root.iterdir()),{root/name for name in ('trajectory.dcd',filename)})
+                self.assertEqual(len(metadata['native_mapping']),6)
+
+    @unittest.skipUnless(importlib.util.find_spec('pymol2') is not None,'requires user PyMOL')
+    def test_native_failure_restores_cwd_and_does_not_modify_unicode_input(self):
+        import pymol2
+        path=Path(self.temp.name)/"轨迹 ' original.dcd"; path.write_bytes(original_dcd())
+        before=path.read_bytes(); cwd=Path.cwd()
+        # Only failure injection is doubled; successful imports use the real
+        # native plugin in the coordinate tests above.
+        for failure in (OSError('native open failed'),-1):
+            with self.subTest(failure=failure), pymol2.PyMOL() as pm:
+                for i in range(4): pm.cmd.pseudoatom('topology',name='C'+str(i),resi=str(i+1))
+                class FailingNative:
+                    def __getattr__(self,name): return getattr(pm.cmd,name)
+                    def load_traj(self,*args,**kwargs):
+                        if isinstance(failure,Exception): raise failure
+                        return failure
+                with self.assertRaisesRegex(ValueError,'Native load_traj'):
+                    dcd.load_dcd(FailingNative(),'topology',path)
+                self.assertEqual(Path.cwd(),cwd)
+                self.assertEqual(path.read_bytes(),before)
+
+    @unittest.skipUnless(importlib.util.find_spec('pymol2') is not None,'requires user PyMOL')
     def test_archived_original_pdb_dcd_pair_order_and_all_coordinates(self):
         import json
         import pymol2

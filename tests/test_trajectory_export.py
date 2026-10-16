@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 import re
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import xml.etree.ElementTree as ET
 try:
     from molscene import trajectory_export, trajectory_plots
@@ -73,9 +76,109 @@ class ExportTests(unittest.TestCase):
         report=trajectory_export.export_trajectory(topology,self.root/'dcd',req)
         self.assertEqual([r['source_frame'] for r in report['frames']],[2,4,6])
         self.assertEqual(sha256(dcd),digest)
-        self.pm.cmd.reinitialize(); self.pm.cmd.do('@'+str(self.root/'dcd/replay.pml'))
-        self.assertEqual(self.pm.cmd.count_states('m'),6)
-        self.assertEqual(self.pm.cmd.get_coordset('m',1).tolist(),ORACLE[0])
+        before={p.relative_to(self.root/'dcd').as_posix():sha256(p) for p in (self.root/'dcd').rglob('*') if p.is_file()}
+        relocated=self.root/"relocated 中文 ' bundle"; shutil.move(self.root/'dcd',relocated)
+        replay=self._standalone_replay(relocated)
+        self.assertTrue(replay['molscene_blocked'])
+        self.assertEqual(replay['cwd_before'],str(self.root.resolve()))
+        self.assertEqual(replay['cwd_after'],replay['cwd_before'])
+        self.assertEqual(replay['states'],6)
+        self.assertEqual(replay['coordinates'],ORACLE)
+        self.assertEqual(replay['names'],[['C1','C2','C3','C4']]*6)
+        self.assertEqual({p.relative_to(relocated).as_posix():sha256(p) for p in relocated.rglob('*') if p.is_file()},before)
+        manifest=json.loads((relocated/'manifest.json').read_text('utf-8'))
+        self.assertEqual(set(manifest['files']),set(before)-{'manifest.json'})
+        for name,record in manifest['files'].items(): self.assertEqual(before[name],record['sha256'])
+
+    def _standalone_replay(self,relocated):
+        # A fresh isolated interpreter has no source checkout on sys.path. The
+        # import guard also rejects an installed MolScene during actual replay.
+        code='''import builtins,json,os,sys
+from pathlib import Path
+import pymol2
+original_import=builtins.__import__
+def guarded(name,*args,**kwargs):
+    if name=='molscene' or name.startswith('molscene.'):
+        raise ImportError('MolScene deliberately unavailable')
+    return original_import(name,*args,**kwargs)
+builtins.__import__=guarded
+try:
+    import molscene
+except ImportError:
+    blocked=True
+else:
+    raise AssertionError('MolScene import was not blocked')
+before=os.getcwd()
+with pymol2.PyMOL() as pm:
+    c=pm.cmd
+    c.do('@'+str(Path(sys.argv[1])/'replay.pml'),echo=0)
+    states=c.count_states('m')
+    result=dict(molscene_blocked=blocked,cwd_before=before,cwd_after=os.getcwd(),states=states,
+                coordinates=[c.get_coordset('m',state).tolist() for state in range(1,states+1)],
+                names=[[a.name for a in c.get_model('m',state).atom] for state in range(1,states+1)])
+print('REPLAY_RESULT='+json.dumps(result))
+'''
+        process=subprocess.run([sys.executable,'-I','-B','-c',code,str(relocated)],cwd=self.root,capture_output=True,text=True,encoding='utf-8',timeout=60)
+        self.assertEqual(process.returncode,0,process.stdout+process.stderr)
+        result=next((line.removeprefix('REPLAY_RESULT=') for line in process.stdout.splitlines() if line.startswith('REPLAY_RESULT=')),None)
+        self.assertIsNotNone(result,process.stdout+process.stderr)
+        return json.loads(result)
+
+    def test_dcd_unicode_export_preserves_original_bytes_and_all_native_coordinates(self):
+        from tests.test_dcd import original_dcd, ORACLE
+        directory=self.root/"输出 中文 ' directory"; directory.mkdir()
+        self.pm.cmd.delete_states('m','2'); topology=directory/"原始 ' topology.pse"; self.pm.cmd.save(str(topology))
+        dcd=directory/"轨迹 ' original.dcd"; dcd.write_bytes(original_dcd())
+        originals={p:p.read_bytes() for p in (self.source,topology,dcd)}
+        old=Path.cwd()
+        report=trajectory_export.export_trajectory(topology,directory/'bundle',dict(self.request,trajectory_path=str(dcd),align=False))
+        self.assertEqual(Path.cwd(),old)
+        self.assertEqual(report['dcd']['native_mapping'],[dict(source_frame=i,state=i) for i in range(1,7)])
+        self.assertEqual((directory/'bundle/inputs/trajectory.dcd').read_bytes(),originals[dcd])
+        self.assertEqual((directory/'bundle/source.pse').read_bytes(),originals[topology])
+        replay=self._standalone_replay(directory/'bundle')
+        self.assertEqual(replay['coordinates'],ORACLE)
+        for path,data in originals.items(): self.assertEqual(path.read_bytes(),data)
+
+    def test_dcd_replay_restores_caller_cwd_on_native_file_failure(self):
+        from tests.test_dcd import original_dcd
+        self.pm.cmd.delete_states('m','2'); topology=self.root/'topology.pse'; self.pm.cmd.save(str(topology))
+        dcd=self.root/'input.dcd'; dcd.write_bytes(original_dcd())
+        trajectory_export.export_trajectory(topology,self.root/'dcd',dict(self.request,trajectory_path=str(dcd),align=False))
+        relocated=self.root/"missing 中文 ' bundle"; shutil.move(self.root/'dcd',relocated)
+        (relocated/'inputs/trajectory.dcd').unlink()
+        replay=self._standalone_replay(relocated)
+        self.assertEqual(replay['states'],1)
+        self.assertEqual(replay['cwd_after'],replay['cwd_before'])
+
+    def test_cancelled_unicode_dcd_import_never_publishes_and_restores_cwd(self):
+        from tests.test_dcd import original_dcd
+        directory=self.root/"取消 中文 ' directory"; directory.mkdir()
+        self.pm.cmd.delete_states('m','2'); topology=directory/'topology.pse'; self.pm.cmd.save(str(topology))
+        dcd=directory/"轨迹 ' original.dcd"; dcd.write_bytes(original_dcd())
+        originals={path:path.read_bytes() for path in (topology,dcd)}; stopped=[]; cwd=Path.cwd()
+        def progress(event):
+            if event['stage']=='import_dcd': stopped.append(True)
+        with self.assertRaises(CancelledError):
+            trajectory_export.export_trajectory(topology,directory/'cancelled',dict(self.request,trajectory_path=str(dcd),align=False),
+                cancelled=lambda:bool(stopped),progress=progress)
+        self.assertEqual(Path.cwd(),cwd)
+        self.assertFalse((directory/'cancelled').exists())
+        for path,data in originals.items(): self.assertEqual(path.read_bytes(),data)
+
+    def test_native_dcd_error_status_never_publishes_and_restores_cwd(self):
+        import pymol
+        from tests.test_dcd import original_dcd
+        directory=self.root/"native error 中文 ' directory"; directory.mkdir()
+        self.pm.cmd.delete_states('m','2'); topology=directory/'topology.pse'; self.pm.cmd.save(str(topology))
+        dcd=directory/"轨迹 ' original.dcd"; dcd.write_bytes(original_dcd())
+        originals={path:path.read_bytes() for path in (topology,dcd)}; cwd=Path.cwd()
+        # Force only the native error return; never simulate successful loads.
+        with patch.object(pymol.cmd,'load_traj',return_value=-1), self.assertRaisesRegex(ValueError,'Native load_traj'):
+            trajectory_export.export_trajectory(topology,directory/'failed',dict(self.request,trajectory_path=str(dcd),align=False))
+        self.assertEqual(Path.cwd(),cwd)
+        self.assertFalse((directory/'failed').exists())
+        for path,data in originals.items(): self.assertEqual(path.read_bytes(),data)
 
 
     def test_dcd_count_mismatch_and_multistate_topology_rejected(self):

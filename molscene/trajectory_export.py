@@ -11,14 +11,20 @@ from .trajectory_plots import write_trajectory_plots
 
 def _replay(path,request,dcd_metadata):
     lines=['# Standalone trajectory replay: original coordinates, no fitting.','python',
-           'from pathlib import Path','_trajectory_root = Path(__script__).resolve().parent',
-           "cmd.load(str(_trajectory_root / 'source.pse'), format='pse')"]
+           'from pathlib import Path','import os','_trajectory_root = Path(__script__).resolve().parent',
+           '_trajectory_cwd = os.getcwd()','try:','    os.chdir(_trajectory_root)',
+           "    cmd.load('source.pse', format='pse')"]
     if dcd_metadata is not None:
-        lines.append("cmd.load_traj(str(_trajectory_root / 'inputs/trajectory.dcd'), "+repr(request['object_name'])+
+        lines.append("    _trajectory_status = cmd.load_traj('inputs/trajectory.dcd', "+repr(request['object_name'])+
                      ', state=1, format="dcd", interval=1, start=1, stop='+str(dcd_metadata['frame_count'])+
                      ', max='+str(dcd_metadata['frame_count'])+', selection="all", image=0, average=1)')
-    lines.extend(['python end',''])
-    path.write_text('\n'.join(lines),encoding='utf-8')
+        lines.extend(['    if _trajectory_status not in (None, 0):',
+                      "        raise RuntimeError('Native DCD replay returned an error status')",
+                      '    if cmd.count_states('+repr('%'+request['object_name'])+') != '+str(dcd_metadata['frame_count'])+
+                      ' or cmd.count_atoms('+repr('%'+request['object_name'])+') != '+str(dcd_metadata['atom_count'])+':',
+                      "        raise RuntimeError('Native DCD replay count/topology verification failed')"])
+    lines.extend(['finally:','    os.chdir(_trajectory_cwd)','python end',''])
+    path.write_text('\n'.join(lines),encoding='utf-8',newline='\n')
 
 
 def export_trajectory(input_session,output_dir,request,*,cancelled=None,progress=None,protected=(),source_input=None):

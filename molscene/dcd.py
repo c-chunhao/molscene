@@ -4,8 +4,12 @@ Loading is only for an exporter-owned private PyMOL instance. This function
 replaces the private topology's coordinates; never call it on the user's source.
 """
 import math
+import os
 from pathlib import Path
+from contextlib import contextmanager, ExitStack
+import shutil
 import struct
+import tempfile
 from .artifacts import checked_path, sha256
 from .trajectory import MAX_FRAMES, MAX_ATOMS, MAX_SAMPLES, trajectory_topology, _cancel, _key
 
@@ -69,20 +73,49 @@ def scan_dcd(path,*,cancelled=None):
                 atom_order_requirement=ORDER_REQUIREMENT)
 
 
+@contextmanager
+def _native_path(path,digest):
+    """Keep Unicode out of the native plugin's narrow filename API.
+
+    Python can enter a Unicode directory on Windows even when the plugin
+    cannot open its absolute path. A Unicode basename needs an owned ASCII
+    copy as well. Only the synchronous native call runs with changed cwd.
+    """
+    if str(path).isascii():
+        yield str(path)
+        return
+    with ExitStack() as stack:
+        directory=path.parent; filename=path.name
+        if not filename.isascii():
+            directory=Path(stack.enter_context(tempfile.TemporaryDirectory(prefix='molscene-dcd-')))
+            filename='trajectory.dcd'
+            shutil.copyfile(path,directory/filename)
+            if sha256(directory/filename)!=digest: raise ValueError('DCD input changed during native copy')
+        previous=Path.cwd()
+        try:
+            os.chdir(directory)
+            yield filename
+        finally:
+            os.chdir(previous)
+
+
 def load_dcd(cmd,object_name,path,*,cancelled=None,progress=None):
     """Import ALL decoded frames into an isolated private single-state topology.
 
     Explicit state=1 replaces the topology state. Independently decoded native
     coordinates and complete original identities are verified at every state.
     """
+    path=checked_path(path)
     topology=trajectory_topology(cmd,object_name); metadata=scan_dcd(path,cancelled=cancelled)
     if metadata['atom_count']!=len(topology): raise ValueError('DCD atom count does not match complete topology')
     _cancel(cancelled)
     n=metadata['frame_count']
-    try:
-        cmd.load_traj(str(checked_path(path)),object_name,state=1,format='dcd',interval=1,
-                      start=1,stop=n,max=n,selection='all',image=0,average=1)
-    except Exception as exc: raise ValueError('Native load_traj cannot load the validated DCD subset: '+str(exc)) from exc
+    with _native_path(path,metadata['sha256']) as filename:
+        try:
+            status=cmd.load_traj(filename,object_name,state=1,format='dcd',interval=1,
+                                 start=1,stop=n,max=n,selection='all',image=0,average=1)
+            if status not in (None,0): raise ValueError('Native load_traj returned an error status')
+        except Exception as exc: raise ValueError('Native load_traj cannot load the validated DCD subset: '+str(exc)) from exc
     if cmd.count_states('%'+object_name)!=n or cmd.count_atoms('%'+object_name)!=len(topology):
         raise ValueError('Native DCD count/topology verification failed')
     identities=[_key(a) for a in topology]
