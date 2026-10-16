@@ -361,3 +361,98 @@ with pymol2.PyMOL() as p:
         with self.assertRaises(ValueError):
             density.register_density(self.c,record,dict(kind='matrix',matrix=D,copy_name='registered'))
         self.assertNotIn('registered',self.c.get_names('objects'))
+
+    def test_matrix_mode_two_alignment_rejected_in_isolated_process(self):
+        record=self.load_origin(); self.models()
+        session=self.root/'source.pse'; self.c.save(str(session))
+        record_path=self.root/'record.json'; record_path.write_text(json.dumps(record))
+        code='''import hashlib,json,pathlib,sys,pymol2
+from molscene import density,density_export
+root=pathlib.Path(sys.argv[1]); record=json.loads((root/'record.json').read_text())
+request=dict(kind='align',mobile='mobile',target='target',mobile_state=2,target_state=2,cycles=0,model_copy_name='aligned',copy_name='registered')
+for scope in ('global','mobile','target'):
+ with pymol2.PyMOL() as p:
+  c=p.cmd; c.load(str(root/'source.pse'))
+  c.set('matrix_mode',2)
+  c.transform_object('mobile',[1,0,0,5,0,1,0,6,0,0,1,7,0,0,0,1],state=2,homogenous=1,transpose=0)
+  if scope!='global':
+   c.set('matrix_mode',1); c.set('matrix_mode',2,scope)
+  def capture():
+   return dict(names=c.get_names('all'),global_mode=c.get_setting_int('matrix_mode'),
+    molecules={name:dict(matrix=list(c.get_object_matrix(name,state=2)),ttt=c.get_object_ttt(name),coords=[a.coord for a in c.get_model('%'+name,state=2).atom],mode=c.get_setting_int('matrix_mode',name,state=2)) for name in ('mobile','target')})
+  before=capture()
+  for algorithm in ('align','super'):
+   try: density.register_density(c,record,dict(request,algorithm=algorithm))
+   except ValueError as exc: assert 'matrix_mode' in str(exc),str(exc)
+   else: raise AssertionError('unsupported matrix_mode reached native alignment')
+   assert capture()==before
+  # The independent numeric registration path remains usable in mode2.
+  result=density.register_density(c,record,dict(kind='matrix',matrix=[0,-1,0,11,1,0,0,-7,0,0,1,3,0,0,0,1],copy_name='numeric'))
+  assert result['copy']=='numeric'; c.delete('numeric'); assert capture()==before
+  if scope=='global': c.save(str(root/'unsupported.pse'))
+source=root/'unsupported.pse'; digest=hashlib.sha256(source.read_bytes()).hexdigest()
+try:
+ density_export.export_density(source,root/'bad_bundle',dict(map_path=record['source_path'],format='mrc',interpretation='origin',registration=request,render=dict(width=32,height=32)))
+except ValueError as exc: assert 'matrix_mode' in str(exc),str(exc)
+else: raise AssertionError('unsupported alignment export succeeded')
+assert not (root/'bad_bundle').exists()
+assert not list(root.glob('.molscene-stage-*')) and not list(root.glob('.molscene-scratch-*'))
+assert hashlib.sha256(source.read_bytes()).hexdigest()==digest
+print('mode2 controlled rejection; source matrices/coordinates/settings preserved; numeric registration passes')
+'''
+        result=subprocess.run([sys.executable,'-u','-B','-X','faulthandler','-c',code,str(self.root)],
+            cwd=Path(__file__).resolve().parents[1],capture_output=True,text=True,timeout=45)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+
+    def test_transformed_model_mode_one_replay_in_isolated_process(self):
+        self.load_origin(); self.models()
+        code='''import builtins,hashlib,json,math,pathlib,sys,pymol2
+from molscene import density_export
+root=pathlib.Path(sys.argv[1]); case=sys.argv[2]
+request=dict(map_path=str(root/'source.mrc'),format='mrc',interpretation='origin',
+ registration=dict(kind='align',mobile='mobile',target='target',mobile_state=2,target_state=2,cycles=0,model_copy_name='aligned',copy_name='registered'),
+ display=dict(kind='mesh',level=100),render=dict(width=32,height=32))
+digest=hashlib.sha256((root/'transformed.pse').read_bytes()).hexdigest()
+report=density_export.export_density(root/'transformed.pse',root/('bundle_'+case),request)
+bundle=root/('bundle_'+case)
+assert hashlib.sha256((root/'transformed.pse').read_bytes()).hexdigest()==digest
+expected_world=[0,-1,0,17,1,0,0,-12,0,0,1,-4,0,0,0,1] if case=='translation' else [0,-1,0,17,0,0,-1,0,1,0,0,-2,0,0,0,1]
+delta=report['analysis']['density']['registration']['world_transform']
+assert max(abs(a-b) for a,b in zip(delta,expected_world))<=1e-4,(delta,expected_world)
+base=[(0,0,0),(1,2,0),(3,1,2),(4,4,1),(6,3,4),(7,6,2)]
+expected_atoms=[[-y+11,x-7,z+3] for x,y,z in base]
+expected_source=[[x+5,y+6,z+7] if case=='translation' else [z+5,y+6,7-x] for x,y,z in base]
+def capture(c):
+ assert c.get_setting_int('matrix_mode')==1
+ source=[a.coord for a in c.get_model('mobile',state=2).atom]
+ assert max(math.dist(a,b) for a,b in zip(source,expected_source))<=1e-4
+ atoms=[a.coord for a in c.get_model('aligned',state=1).atom]
+ assert max(math.dist(a,b) for a,b in zip(atoms,expected_atoms))<=1e-4,atoms
+ assert not any(n.startswith('density_replay_check') for n in c.get_names('all'))
+ return dict(atoms=atoms,matrix=list(c.get_object_matrix('aligned',state=1)),source_matrix=list(c.get_object_matrix('mobile',state=2)),map_matrix=list(c.get_object_matrix('registered',state=1)),source=source)
+with pymol2.PyMOL() as p:
+ p.cmd.load(str(bundle/'scene.pse')); expected=capture(p.cmd)
+original=builtins.__import__
+def standalone(name,*args,**kwargs):
+ if name=='molscene' or name.startswith('molscene.'): raise ImportError('MolScene unavailable during replay')
+ return original(name,*args,**kwargs)
+builtins.__import__=standalone
+with pymol2.PyMOL() as p:
+ body=(bundle/'replay.pml').read_text().split('python\\n',1)[1].rsplit('python end',1)[0]
+ exec(compile(body,'replay.pml','exec'),{'cmd':p.cmd,'__script__':str(bundle/'replay.pml')})
+ actual=capture(p.cmd)
+ for key in ('matrix','map_matrix','source_matrix'):
+  assert max(abs(a-b) for a,b in zip(actual[key],expected[key]))<=1e-4,(key,actual[key],expected[key])
+print('supported '+case+' state-matrix alignment and standalone replay agree; sources/settings preserved')
+'''
+        for case,matrix in [('translation',[1,0,0,5,0,1,0,6,0,0,1,7,0,0,0,1]),
+                            ('rotation',[0,0,1,5,0,1,0,6,-1,0,0,7,0,0,0,1])]:
+            with self.subTest(case=case):
+                self.c.set('matrix_mode',2)
+                self.c.matrix_reset('mobile',state=2,mode=2)
+                self.c.transform_object('mobile',matrix,state=2,homogenous=1,transpose=0)
+                self.c.set('matrix_mode',1)
+                self.c.save(str(self.root/'transformed.pse'))
+                result=subprocess.run([sys.executable,'-u','-B','-X','faulthandler','-c',code,str(self.root),case],
+                    cwd=Path(__file__).resolve().parents[1],capture_output=True,text=True,timeout=45)
+                self.assertEqual(result.returncode,0,result.stdout+result.stderr)

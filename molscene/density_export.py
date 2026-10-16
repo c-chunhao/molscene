@@ -84,7 +84,7 @@ def _write_replay(path,metadata,has_session):
         if alignment is not None:
             args=alignment['parameters']; model=args['model_copy_name']
             lines.append(f"cmd.create({model!r}, {'%'+args['mobile']!r}, source_state={args['mobile_state']}, target_state=1, zoom=0)")
-            lines.append(f"cmd.transform_object({model!r}, {ascii(registration['world_transform'])}, state=1, homogenous=1, transpose=0)")
+            lines.append(f"cmd.transform_object({model!r}, {ascii(alignment['replay_transform'])}, state=1, homogenous=1, transpose=0)")
         rec=registration['record']
         lines.extend(_load_lines(rec['name'],rec['source_path'],rec['format'],1))
         transform=list(compose(inverse_affine(rec['load_matrix']),rec['world_matrix']))
@@ -183,7 +183,8 @@ def export_density(session_path,output_dir,request,*,cancelled=None,progress=Non
             source_fingerprints=fingerprints,advanced_fingerprints=dict(files={k:v['sha256'] for k,v in inputs.items()},
                 maps=advanced_maps,timeline=None,display_snapshot=snapshot,selection=None,session_epoch=None),
             limitations=['Rigid registration maps coordinate frames; it does not optimize density correlation, refine atoms, or assess experimental quality.',
-                          'Raw map values have unknown units unless separately established. Bounds are geometric diagnostics only.'],warnings=[],
+                          'Raw map values have unknown units unless separately established. Bounds are geometric diagnostics only.',
+                          'Aligned-copy registration requires global, mobile and target matrix_mode -1, 0 or 1; mode2 is unsupported.'],warnings=[],
             artifact_hashes={name:sha256(bundle.stage/name) for name in inventory if name not in ('report.json','manifest.json')})
         write_json(bundle.stage/'report.json',report)
         stage('publish',5,'Publishing validated density bundle')

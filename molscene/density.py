@@ -350,6 +350,55 @@ def _bounds(grid,current,loaded):
                 corners=corners,meaning='Geometric bounds only; not evidence of density fit')
 
 
+def _alignment_modes(cmd, request):
+    """Reject the native state-matrix alignment path before creating objects.
+
+    PyMOL 3.2 can access-violate inside align/super with matrix_mode=2,
+    including identity sources. Changing that setting also changes the source
+    coordinate frame, so never silently override global or source settings.
+    """
+    modes = {'global': cmd.get_setting_int('matrix_mode')}
+    for role in ('mobile', 'target'):
+        modes[role] = cmd.get_setting_int('matrix_mode', request[role],
+                                         state=request[role+'_state'])
+    if any(mode not in (-1, 0, 1) for mode in modes.values()):
+        raise ValueError('Density alignment supports matrix_mode -1, 0 or 1 only; '
+                         'matrix_mode=2 is unsafe in the native alignment backend. '
+                         'Use numeric rigid registration or a separately prepared supported snapshot.')
+    return modes
+
+
+def _verify_model_replay(cmd, request, model, before, after, delta, expected, owned):
+    """Measure a reconstruction before publishing a native replay matrix.
+
+    Molecules in mode1 require forward conjugation, unlike map transforms.
+    This behavior is checked on every reconstruction against both coordinates
+    and the effective matrix, rather than assumed from a backend version.
+    """
+    mode = cmd.get_setting_int('matrix_mode', model, state=1)
+    if mode not in (-1, 0, 1):
+        raise ValueError('Copied molecule has unsupported matrix_mode')
+    replay = compose(compose(before, delta), inverse_affine(before)) if mode == 1 else delta
+    name = _unique(cmd, 'density_replay_check')
+    owned.append(name)
+    try:
+        cmd.create(name, '%'+request['mobile'], source_state=request['mobile_state'],
+                   target_state=1, zoom=0)
+        if not _close(_matrix(cmd, name, 1), before):
+            raise ValueError('Molecular replay copy does not reproduce its source matrix')
+        cmd.transform_object(name, list(replay), state=1, homogenous=1, transpose=0)
+        actual = _atoms(cmd, name, 1)
+        if len(actual) != len(expected):
+            raise ValueError('Molecular replay changed atom membership')
+        error = max(math.dist(a, b) for a, b in zip(actual, expected))
+        if error > 1e-4 or not _close(_matrix(cmd, name, 1), after):
+            raise ValueError('Native molecular replay does not reproduce the verified alignment')
+        return mode, list(replay), error
+    finally:
+        if name in cmd.get_names('objects'):
+            cmd.delete(name)
+
+
 def register_density(cmd,record,registration):
     request=validate_registration(registration)
     grid=_verify_record(cmd,record)
@@ -359,6 +408,7 @@ def register_density(cmd,record,registration):
     before=_matrix(cmd,record['name'],record['state'])
     alignment=None; owned=[]
     if request['kind']=='align':
+        _alignment_modes(cmd, request)
         _new_name(cmd,request['model_copy_name'])
         for role in ('mobile','target'):
             _controlled(cmd,request[role])
@@ -379,9 +429,12 @@ def register_density(cmd,record,registration):
             if len(atom_before)!=len(atom_after): raise ValueError('Alignment changed atom membership')
             error=max(math.dist(_point(delta,a),b) for a,b in zip(atom_before,atom_after))
             if error>1e-4: raise ValueError('Alignment matrix does not explain every copied atom')
+            mode, replay, replay_error = _verify_model_replay(
+                cmd, request, model, matrix_before, matrix_after, delta, atom_after, owned)
             alignment=dict(parameters=request,before_matrix=matrix_before,after_matrix=matrix_after,world_transform=delta,
                 model_copy=model,atom_count=len(atom_before),rmsd=float(stats[0]),aligned_atoms=int(stats[1]),
-                statistics=[float(v) for v in stats],max_atom_error_angstrom=error,source_fingerprints=fingerprints)
+                statistics=[float(v) for v in stats],max_atom_error_angstrom=error,source_fingerprints=fingerprints,
+                matrix_mode=mode,replay_transform=replay,max_replay_atom_error_angstrom=replay_error)
         name=request['copy_name']; owned.append(name)
         copy=load_density(cmd,record['source_path'],format=record['format'],interpretation=record['interpretation'] if record['format']!='dx' else 'auto',name=name,state=1,units=grid.value_unit)
         # Reload selected source state as a single-state copy, then reproduce its
