@@ -93,7 +93,141 @@ def _parser():
     selftest = commands.add_parser('selftest', help='Run offline geometry, rendering, session, and replay checks')
     selftest.add_argument('--output', required=True)
     selftest.add_argument('--overwrite', action='store_true')
+    _advanced_parsers(commands)
     return parser
+
+
+def _advanced_parsers(commands):
+    validate = commands.add_parser('timeline-validate', help='Validate timeline JSON without a backend')
+    validate.add_argument('timeline')
+    validate.add_argument('--session')
+    project = commands.add_parser('timeline-project')
+    animate = commands.add_parser('animate')
+    for parser in (project, animate):
+        parser.add_argument('session')
+        parser.add_argument('--timeline', required=True)
+        parser.add_argument('--output', required=True)
+    animate.add_argument('--mp4', action='store_true')
+    animate.add_argument('--tools')
+    density = commands.add_parser('density')
+    density.add_argument('map')
+    density.add_argument('--format', choices=('dx', 'mrc', 'ccp4'), required=True)
+    density.add_argument('--output', required=True)
+    density.add_argument('--session')
+    for key, choices in [('interpretation', ('auto', 'origin', 'starts')), ('kind', ('mesh', 'surface', 'volume')),
+                         ('algorithm', ('align', 'super'))]:
+        density.add_argument('--' + key, choices=choices, default=argparse.SUPPRESS)
+    for key, kind in [('level', float), ('color', str), ('opacity', float), ('volume-ramp', str), ('matrix', str),
+                      ('mobile', str), ('target', str), ('mobile-state', int), ('target-state', int),
+                      ('alignment-selection', str), ('cutoff', float), ('cycles', int)]:
+        density.add_argument('--' + key, type=kind, default=argparse.SUPPRESS)
+    potential = commands.add_parser('potential')
+    potential.add_argument('--mode', choices=('prepared', 'prepare', 'import'), required=True)
+    potential.add_argument('--output', required=True)
+    potential.add_argument('--session')
+    potential.add_argument('--grid', nargs=3, type=int, default=argparse.SUPPRESS)
+    potential.add_argument('--drop-water', action='store_true', default=argparse.SUPPRESS)
+    for key, kind in [('pqr', str), ('dx', str), ('selection', str), ('state', int), ('units', str),
+                      ('display-units', str), ('temperature', float), ('force-field', str), ('ph', float),
+                      ('protonation', str), ('solute-dielectric', float), ('solvent-dielectric', float),
+                      ('salt', float), ('ion-radius', float), ('probe-radius', float), ('coarse-padding', float),
+                      ('fine-padding', float), ('ramp-limit', float), ('tools', str)]:
+        potential.add_argument('--' + key, type=kind, default=argparse.SUPPRESS)
+    for parser in (animate, density, potential):
+        for key in ('width', 'height', 'dpi'):
+            parser.add_argument('--' + key, type=int, default=argparse.SUPPRESS)
+        parser.add_argument('--no-ray', action='store_true')
+    tools = commands.add_parser('tools')
+    tools.add_argument('--config', required=True)
+
+
+def _advanced_main(args):
+    import tempfile
+    from .advanced import read_json, run_advanced, probe_tools
+    from .artifacts import checked_path
+    from .external_tools import load_tools
+    from .timeline import validate_timeline
+    if args.command == 'tools':
+        config = load_tools(checked_path(args.config))
+        folder = Path(tempfile.mkdtemp(prefix='molscene-probes-'))
+        report = probe_tools(config, folder)
+        # Successful probes clean their own scratch. Keep failed probe logs
+        # reachable through returned diagnostics instead of deleting them.
+        if not any(folder.iterdir()):
+            folder.rmdir()
+    elif args.command == 'timeline-validate':
+        document = read_json(checked_path(args.timeline))
+        if args.session:
+            with engine._runtime().PyMOL() as pm:
+                pm.cmd.load(str(engine._session(checked_path(args.session))))
+                document = validate_timeline(document, pm.cmd)
+        else:
+            document = validate_timeline(document)
+        report = dict(passed=True, timeline=document)
+    else:
+        protected = []
+        session = str(checked_path(args.session)) if args.session else None
+        render = {name: getattr(args, name) for name in ('width', 'height', 'dpi') if hasattr(args, name)}
+        if hasattr(args, 'no_ray'):
+            render['ray'] = not args.no_ray
+        operation = {'timeline-project': 'timeline_project', 'animate': 'animation'}.get(args.command, args.command)
+        if operation in ('timeline_project', 'animation'):
+            source = checked_path(args.timeline)
+            protected.append(source)
+            parameters = dict(timeline=read_json(source))
+            if operation == 'animation':
+                parameters.update(render=render, mp4=args.mp4)
+                if args.tools:
+                    protected.append(checked_path(args.tools))
+                    parameters['tools'] = load_tools(args.tools)
+        elif operation == 'density':
+            request = dict(map_path=str(checked_path(args.map)), format=args.format, render=render)
+            if hasattr(args, 'interpretation'):
+                request['interpretation'] = args.interpretation
+            request['display'] = {key: getattr(args, key) for key in ('kind', 'level', 'color', 'opacity') if hasattr(args, key)}
+            if hasattr(args, 'volume_ramp'):
+                protected.append(checked_path(args.volume_ramp))
+                request['display']['volume_ramp'] = read_json(args.volume_ramp)
+            if hasattr(args, 'matrix'):
+                if hasattr(args, 'mobile') or hasattr(args, 'target'):
+                    raise ValueError('Choose matrix or molecular alignment, not both')
+                protected.append(checked_path(args.matrix))
+                request['registration'] = dict(kind='matrix', matrix=read_json(args.matrix), copy_name='density_registered')
+            elif hasattr(args, 'mobile') or hasattr(args, 'target'):
+                if not hasattr(args, 'mobile') or not hasattr(args, 'target'):
+                    raise ValueError('Alignment requires both mobile and target')
+                registration = dict(kind='align', mobile=args.mobile, target=args.target,
+                                    copy_name='density_registered', model_copy_name='density_aligned')
+                for key in ('mobile_state', 'target_state', 'algorithm', 'cutoff', 'cycles'):
+                    if hasattr(args, key):
+                        registration[key] = getattr(args, key)
+                if hasattr(args, 'alignment_selection'):
+                    registration['selection'] = args.alignment_selection
+                request['registration'] = registration
+            parameters = dict(request=request)
+        else:
+            request = dict(mode=args.mode, render=render)
+            for key in ('selection', 'state', 'units', 'display_units', 'temperature', 'ramp_limit'):
+                if hasattr(args, key):
+                    request[key] = getattr(args, key)
+            for key in ('pqr', 'dx'):
+                if hasattr(args, key):
+                    request[key + '_path'] = str(checked_path(getattr(args, key)))
+            request['preparation'] = {key: getattr(args, key) for key in ('force_field', 'ph', 'protonation', 'drop_water') if hasattr(args, key)}
+            request['solver'] = {key: getattr(args, key) for key in ('grid', 'solute_dielectric', 'solvent_dielectric', 'ion_radius', 'probe_radius', 'coarse_padding', 'fine_padding') if hasattr(args, key)}
+            if hasattr(args, 'salt'):
+                request['solver']['salt_molar'] = args.salt
+            if hasattr(args, 'tools'):
+                protected.append(checked_path(args.tools))
+                request['tools'] = load_tools(args.tools)
+            if args.mode == 'prepare' and (session is None or not hasattr(args, 'selection')):
+                raise ValueError('prepare requires session and explicit selection')
+            if args.mode == 'import' and (not hasattr(args, 'units') or bool(session) == hasattr(args, 'pqr')):
+                raise ValueError('import requires explicit units and exactly one PQR/session')
+            parameters = dict(request=request)
+        report = run_advanced(operation, session, checked_path(args.output), parameters, protected=protected)
+    print(json.dumps(report, ensure_ascii=False, allow_nan=False))
+    return 0 if report.get('passed', True) else 1
 
 
 def _present_analysis(command, report):
@@ -129,6 +263,8 @@ def main(argv=None):
     except SystemExit as exc:
         return exc.code
     try:
+        if args.command in ('timeline-validate', 'timeline-project', 'animate', 'density', 'potential', 'tools'):
+            return _advanced_main(args)
         if args.command == 'gui':
             try:
                 from .desktop import launch

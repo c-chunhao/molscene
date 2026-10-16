@@ -7,6 +7,8 @@ import sys
 
 from pymol.Qt import QtCore
 
+_COOPERATIVE = frozenset(('timeline_project', 'animation', 'density', 'potential', 'tools'))
+
 
 def worker_command(job_path):
     return [sys.executable, '-B', '-u', '-m', 'molscene.worker', str(job_path)]
@@ -80,6 +82,7 @@ class JobManager(QtCore.QObject):
                 continue
             if isinstance(record, dict) and 'progress' in record:
                 self.progress.emit(record['progress'])
+        self._stdout = self._stdout[-65536:]
 
     def _read_stderr(self):
         if self.process is None:
@@ -105,14 +108,17 @@ class JobManager(QtCore.QObject):
     def cancel(self):
         if self.process is None or self._cancelled:
             return
-        if self.job['operation'] == 'batch':
+        if self.job['operation'] == 'batch' or self.job['operation'] in _COOPERATIVE:
             marker = self.job.get('parameters', {}).get('cancel_file')
             if not marker:
-                raise ValueError('Batch job has no cooperative cancel marker')
+                raise ValueError('Job has no cooperative cancel marker')
             # Marker is an exclusively owned path in prepare_job's private dir.
             with Path(marker).open('x', encoding='utf-8') as handle:
                 handle.write('cancel requested\n')
             self._cancelled = True
+            if self.job['operation'] in _COOPERATIVE:
+                process = self.process
+                QtCore.QTimer.singleShot(5000, lambda: process.kill() if self.process is process else None)
             return
         self._cancelled = True
         self.process.terminate()
@@ -139,7 +145,7 @@ class JobManager(QtCore.QObject):
         self._read_stdout()
         self._read_stderr()
         self._read_progress()
-        if self._cancelled and self.job['operation'] != 'batch':
+        if self._cancelled and self.job['operation'] not in _COOPERATIVE | {'batch'}:
             result = self._batch_report() or dict(items=[], completed=0, failed=0)
             result = deepcopy(result)
             result.update(cancelled=True, passed=False)
@@ -169,6 +175,11 @@ class JobManager(QtCore.QObject):
                 raise ValueError('Worker exited unsuccessfully: ' + str(exit_code))
             result = envelope['result']
         except (OSError, ValueError, KeyError, TypeError) as exc:
+            if self._cancelled and self.job['operation'] in _COOPERATIVE:
+                result = dict(operation=self.job['operation'], passed=False, cancelled=True)
+                self._release()
+                self.cancelled.emit(result)
+                return
             message = str(exc)
             if self._stderr.strip():
                 message += '\n' + self._stderr.strip()
