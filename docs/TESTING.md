@@ -50,6 +50,26 @@ review, final CI, downloaded-release hash verification and backed-up desktop
 upgrade are separate release evidence. Historical v0.5 records below remain
 unchanged and do not supply v0.6 acceptance counts.
 
+## Recorded v0.6.0 local validation
+
+Actual local tests only. Source-freeze maps identify each gate input; they do not establish equality with a final public commit. Final source and package provenance require separate sidecars. Hosted CI and publication are not established. No unobserved external-tool version is inferred.
+
+| Run | Discovered | Passed | Skipped | Failures/errors | Seconds |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Source backend | 596 | 574 | 22 | 0/0 | 1057.610 |
+| Source plain | 596 | 211 | 385 | 0/0 | 103.422 |
+| Installed required | 17 | 17 | 0 | 0/0 | 676.078 |
+
+All 17 required cases passed in source backend and source-free installed runs. Plain skipped every required native case; its recorded dependency/platform reasons are preserved. All 54 current source and installed runtime modules match the audited wheel. Every gate runtime input matches the audited wheel exactly. The JSON retains every actual passed ID, sanitized skip reason, source-freeze/runtime hash, helper/config identity and gate proof hash.
+
+Observed installed environment: python=3.10.18 | packaged by conda-forge | (main, Jun  4 2025, 14:42:04) [MSC v.1943 64 bit (AMD64)]; pymol_distribution=3.2.0a0; qt_binding=PySide6; qt_version=6.8.1; pymol_native_version=3.2.0a.
+
+[Machine-readable v0.6 local record](validation-v06.json).
+
+An earlier full run timed out during the PDB2PQR version prerequisite at its 15-second limit. The unchanged isolated case and final full-source/installed gates passed; failure evidence is retained. No production timeout, test identity or skip was changed. The exact startup delay was not reproduced.
+
+Separately, installed-wheel and extracted-sdist offline examples passed independent analytic CSV checks, original input-byte checks, closed manifests and native session-string inspection. Standalone replay with MolScene imports blocked restored two 5,205-atom assembly copies, three fitted trajectory states, and all six DCD states under a Unicode/apostrophe path. The example ZIP preserves all 166 prior payload members, including 153 historical outputs, and adds 32 accepted v0.6 gallery files. These are separate package/example observations; exact final-commit CI and published asset hashes belong to the release sidecars.
+
 ## Recorded v0.5 local validation
 
 Local actual-test evidence only. Source freeze maps describe each gate input; they do not assert all frozen files equal the final public commit. Final commit and deltas belong to source-provenance/publication sidecars. Hosted CI and publication are not established here; actual CI job results belong to release publication-evidence.json. No unobserved APBS, PDB2PQR or FFmpeg version is inferred.
