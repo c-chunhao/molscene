@@ -38,7 +38,8 @@ class ReproduceV06Tests(unittest.TestCase):
             shutil.copytree(ROOT/'examples/data', folder/'data')
             shutil.copy2(SCRIPT, folder/SCRIPT.name)
             installed = example_module(folder/SCRIPT.name)
-            self.assertEqual(installed.data_path('3c70.cif'), folder/'data/3c70.cif')
+            # Windows may spell the same temp directory with an 8.3 alias.
+            self.assertTrue(installed.data_path('3c70.cif').samefile(folder/'data/3c70.cif'))
             with (folder/'data/3c70.cif').open('ab') as handle:
                 handle.write(b'\n')
             with self.assertRaisesRegex(ValueError, 'checksum'):
